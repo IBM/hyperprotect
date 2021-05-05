@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Key Protect Interface for keyprotect-LUKS service via Python
+#
+# Nayna Jain <nayna@linux.ibm.com>, George Wilson <gcwilson@linux.ibm.com>
+#
+# Copyright (C) 2021 IBM Corp.
+#
+
+
+import argparse
+import os
+import keyprotect
+from keyprotect import bxauth
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('op', choices=['list', 'createroot', 'createstd', 'get', 'wrap', 'delete'])
+parser.add_argument('--uuid', default=None)
+parser.add_argument('--dek', default=None)
+args = parser.parse_args()
+
+print(args.op)
+
+tm = bxauth.TokenManager(api_key="<Fill you API Key Here>")
+
+kp = keyprotect.Client(
+    credentials=tm,
+    region="eu-de",
+    service_instance_id="ec3faac8-dbb8-4a91-80e4-802e69256ccf",
+    endpoint_url="https://api.eu-de.hs-crypto.cloud.ibm.com:9326"
+)
+
+# print(kp)
+
+if args.op == 'list':
+    keys = kp.keys()
+    for key in kp.keys():
+        print("%s\t%s" % (key["id"], key["name"]))
+
+elif args.op == 'createroot':
+    rootkey = kp.create(name="gcw_sys_using_api", root=True)
+    print("Created key '%s'" % rootkey['id'])
+
+elif args.op == 'createstd':
+    rootkey = kp.create(name="gcw_sys_using_api", root=False)
+    print("Created key '%s'" % rootkey['id'])
+
+elif args.op == 'wrap':
+    if args.uuid == None:
+        print("Missing root key --uuid for wrap op")
+    if args.dek == None:
+        print("Missing --dek for wrap op")
+    else:
+        wrappedkey = kp.wrap(args.uuid, plaintext=args.dek.encode('utf-8'))
+        ciphertext = wrappedkey.get("ciphertext")
+        unwrapped = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
+        print("ciphertext = %s" % ciphertext)
+        print("plaintext = %s" % unwrapped.decode('utf-8'))
+
+elif args.op == 'get':
+    if args.uuid == None:
+        print("Missing --uuid for get op")
+    else:
+        key = kp.get(args.uuid)
+        print(key)
+        #print("%s\t%s" % (key["id"], key["name"]))
+
+elif args.op == 'delete':
+    if args.uuid == None:
+        print("Missing root key --uuid for delete op")
+    else:
+        deleted_key = kp.delete(args.uuid)
+        print("Deleted key '%s'" % args.uuid)
+
+else:
+    print("Unknown op arg: %s" % args.op)
+
+exit(0)
+
+
+# Initialize the key management service client as specified in Authentication
+# key = kp.get('04a5102e-d2b5-433f-9c99-5c146e3c70a9')
+# print("%s\t%s" % (key["id"], key["name"]))
+
+# Uncomment this code to create a key via API.. and set a new name for the key. This one is already used"
+#key = kp.create(name="gcw_sys_using_api", root=True)
+#print("Created key '%s'" % key['id'])
+
+keys = kp.keys()
+for key in kp.keys():
+    print("%s\t%s" % (key["id"], key["name"]))
+
+#for key_id in '351bd1f2-c8d1-458f-ae89-b913bebc152c', '399cd3e3-134b-41c5-9034-cf932bf1cb44', '7cadd5d4-0f76-41c7-a1dc-bd28e3e7801d':
+#    print(key_id)
+#    print(kp.get(key_id))
+#    deleted_key = kp.delete(key_id)
+#    print("Deleted key '%s'" % key_id)
+
+#print(kp.get('5db9800f-716a-40f2-9c7b-0e0768856fac'))
+#deletedkey = kp.delete(key_id='5db9800f-716a-40f2-9c7b-0e0768856fac')
+#print("Deleted key '%s'" % key['5db9800f-716a-40f2-9c7b-0e0768856fac'])
