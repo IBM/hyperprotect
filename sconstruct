@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: Apache-2.0
+# 
+# SConstruct for keyprotect-luks
+#
+# George Wilson <gcwilson@linux.ibm.com>
+#
+# Copyright (C) 2021 IBM Corp.
+#
+
+env = Environment()
+env.Install("$prefix/usr/bin", "kp")
+env.Install("$prefix/usr/lib/systemd/system", "keyprotect.service")
+ib = env.Alias("install-bin", "$prefix/usr/bin")
+il = env.Alias("install-lib", "$prefox/usr/lib/systemd/system")
+env.Alias("install", [ib, il])
