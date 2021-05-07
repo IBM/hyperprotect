@@ -12,8 +12,10 @@
 import configparser
 import argparse
 import os
+import sys
 import keyprotect
 from keyprotect import bxauth
+
 
 # Read kp.ini config file
 
@@ -23,12 +25,12 @@ config.read('/etc/keyprotect-luks.ini')
 # Parse args
 
 parser = argparse.ArgumentParser()
-parser.add_argument('op', choices=['list', 'createcrk', 'createstd', 'get', 'wrap', 'delete'])
+parser.add_argument('op', choices=['list', 'createcrk', 'createstd', 'get', 'wrap', 'genwrap', 'unwrap', 'delete'])
 parser.add_argument('--uuid', default=None)
 parser.add_argument('--dek', default=None)
 parser.add_argument('--name', default=None)
 args = parser.parse_args()
-print(args.op)
+# print(args.op)
 
 # Initialize the key management service client as specified in Authentication
 
@@ -71,9 +73,10 @@ elif args.op == 'wrap':
     else:
         wrappedkey = kp.wrap(args.uuid, plaintext=args.dek.encode('utf-8'))
         ciphertext = wrappedkey.get("ciphertext")
-        unwrapped = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
-        print("ciphertext = %s" % ciphertext)
-        print("plaintext = %s" % unwrapped.decode('utf-8'))
+        plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
+        # print("ciphertext = %s" % ciphertext)
+        #print("plaintext = %s" % plaintext.decode('utf-8'))
+        print(ciphertext)
 
 elif args.op == 'get':
     if args.uuid == None:
@@ -82,6 +85,25 @@ elif args.op == 'get':
         key = kp.get(args.uuid)
         print(key)
         #print("%s\t%s" % (key["id"], key["name"]))
+
+elif args.op == 'genwrap':
+    if args.uuid == None:
+        print("Missing CRK --uuid for genwrapwrap op")
+    else:
+        wrappedkey = kp.wrap(args.uuid, plaintext=os.urandom(32))
+        ciphertext = wrappedkey.get("ciphertext")
+        plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
+        # print("ciphertext = %s" % ciphertext)
+        # print("plaintext = %s" % plaintext)
+        print(ciphertext)
+
+elif args.op == 'unwrap':
+    if args.uuid == None:
+        print("Missing CRK --uuid for genwrapwrap op")
+    else:
+        ciphertext = sys.stdin.read()
+        plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
+        print(plaintext)
 
 elif args.op == 'delete':
     if args.uuid == None:
