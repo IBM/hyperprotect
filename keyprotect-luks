@@ -104,7 +104,7 @@ elif args.op == 'unwrap':
     else:
         ciphertext = sys.stdin.read()
         plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
-        print(plaintext)
+        print(plaintext, end='', flush=True)
 
 elif args.op == 'process':
     if args.uuid == None:
