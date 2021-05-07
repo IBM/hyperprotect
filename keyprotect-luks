@@ -18,7 +18,7 @@ from keyprotect import bxauth
 # Read kp.ini config file
 
 config = configparser.ConfigParser()
-config.read("/etc/keyprotect-luks.ini")
+config.read('/etc/keyprotect-luks.ini')
 
 # Parse args
 
@@ -51,14 +51,14 @@ if args.op == 'list':
 
 elif args.op == 'createcrk':
     if args.name == None:
-        print("Missing --name for CRK")
+        print("Missing CRK --name for createcrk op")
     else:
         rootkey = kp.create(name=args.name, root=True)
         print("Created key '%s'" % rootkey['id'])
 
 elif args.op == 'createstd':
     if args.name == None:
-        print("Missing --name for standard key")
+        print("Missing standard key --name for createstd op")
     else:
         rootkey = kp.create(name=args.name, root=False)
         print("Created key '%s'" % rootkey['id'])
