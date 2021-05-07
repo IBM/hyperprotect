@@ -126,7 +126,7 @@ elif args.op == 'process':
         args.uuid = config['KP']['default_crk_uuid']
     if args.uuid != None:
         for filename in os.listdir(WRAPPED_KEY_DIR):
-            print(filename)
+            print(filename, end=' ')
             file = open(WRAPPED_KEY_DIR + '/' + filename)
             ciphertext = file.read()
             plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
