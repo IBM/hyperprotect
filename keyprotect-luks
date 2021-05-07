@@ -17,11 +17,14 @@ import sys
 import keyprotect
 from keyprotect import bxauth
 
+CONFIG_FILE = '/etc/keyprotect-luks.ini'
+WRAPPED_KEY_DIR = '/var/lib/keyprotect-luks'
+
 
 # Read kp.ini config file
 
 config = configparser.ConfigParser()
-config.read('/etc/keyprotect-luks.ini')
+config.read(CONFIG_FILE)
 
 # Parse args
 
@@ -54,23 +57,23 @@ if args.op == 'list':
 
 elif args.op == 'createcrk':
     if args.name == None:
-        print('Missing CRK --name for createcrk op')
+        print('Missing CRK --name for createcrk op', file=sys.stderr)
     else:
         rootkey = kp.create(name=args.name, root=True)
         print('Created key %s' % rootkey['id'])
 
 elif args.op == 'createstd':
     if args.name == None:
-        print('Missing standard key --name for createstd op')
+        print('Missing standard key --name for createstd op', file=sys.stderr)
     else:
         rootkey = kp.create(name=args.name, root=False)
         print('Created key %s' % rootkey['id'])
 
 elif args.op == 'wrap':
     if args.uuid == None:
-        print('Missing CRK --uuid for wrap op')
+        print('Missing CRK --uuid for wrap op', file=sys.stderr)
     if args.dek == None:
-        print('Missing --dek for wrap op')
+        print('Missing --dek for wrap op', file=sys.stderr)
     else:
         wrappedkey = kp.wrap(args.uuid, plaintext=args.dek.encode('utf-8'))
         ciphertext = wrappedkey.get('ciphertext')
@@ -81,7 +84,7 @@ elif args.op == 'wrap':
 
 elif args.op == 'get':
     if args.uuid == None:
-        print('Missing --uuid for get op')
+        print('Missing --uuid for get op', file=sys.stderr)
     else:
         key = kp.get(args.uuid)
         print(key)
@@ -89,8 +92,12 @@ elif args.op == 'get':
 
 elif args.op == 'genwrap':
     if args.uuid == None:
-        print('Missing CRK --uuid for genwrapwrap op')
+        print('Missing CRK --uuid for genwrap op; attempting to use default CRK UUID', file=sys.stderr)
+    if config['KP']['default_crk_uuid'] == None:
+        print('No default CRK UUID in config file', file=sys.stderr)
     else:
+        args.uuid = config['KP']['default_crk_uuid']
+    if args.uuid != None:
         wrappedkey = kp.wrap(args.uuid, plaintext=os.urandom(32))
         ciphertext = wrappedkey.get('ciphertext')
         plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
@@ -100,37 +107,41 @@ elif args.op == 'genwrap':
 
 elif args.op == 'unwrap':
     if args.uuid == None:
-        print('Missing CRK --uuid for genwrapwrap op')
+        print('Missing CRK --uuid for process op; attempting to use default CRK UUID', file=sys.stderr)
+    if config['KP']['default_crk_uuid'] == None:
+        print('No default CRK UUID in config file', file=sys.stderr)
     else:
+        args.uuid = config['KP']['default_crk_uuid']
+    if args.uuid != None:
         ciphertext = sys.stdin.read()
         plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
         print(plaintext, end='', flush=True)
 
 elif args.op == 'process':
     if args.uuid == None:
-        print('Missing CRK --uuid for process op; attempting to use default CRK UUID')
-        if config['KP']['default_crk_uuid'] != None:
-            print('Using default CRK UUID')
-            args.uuid = config['KP']['default_crk_uuid']
-            for filename in os.listdir('/var/lib/keyprotect-luks'):
-                print(filename)
-                file = open('/var/lib/keyprotect-luks/' + filename)
-                ciphertext = file.read()
-                plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
-                keyctl_proc = subprocess.Popen(('keyctl', 'padd', 'logon', filename, '@u'), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                outs, errs = keyctl_proc.communicate(input=plaintext)
-                print(outs.decode('utf-8'), end='', flush=True)
-        else:
-            print('No default CRK UUID');
+        print('Missing CRK --uuid for process op; attempting to use default CRK UUID', file=sys.stderr)
+    if config['KP']['default_crk_uuid'] == None:
+        print('No default CRK UUID in config file', file=sys.stderr)
+    else:
+        args.uuid = config['KP']['default_crk_uuid']
+    if args.uuid != None:
+        for filename in os.listdir(WRAPPED_KEY_DIR):
+            print(filename)
+            file = open(WRAPPED_KEY_DIR + '/' + filename)
+            ciphertext = file.read()
+            plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
+            keyctl_proc = subprocess.Popen(('keyctl', 'padd', 'logon', filename, '@u'), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            outs, errs = keyctl_proc.communicate(input=plaintext)
+            print(outs.decode('utf-8'), end='', flush=True)
 
 elif args.op == 'delete':
     if args.uuid == None:
-        print('Missing root key --uuid for delete op')
+        print('Missing root key --uuid for delete op', file=sys.stderr)
     else:
         deleted_key = kp.delete(args.uuid)
         print('Deleted key %s' % args.uuid)
 
 else:
-    print('Unknown op arg: %s' % args.op)
+    print('Unknown op arg: %s' % args.op, file=sys.stderr)
 
 exit(0)
