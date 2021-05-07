@@ -12,6 +12,7 @@
 import configparser
 import argparse
 import os
+import subprocess
 import sys
 import keyprotect
 from keyprotect import bxauth
@@ -25,7 +26,7 @@ config.read('/etc/keyprotect-luks.ini')
 # Parse args
 
 parser = argparse.ArgumentParser()
-parser.add_argument('op', choices=['list', 'createcrk', 'createstd', 'get', 'wrap', 'genwrap', 'unwrap', 'delete'])
+parser.add_argument('op', choices=['list', 'createcrk', 'createstd', 'get', 'wrap', 'genwrap', 'unwrap', 'process', 'delete'])
 parser.add_argument('--uuid', default=None)
 parser.add_argument('--dek', default=None)
 parser.add_argument('--name', default=None)
@@ -105,6 +106,18 @@ elif args.op == 'unwrap':
         plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
         print(plaintext)
 
+elif args.op == 'process':
+    if args.uuid == None:
+        print("Missing CRK --uuid for process op")
+    for filename in os.listdir('/var/lib/keyprotect-luks'):
+        print(filename)
+        file = open('/var/lib/keyprotect-luks/' + filename)
+        ciphertext = file.read()
+        plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
+        keyctl_proc = subprocess.Popen(('keyctl', 'padd', 'logon', filename, '@u'), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        outs, errs = keyctl_proc.communicate(input=plaintext)
+        # keyctl_proc.wait()
+
 elif args.op == 'delete':
     if args.uuid == None:
         print("Missing root key --uuid for delete op")
@@ -116,9 +129,3 @@ else:
     print("Unknown op arg: %s" % args.op)
 
 exit(0)
-
-#for key_id in '351bd1f2-c8d1-458f-ae89-b913bebc152c', '399cd3e3-134b-41c5-9034-cf932bf1cb44', '7cadd5d4-0f76-41c7-a1dc-bd28e3e7801d':
-#    print(key_id)
-#    print(kp.get(key_id))
-#    deleted_key = kp.delete(key_id)
-#    print("Deleted key '%s'" % key_id)
