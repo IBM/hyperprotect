@@ -1,4 +1,8 @@
-install: ${prefix}/usr/bin/keyprotect-luks ${prefix}/usr/lib/systemd/system/keyprotect-luks.service
+install: ${prefix}/usr/bin/keyprotect-luks \
+	 ${prefix}/usr/lib/systemd/system/keyprotect-luks.service \
+	 ${prefix}/usr/share/doc/keyprotect-luks/README.md \
+	 ${prefix}/usr/share/doc/keyprotect-luks/keyprotect-luks.ini \
+	 ${prefix}/var/lib/keyprotect-luks
 
 ${prefix}/usr/bin/keyprotect-luks: keyprotect-luks
 	install -m 755 -o root -g root -D keyprotect-luks -t "${prefix}/usr/bin"
@@ -11,3 +15,6 @@ ${prefix}/usr/share/doc/keyprotect-luks/README.md: README.md
 
 ${prefix}/usr/share/doc/keyprotect-luks/keyprotect-luks.ini: keyprotect-luks.ini
 	install -m 644 -o root -g root -D keyprotect-luks.ini -t "${prefix}/usr/share/doc/keyprotect-luks"
+
+${prefix}/var/lib/keyprotect-luks:
+	install -m 755 -o root -g root -d ${prefix}/var/lib/keyprotect-luks
