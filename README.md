@@ -15,12 +15,12 @@
 
    - Copy the skeleton to the destination directory
 
-	cp /usr/share/doc/keyprotect-luks/keyprotect-luks.ini /etc
+        cp /usr/share/doc/keyprotect-luks/keyprotect-luks.ini /etc
 
    - Set permission on it
 
-	chown root:root /etc/keyprotect-luks.ini
-	chmod 640 /etc/keyprotect-luks.ini
+        chown root:root /etc/keyprotect-luks.ini
+        chmod 640 /etc/keyprotect-luks.ini
 
    - Fill in each of the options using information from the IBM Cloud portal, putting a placeholder in default_crk_uuid for now:
 
