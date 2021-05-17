@@ -9,21 +9,16 @@
 
 [Unit]
 Description=IBM HPCS Key Protect Boot Service
-#Documentation=
-#Before=cryptsetup.target
+Documentation=/usr/share/doc/keyprotect-luks/README.md
+#Before=
 After=network.target network-online.target
 Wants=network.target network-online.target
 Conflicts=shutdown.target
 
 [Service]
 Type=oneshot
-#EnvironmentFile=-/etc/crypto-policies/back-ends/opensshserver.config
-#EnvironmentFile=-/etc/sysconfig/sshd
+EnvironmentFile=-/etc/keyprotect-luks.ini
 ExecStart=/usr/bin/keyprotect-luks process
-#ExecReload=/bin/kill -HUP $MAINPID
-#KillMode=process
-#Restart=on-failure
-#RestartSec=42s
 
 [Install]
 WantedBy=multi-user.target
