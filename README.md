@@ -31,7 +31,7 @@
 			endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
 			default_crk_uuid = placeholder
 
-3. Generate a CRK and add it's UUID to /etc/keyprotect-luks.ini
+3. Generate a CRK and add its UUID to /etc/keyprotect-luks.ini
 
    - Generate a CRK
 
@@ -93,13 +93,13 @@
 
 6. Enable the keyprotect-luks systemd service:
 
-			systemctl enable keyprotect-luks
+		systemctl enable keyprotect-luks
 
 7. Reboot
 
 8. You should see a logon key type called dmcrypt:key1 and user key type called dmcrypt:key2 in root's @u keyring
 
-			keyctl show @s
+		keyctl show @s
 
 9. You can directly use they keys with dmsetup create
 
