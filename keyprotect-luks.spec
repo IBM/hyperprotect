@@ -6,13 +6,13 @@ Summary:	IBM HPCS Key Protect Integration with LUKS
 Group:		None
 License:	Apache 2.0
 URL:		https://example.com
-Source0:	keyprotect-luks.tar.gz
+Source0:	%{name}-%{version}.tar.gz
 
-BuildRequires:
+#BuildRequires:
 Requires:	python3
 
 %description
-keyprotect-luks provides integration between IBM HPCS Key Protect
+%{name} provides integration between IBM HPCS Key Protect
 and LUKS via the kernel keyring.
 
 
@@ -20,25 +20,24 @@ and LUKS via the kernel keyring.
 %setup -q
 
 
-#%build
-#%configure
-#make %{?_smp_mflags}
-
-
 %install
-#%make_install
-scons install
+make install DESTDIR=%{buildroot}
 
 
 %files
 %defattr(-,root,root)
 %license LICENSE
 %doc README.md
-%attr(0755,root,root) %{_bindir}/keyprotect-luks
-%attr(0644,root,root) %{_exec_prefix}/keyprotect-luks.service
+%attr(0755,root,root) %{_bindir}/%{name}
+%attr(0644,root,root) %{_prefix}/lib/systemd/system/%{name}.service
+%attr(0644,root,root) %{_sharedstatedir}/%{name}/logon
+%attr(0644,root,root) %{_sharedstatedir}/%{name}/user
+%attr(0644,root,root) %{_docdir}/%{name}/%{name}.ini
 
 
 %changelog
+* Mon May 17 2021 George Wilson <gcwilson@linux.ibm.com>
+- Add key dirs and keyprotect.ini
 * Thu May 06 2021 George Wilson <gcwilson@linux.ibm.com>
-- inital packaging
+- Inital packaging
 
