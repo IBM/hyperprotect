@@ -113,3 +113,31 @@ If you use mosh to login remotely, root will not have a valid @s keyring and you
 	keyctl link @us @s
 
 and you should now be able to show the keys
+
+## Use
+
+### dmsetup Example
+
+Here's an example dmsetup command assuming:
+
+	- /dev/loop0 is the block device to be encrypted
+	- dmcrypt:mykey1 is the description of a 32-byte logon key present in the kernel keyring
+
+		dmsetup create secrets --table "0 $(blockdev --getsz /dev/loop0) crypt aes-xts-plain64 :32:logon:dmcrypt:mykey1 0 /dev/loop0 0"
+		mount /dev/mapper/secrets /secrets
+
+### cryptsetup Example
+
+Here's an example of how to setup a key token on a LUKS-encrypted device assuming:
+
+	- /root/secrets.img is a loopback file to be encrypted
+	- /dev/loop0 is the block device associated with /root/secrets.img with losetup
+	- cryptsetup:mykey2 is the description of a user key present in the kernel keyring that contains the LUKS passphrase provided to luksFormat
+
+		losetup -f /root/secrets.img
+		cryptsetup luksFormat --type luks2 /dev/loop0
+		cryptsetup token add --key-description cryptsetup:mykey2 /dev/loop0
+		cryptsetup luksDump /dev/loop0
+		losetup -d /dev/loop0
+		cryptsetup luksOpen /root/secrets.img secrets
+		mount /dev/mapper/secrets /secrets
