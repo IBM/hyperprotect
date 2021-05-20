@@ -53,9 +53,9 @@
 
 4. For dm-crypt keys:
 
-    - Generate a random wrapped key and store it in the /var/lib/keyprotect-luks/login directory
+    - Generate a random wrapped key and store it in the /var/lib/keyprotect-luks/logon directory
 
-			keyprotect-luks genwrap > /var/lib/keyprotect-luks/login/dmcrypt:key1
+			keyprotect-luks genwrap > /var/lib/keyprotect-luks/logon/dmcrypt:key1
 
     - Use dmsetup to setup a crypt target for the block device, assuming /dev/loop0 as the block device for this example and secrets as the mapped name
 
