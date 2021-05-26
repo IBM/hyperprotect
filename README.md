@@ -142,7 +142,11 @@ Here's an example of how to setup a key token on a LUKS-encrypted device assumin
 			cryptsetup luksOpen /root/secrets.img secrets
 			mount /dev/mapper/secrets /secrets
 
-Example /etc/crypttab
+## Example /etc/crypttab entry
 
 	#volume-name encrypted-device key-file options
-	secrets UUID=5f19f978-00bf-4773-9b2a-b52b762ed27d /dev/null _netdev,nofail
+	secrets /root/secrets.img none _netdev,timeout=1
+
+## Example /etc/fstab entry
+
+	/dev/mapper/secrets   /secrets      ext4    defaults,_netdev 0 0

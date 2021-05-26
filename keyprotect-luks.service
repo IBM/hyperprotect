@@ -10,7 +10,7 @@
 [Unit]
 Description=IBM HPCS Key Protect Boot Service
 Documentation=/usr/share/doc/keyprotect-luks/README.md
-#Before=
+Before=remote-fs-pre.target remote-cryptsetup.target
 After=network.target network-online.target
 Wants=network.target network-online.target
 Conflicts=shutdown.target
@@ -21,4 +21,4 @@ EnvironmentFile=-/etc/keyprotect-luks.ini
 ExecStart=/usr/bin/keyprotect-luks process
 
 [Install]
-WantedBy=multi-user.target
+RequiredBy=remote-cryptsetup.target
