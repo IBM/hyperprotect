@@ -84,7 +84,7 @@
 
    - Add a key token to the LUKS header
 
-			cryptsetup token add /dev/mapper/secrets --key-description dmcrypt:key2
+			cryptsetup token add /dev/loop0 --key-description dmcrypt:key2
 
     - Mount the encrypted device called "secrets" on a mountpoint called "/secrets"
 

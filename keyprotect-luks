@@ -20,7 +20,8 @@ from keyprotect import bxauth
 CONFIG_FILE = '/etc/keyprotect-luks.ini'
 KEY_BYTES = 32
 WRAPPED_KEY_DIR = '/var/lib/keyprotect-luks'
-key_types = ('logon', 'user')
+KEY_TYPES = ('logon', 'user')
+BLOB_FILE = WRAPPED_KEY_DIR + '/blob.txt'
 
 #
 #  Parse config file
@@ -66,6 +67,24 @@ def parse_args():
     parser.add_argument('--name', default=None)
     args = parser.parse_args()
     return args
+
+#
+# Check for TPM special case, attempt unseal, replace config['KP']['api_key'] on success
+#
+
+def tpm_unseal(config):
+    if config['KP']['api_key'] == 'TPM':
+        print('TPM case')
+        file = open(BLOB_FILE)
+        ciphertext = file.read()
+        unseal_proc = subprocess.Popen(('tpm_unsealdata', '-z'), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        raw_plaintext, perr = keyctl_proc.communicate(input=ciphertext)
+        if unseal.returncode != 0:
+            print('Cannot obtain API key from TPM', file=sys.stderr)
+            exit(1)
+        print(raw_plaintext.decode('utf-8'), end='', flush=True)
+        print(perr.decode('utf-8'), end='', flush=True)
+        config['KP']['api_key'] = raw_plaintext
 
 #
 #  Initialize key protect
@@ -218,7 +237,7 @@ class key_protect_luks:
                 exit(1)
             else:
                 args.uuid = config['KP']['default_crk_uuid']
-        for key_type in key_types:
+        for key_type in KEY_TYPES:
             self.process_keys_of_type(key_type)
 
     #
@@ -257,6 +276,10 @@ class key_protect_luks:
 
 config = parse_config(CONFIG_FILE)
 args = parse_args()
+
+# Check for TPM case
+
+tpm_unseal(config)
 
 # Initialize the key management service client as specified in Authentication
 
