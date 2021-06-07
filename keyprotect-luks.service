@@ -9,7 +9,7 @@
 
 [Unit]
 Description=IBM HPCS Key Protect Boot Service
-Documentation=/usr/share/doc/keyprotect-luks/README.md
+Documentation=file:///usr/share/doc/keyprotect-luks/README.md
 Before=remote-fs-pre.target remote-cryptsetup.target
 After=network.target network-online.target
 Wants=network.target network-online.target
