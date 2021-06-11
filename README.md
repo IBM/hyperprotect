@@ -95,25 +95,67 @@
 
 		systemctl enable keyprotect-luks
 
-7. Reboot
+7. Enable the remote cryptsetup target
 
-8. You should see a logon key type called dmcrypt:key1 and user key type called dmcrypt:key2 in root's @u keyring
+		systemctl enable remote-cryptsetup.target
+
+8. Reboot
+
+9. You should see a logon key type called dmcrypt:key1 and user key type called dmcrypt:key2 in root's @u keyring
 
 		keyctl show @s
 
-9. You can directly use they keys with dmsetup create
+10. You can directly use they keys with dmsetup create
 
-10. cryptsetup should NOT prompt for a key when you luksOpen the LUKS device
+11. cryptsetup should NOT prompt for a key when you luksOpen the LUKS device
 
 **IMPORTANT**
 
-If you use mosh to login remotely, root will not have a valid @s keyring and you won't be able to see the keys.  In this case:
+If you use mosh to login remotely, root will not have a valid @s keyring and you won't be able to see and use the keyring keys.  In this case:
 
 	keyctl new_session
 	keyctl link @us @s
 
 and you should now be able to show the keys
 
+	keyctl show @s
+
+## Sealing the API key to TPM 1.2 PCRs
+
+1. Enable the vTPM 1.2 from the HMC or disable and re-enable it in order to clear it
+
+2. Install TrouSerS and ensure tcsd is running
+
+	dnf install trousers
+	systemctl enable tcsd
+	systemctl start tcsd
+
+3. Take ownership of the vTPM using well-known secrets
+
+	tpm_takeownership -y -z
+
+4. Create a file containing the API key
+
+	echo -n 'AB0CdEfGHijKlMN--12OPqRStuv3wx456yZAb7CDEF8g' > api-key.txt
+
+	
+5. Seal the key in the file to PCRs, in this example PCR[4] and PCR[5]
+
+	tpm_sealdata -p 4 -p 5 -z --infile api-key.txt --outfile /var/lib/keyprotect-luks/api-key-blob.txt
+
+6: Remove the file containing the API key plaintext
+
+	rm api-key.txt
+
+6. Edit /etc/keyprotect-luks.ini and assign api_key the special value "TPM"
+
+	[KP]
+	api_key = TPM
+	region = us-east
+	service_instance_id = 01234567-89ab-cdef-0123-456789abcdef
+	endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
+	default_crk_uuid = fedcba98-7654-3210-fedc-ba9876543210
+ 
 ## Use
 
 ### dmsetup Example
