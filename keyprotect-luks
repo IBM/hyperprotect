@@ -74,17 +74,14 @@ def parse_args():
 
 def tpm_unseal(config):
     if config['KP']['api_key'] == 'TPM':
-        print('TPM case')
-        file = open(BLOB_FILE)
-        ciphertext = file.read()
-        unseal_proc = subprocess.Popen(('tpm_unsealdata', '-z'), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        raw_plaintext, perr = keyctl_proc.communicate(input=ciphertext)
-        if unseal.returncode != 0:
-            print('Cannot obtain API key from TPM', file=sys.stderr)
+        print('Unsealing API key from TPM')
+        unseal_proc = subprocess.Popen(('tpm_unsealdata', '-z', '-i', BLOB_FILE), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        raw_plaintext, perr = unseal_proc.communicate()
+        if unseal_proc.returncode != 0:
+            print('Cannot obtain API key from TPM: ' + perr.decode('utf-8') + ", rc =", unseal_proc.returncode, file=sys.stderr)
             exit(1)
-        print(raw_plaintext.decode('utf-8'), end='', flush=True)
         print(perr.decode('utf-8'), end='', flush=True)
-        config['KP']['api_key'] = raw_plaintext
+        config['KP']['api_key'] = raw_plaintext.decode('utf-8')
 
 #
 #  Initialize key protect
