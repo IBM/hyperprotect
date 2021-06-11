@@ -21,7 +21,7 @@ CONFIG_FILE = '/etc/keyprotect-luks.ini'
 KEY_BYTES = 32
 WRAPPED_KEY_DIR = '/var/lib/keyprotect-luks'
 KEY_TYPES = ('logon', 'user')
-BLOB_FILE = WRAPPED_KEY_DIR + '/blob.txt'
+BLOB_FILE = WRAPPED_KEY_DIR + '/api-key-blob.txt'
 
 #
 #  Parse config file
