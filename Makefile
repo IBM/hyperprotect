@@ -4,7 +4,12 @@ install: $(DESTDIR)/usr/bin/keyprotect-luks \
 	 $(DESTDIR)/usr/share/doc/keyprotect-luks/keyprotect-luks.ini \
 	 $(DESTDIR)/var/lib/keyprotect-luks \
 	 $(DESTDIR)/var/lib/keyprotect-luks/logon \
-	 $(DESTDIR)/var/lib/keyprotect-luks/user
+	 $(DESTDIR)/var/lib/keyprotect-luks/user \
+	 $(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks \
+	 $(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/keyprotect-luks.sh \
+	 $(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/module-setup.sh \
+	 $(DESTDIR)/etc/dracut.conf.d/keyprotect-luks.conf
+
 
 $(DESTDIR)/usr/bin/keyprotect-luks: keyprotect-luks
 	install -m 755 -D keyprotect-luks -t "$(DESTDIR)/usr/bin"
@@ -26,3 +31,15 @@ $(DESTDIR)/var/lib/keyprotect-luks/logon:
 
 $(DESTDIR)/var/lib/keyprotect-luks/user:
 	install -m 755 -d $(DESTDIR)/var/lib/keyprotect-luks/user
+
+$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks:
+	install -m 755 -d $(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks
+
+$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/keyprotect-luks.sh: dracut/85keyprotect-luks/keyprotect-luks.sh
+	install -m 755 -D dracut/85keyprotect-luks/keyprotect-luks.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/keyprotect-luks.sh"
+
+$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/module-setup.sh: dracut/85keyprotect-luks/module-setup.sh
+	install -m 755 -D dracut/85keyprotect-luks/module-setup.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/module-setup.sh"
+
+$(DESTDIR)/etc/dracut.conf.d/keyprotect-luks.conf: dracut/keyprotect-luks.conf
+	install -m 644 -D dracut/85keyprotect-luks/module-setup.sh -t "$(DESTDIR)/etc/dracut.conf.d/keyprotect-luks.conf"
