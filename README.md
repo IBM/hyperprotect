@@ -192,3 +192,47 @@ Here's an example of how to setup a key token on a LUKS-encrypted device assumin
 ## Example /etc/fstab entry
 
 	/dev/mapper/secrets   /secrets      ext4    defaults,_netdev 0 0
+
+## Networking in the initramfs
+
+### Dracut modules
+
+Add the following Dracut module files to /etc/dracut.conf.d
+
+#### ifcfg.confg
+
+	add_dracutmodules+=" ifcfg "
+
+#### network.conf
+
+	add_dracutmodules+=" network "
+
+#### network-legacy.conf
+
+	add_dracutmodules+=" network-legacy "
+
+#### network-manager.conf
+
+	add_dracutmodules+=" network-manager "
+
+#### url-lib.conf
+
+	add_dracutmodules+=" url-lib "
+
+### Rebuild initramfs
+
+	dracut --regenerate-all --force --verbose
+
+### Kernel cmdline
+
+Use grub2-editenv to append the following options to the kernel cmdline.  For example:
+
+	grub2-editenv /boot/grub2/grubenv set kernelopts="root=UUID=96fa7ba7-5229-4f32-a9d3-849404febb0e ro crashkernel=auto biosdevname=0 ip=9.114.227.82::9.114.224.1:22:jelly.pok.stglabs.ibm.com:net0:none:9.12.18.2 rd.neednet=1 rd.shell rd.debug log_buf_len=1M "
+
+#### Network 
+
+	ip=9.114.227.82::9.114.224.1:22:jelly.pok.stglabs.ibm.com:net0:none:9.12.18.2
+
+#### Debug
+
+	rd.neednet=1 rd.shell rd.debug log_buf_len=1M
