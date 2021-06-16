@@ -33,9 +33,13 @@ make install DESTDIR=%{buildroot}
 %attr(0644,root,root) %{_sharedstatedir}/%{name}/logon
 %attr(0644,root,root) %{_sharedstatedir}/%{name}/user
 %attr(0644,root,root) %{_docdir}/%{name}/%{name}.ini
-
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{name}/%{name}.sh
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{name}/module-setup.sh
+%attr(0644,root,root) %{_sysconfdir}/dracut.conf.d/%{name}.conf
 
 %changelog
+* Wed Jun 16 2021 George Wilson <gcwilson@linux.ibm.com>
+- Add dracutl module skeleton
 * Mon May 17 2021 George Wilson <gcwilson@linux.ibm.com>
 - Add key dirs and keyprotect.ini
 * Thu May 06 2021 George Wilson <gcwilson@linux.ibm.com>
