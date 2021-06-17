@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 parse_ini() {
 	while read INI_LINE; do
@@ -60,20 +60,30 @@ unwrap_key() {
   	    }"
 }
 
+parse_plaintext_json() {
+	_BASE64_PLAINTEXT=${_PLAINTEXT_JSON##\{\"plaintext\"\:\"}
+	_BASE64_PLAINTEXT=${_BASE64_PLAINTEXT%%\"*}
+}
+
+
 if grep -q "rd.keyprotect-luks" /proc/cmdline; then
-	echo "Hello from keyprotect-luks"
+	#echo "Hello from keyprotect-luks"
 	parse_ini
-	echo "api_key = $_API_KEY"
-	echo "region = $_REGION"
-	echo "endpoint_url = $_ENDPOINT_URL"
-	echo "service_instance_id = $_SERVICE_INSTANCE_ID"
-	echo "default_crk_uuid = $_DEFAULT_CRK_UUID"
+	#echo "api_key = $_API_KEY"
+	#echo "region = $_REGION"
+	#echo "endpoint_url = $_ENDPOINT_URL"
+	#echo "service_instance_id = $_SERVICE_INSTANCE_ID"
+	#echo "default_crk_uuid = $_DEFAULT_CRK_UUID"
 	authenticate
 	parse_authtoken
-	echo $_AUTH_TOKEN
-	list_keys
+	#echo $_AUTH_TOKEN
+	#list_keys
 	_CIPHERTEXT=`cat /var/lib/keyprotect-luks/user/luks:root`
-	unwrap_key
+	_PLAINTEXT_JSON=`unwrap_key`
+	#echo $_PLAINTEXT_JSON
+	parse_plaintext_json
+	#echo $_BASE64_PLAINTEXT
+	printf "%s" $_BASE64_PLAINTEXT | base64 --decode
 else
 	echo "keyprotect-luks says rd.keyprotect-luks is not set on the cmdline"
 fi
