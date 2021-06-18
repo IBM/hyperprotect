@@ -36,8 +36,14 @@ make install DESTDIR=%{buildroot}
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{name}/%{name}.sh
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{name}/module-setup.sh
 %attr(0644,root,root) %{_sysconfdir}/dracut.conf.d/%{name}.conf
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/module-setup.sh
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/start-tcsd.sh
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/stop-tcsd.sh
+%attr(0644,root,root) %{_sysconfdir}/dracut.conf.d/tss.conf
 
 %changelog
+* Fri Jun 18 2021 George Wilson <gcwilson@linux.ibm.com>
+- Add tss dracut module
 * Wed Jun 16 2021 George Wilson <gcwilson@linux.ibm.com>
 - Add dracutl module skeleton
 * Mon May 17 2021 George Wilson <gcwilson@linux.ibm.com>
