@@ -9,7 +9,17 @@
 
 1. Generate an HPCS Key Protect API key on the IBM Cloud portal
 
-2. Create the initial /etc/keyprotect-luks.ini
+2. Install python3 and python3-cryptography packages
+
+	dnf install python3 python3-cryptography
+
+   - **IMPORTANT:** You'll have Rust problems if you try to use pip to install Python Cryptography.
+
+3. Install IBM Key Protect
+
+	pip3 install keyprotect
+
+4. Create the initial /etc/keyprotect-luks.ini
 
    - A skeleton is provided in /usr/share/doc/keyprotect-luks
 
@@ -31,7 +41,7 @@
 			endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
 			default_crk_uuid = placeholder
 
-3. Generate a CRK and add its UUID to /etc/keyprotect-luks.ini
+5. Generate a CRK and add its UUID to /etc/keyprotect-luks.ini
 
    - Generate a CRK
 
@@ -51,7 +61,7 @@
 			endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
 			default_crk_uuid = fedcba98-7654-3210-fedc-ba9876543210
 
-4. For dm-crypt keys:
+6. For dm-crypt keys:
 
     - Generate a random wrapped key and store it in the /var/lib/keyprotect-luks/logon directory
 
@@ -66,7 +76,7 @@
 			mkdir /secrets
 			mount /dev/mapper/secrets /secrets
 
-5. For LUKS passphrases:
+7. For LUKS passphrases:
 
    - Wrap your passphrase and store it in the var/lib/keyprotect-luks/user directory
 
@@ -91,23 +101,23 @@
 			mkdir /secrets
 			mount /dev/mapper/secrets /secrets
 
-6. Enable the keyprotect-luks systemd service:
+8. Enable the keyprotect-luks systemd service:
 
 		systemctl enable keyprotect-luks
 
-7. Enable the remote cryptsetup target
+9. Enable the remote cryptsetup target
 
 		systemctl enable remote-cryptsetup.target
 
-8. Reboot
+10. Reboot
 
-9. You should see a logon key type called dmcrypt:key1 and user key type called dmcrypt:key2 in root's @u keyring
+11. You should see a logon key type called dmcrypt:key1 and user key type called dmcrypt:key2 in root's @u keyring
 
 		keyctl show @s
 
-10. You can directly use they keys with dmsetup create
+12. You can directly use they keys with dmsetup create
 
-11. cryptsetup should NOT prompt for a key when you luksOpen the LUKS device
+13. cryptsetup should NOT prompt for a key when you luksOpen the LUKS device
 
 **IMPORTANT**
 
@@ -124,9 +134,9 @@ and you should now be able to show the keys
 
 1. Enable the vTPM 1.2 from the HMC or disable and re-enable it in order to clear it
 
-2. Install TrouSerS and ensure tcsd is running
+2. Install TrouSerS and tpm-tools and ensure tcsd is running
 
-	dnf install trousers
+	dnf install trousers tpm-tools
 	systemctl enable tcsd
 	systemctl start tcsd
 
