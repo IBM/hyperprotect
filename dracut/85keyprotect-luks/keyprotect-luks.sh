@@ -74,6 +74,14 @@ if grep -q "rd.keyprotect-luks" /proc/cmdline; then
 	#echo "endpoint_url = $_ENDPOINT_URL"
 	#echo "service_instance_id = $_SERVICE_INSTANCE_ID"
 	#echo "default_crk_uuid = $_DEFAULT_CRK_UUID"
+	if [ $_API_KEY == "TPM" ]; then
+		if grep -q "rd.tss" /proc/cmdline; then
+			echo "Unsealing API key from TPM"
+			_API_KEY=$(tpm_unsealdata -z -i /var/lib/keyprotect-luks/api-key-blob.txt)
+		else
+			echo "keyprotect-luks dracut module says there's TPM in the config file but rd.tss is not set on the cmdline"
+		fi
+	fi
 	authenticate
 	parse_authtoken
 	#echo $_AUTH_TOKEN
@@ -83,14 +91,7 @@ if grep -q "rd.keyprotect-luks" /proc/cmdline; then
 	#echo $_PLAINTEXT_JSON
 	parse_plaintext_json
 	#echo $_BASE64_PLAINTEXT
-	printf "%s" $_BASE64_PLAINTEXT | base64 --decode
+	printf "%s" $_BASE64_PLAINTEXT | base64 --decode | keyctl padd user "luks:root" @u
 else
-	echo "keyprotect-luks says rd.keyprotect-luks is not set on the cmdline"
+	echo "keyprotect-luks dracut module says rd.keyprotect-luks is not set on the cmdline"
 fi
-
-#/usr/bin/curl http://crimini9.aus.stglabs.ibm.com/testpage.html
-
-#region = us-east # Another comment
-#service_instance_id = 8b12b984-5c42-4324-8a50-c4bc4a223154
-#endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
-#default_crk_uuid = 1cbf4897-de35-48d2-b393-eec5adf117a0
