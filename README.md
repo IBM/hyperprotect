@@ -61,26 +61,54 @@
 			endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
 			default_crk_uuid = fedcba98-7654-3210-fedc-ba9876543210
 
-6. For dm-crypt keys:
+6. Note on the dm-crypt and LUKS insturctions below:
+
+    - The following examples assume that /dev/loop0 is the encrypted block device.  Substitute it with the actual encrypted block device if not using /dev/loop0.
+
+7. For dm-crypt keys:
 
     - Generate a random wrapped key and store it in the /var/lib/keyprotect-luks/logon directory
 
 			keyprotect-luks genwrap > /var/lib/keyprotect-luks/logon/dmcrypt:key1
 
+    - After creating wrapped keys, populate the kernel keyring by either
+
+			shutdown -r now
+
+      so that the keyprotect-luks systemd service will populate it or
+
+			keyprotect-luks process
+
+      to populate it immediately.
+
     - Use dmsetup to setup a crypt target for the block device, assuming /dev/loop0 as the block device for this example and secrets as the mapped name
 
 			dmsetup create secrets --table "0 $(blockdev --getsz /dev/loop0) crypt aes-xts-plain64 :32:logon:dmcrypt:key1 0 /dev/loop0 0"
+
+   - Format the mapped device with your favorite filesystem, in this case ext4:
+
+			mkfs -t ext4 /dev/mapper/secrets
 
     - Mount the encrypted device called "secrets" on a mountpoint called "/secrets"
 
 			mkdir /secrets
 			mount /dev/mapper/secrets /secrets
 
-7. For LUKS passphrases:
+8. For LUKS passphrases:
 
    - Wrap your passphrase and store it in the var/lib/keyprotect-luks/user directory
 
 			keyprotect-luks wrap --dek MyPassPhrase > /var/lib/keyprotect-luks/user/dmcrypt:key2
+
+    - After creating wrapped keys, populate the kernel keyring by either
+
+			shutdown -r now
+
+      so that the keyprotect-luks systemd service will populate it or
+
+			keyprotect-luks process
+
+      to populate it immediately.
 
    - Use cryptsetup to format the block device, assuming /dev/loop0 as the block device for this example
 
@@ -92,6 +120,10 @@
 
 			cryptsetup luksOpen /dev/loop0 secrets
 
+   - Format the mapped device with your favorite filesystem, in this case ext4:
+
+			mkfs -t ext4 /dev/mapper/secrets
+
    - Add a key token to the LUKS header
 
 			cryptsetup token add /dev/loop0 --key-description dmcrypt:key2
@@ -101,25 +133,29 @@
 			mkdir /secrets
 			mount /dev/mapper/secrets /secrets
 
-8. Enable the keyprotect-luks systemd service:
+9. Enable the keyprotect-luks systemd service:
 
 		systemctl enable keyprotect-luks
 
-9. Enable the remote cryptsetup target
+10. Enable the remote cryptsetup target
 
 		systemctl enable remote-cryptsetup.target
 
-10. Reboot
+11. Reboot
 
-11. You should see a logon key type called dmcrypt:key1 and user key type called dmcrypt:key2 in root's @u keyring
+12. You should see a logon key type called dmcrypt:key1 and user key type called dmcrypt:key2 in root's @u keyring
 
 		keyctl show @s
 
-12. You can directly use they keys with dmsetup create
+13. You can directly use they keys with dmsetup create
 
-13. cryptsetup should NOT prompt for a key when you luksOpen the LUKS device
+14. cryptsetup should NOT prompt for a key when you luksOpen the LUKS device
 
 **IMPORTANT**
+
+The above instructions assume that the user directly logs in as root; not indirectly su or sudo from another user.  If it's necessary to login as an ordinary user and switch to root , please see this article:
+
+	https://mjg59.dreamwidth.org/37333.html
 
 If you use mosh to login remotely, root will not have a valid @s keyring and you won't be able to see and use the keyring keys.  In this case:
 
@@ -157,7 +193,7 @@ and you should now be able to show the keys
 
 	rm api-key.txt
 
-6. Edit /etc/keyprotect-luks.ini and assign api_key the special value "TPM"
+7. Edit /etc/keyprotect-luks.ini and assign api_key the special value "TPM"
 
 	[KP]
 	api_key = TPM
@@ -206,6 +242,12 @@ Here's an example of how to setup a key token on a LUKS-encrypted device assumin
 ## Networking in the initramfs
 
 ### Dracut modules
+
+!!!THIS WORK IS INCOMPLETE AND SHOULD NOT BE USED YET!!!
+
+First, install the dracut modules by running
+
+	make install-dracut
 
 Add the following Dracut module files to /etc/dracut.conf.d
 
