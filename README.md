@@ -153,9 +153,8 @@
 
 **IMPORTANT**
 
-The above instructions assume that the user directly logs in as root; not indirectly su or sudo from another user.  If it's necessary to login as an ordinary user and switch to root , please see this article:
+The above instructions assume that the user directly logs in as root; not indirectly via su or sudo from another user.  If it's necessary to login as an ordinary user and switch to root, please refer to this article: https://mjg59.dreamwidth.org/37333.html
 
-	https://mjg59.dreamwidth.org/37333.html
 
 If you use mosh to login remotely, root will not have a valid @s keyring and you won't be able to see and use the keyring keys.  In this case:
 
