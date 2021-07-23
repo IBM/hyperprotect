@@ -1,20 +1,23 @@
-install: $(DESTDIR)/usr/bin/keyprotect-luks \
-	 $(DESTDIR)/usr/lib/systemd/system/keyprotect-luks.service \
-	 $(DESTDIR)/usr/share/doc/keyprotect-luks/README.md \
-	 $(DESTDIR)/usr/share/doc/keyprotect-luks/keyprotect-luks.ini \
-	 $(DESTDIR)/var/lib/keyprotect-luks \
-	 $(DESTDIR)/var/lib/keyprotect-luks/logon \
-	 $(DESTDIR)/var/lib/keyprotect-luks/user \
-	 $(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks \
-	 $(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/keyprotect-luks.sh \
-	 $(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/module-setup.sh \
-	 $(DESTDIR)/etc/dracut.conf.d/keyprotect-luks.conf \
-	 $(DESTDIR)/usr/lib/dracut/modules.d/83tss \
-	 $(DESTDIR)/usr/lib/dracut/modules.d/83tss/module-setup.sh \
-	 $(DESTDIR)/usr/lib/dracut/modules.d/83tss/start-tcsd.sh \
-	 $(DESTDIR)/usr/lib/dracut/modules.d/83tss/stop-tcsd.sh \
-	 $(DESTDIR)/etc/dracut.conf.d/tss.conf
+install: \
+	$(DESTDIR)/usr/bin/keyprotect-luks \
+	$(DESTDIR)/usr/lib/systemd/system/keyprotect-luks.service \
+	$(DESTDIR)/usr/share/doc/keyprotect-luks/README.md \
+	$(DESTDIR)/usr/share/doc/keyprotect-luks/keyprotect-luks.ini \
+	$(DESTDIR)/var/lib/keyprotect-luks \
+	$(DESTDIR)/var/lib/keyprotect-luks/logon \
+	$(DESTDIR)/var/lib/keyprotect-luks/user
 
+install-dracut: \
+	$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks \
+	$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/keyprotect-luks.sh \
+	$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/module-setup.sh \
+	$(DESTDIR)/etc/dracut.conf.d/keyprotect-luks.conf \
+	$(DESTDIR)/usr/lib/dracut/modules.d/83tss \
+	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/module-setup.sh \
+	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/start-tcsd.sh \
+	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/stop-tcsd.sh \
+	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/run-tss-cmds.sh \
+	$(DESTDIR)/etc/dracut.conf.d/tss.conf
 
 $(DESTDIR)/usr/bin/keyprotect-luks: keyprotect-luks
 	install -m 755 -D keyprotect-luks -t "$(DESTDIR)/usr/bin"
@@ -60,6 +63,9 @@ $(DESTDIR)/usr/lib/dracut/modules.d/83tss/start-tcsd.sh: dracut/83tss/start-tcsd
 
 $(DESTDIR)/usr/lib/dracut/modules.d/83tss/stop-tcsd.sh: dracut/83tss/stop-tcsd.sh
 	install -m 755 -D dracut/83tss/stop-tcsd.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/83tss"
+
+$(DESTDIR)/usr/lib/dracut/modules.d/83tss/run-tss-cmds.sh: dracut/83tss/run-tss-cmds.sh
+	install -m 755 -D dracut/83tss/run-tss-cmds.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/83tss"
 
 $(DESTDIR)/etc/dracut.conf.d/tss.conf: dracut/tss.conf
 	install -m 644 -D dracut/tss.conf -t "$(DESTDIR)/etc/dracut.conf.d"
