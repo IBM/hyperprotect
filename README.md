@@ -41,11 +41,11 @@
 			endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
 			default_crk_uuid = placeholder
 
-5. Generate a CRK and add its UUID to /etc/keyprotect-luks.ini
+5. Generate a random CRK and add its UUID to /etc/keyprotect-luks.ini
 
-   - Generate a CRK
+   - Generate a random CRK
 
-			keyprotect-luks createcrk --name MyCRKName
+			keyprotect-luks create --crk --gen --name MyCRKName
 
    - List the Key Protect keys to get the UUID associated with MyCRKName
 
@@ -69,7 +69,7 @@
 
     - Generate a random wrapped key and store it in the /var/lib/keyprotect-luks/logon directory
 
-			keyprotect-luks genwrap > /var/lib/keyprotect-luks/logon/dmcrypt:key1
+			keyprotect-luks wrap --gen > /var/lib/keyprotect-luks/logon/dmcrypt:key1
 
     - After creating wrapped keys, populate the kernel keyring by either
 
@@ -98,7 +98,7 @@
 
    - Wrap your passphrase and store it in the var/lib/keyprotect-luks/user directory
 
-			keyprotect-luks wrap --dek MyPassPhrase > /var/lib/keyprotect-luks/user/dmcrypt:key2
+			echo -n 'MyPassPhrase' | keyprotect-luks wrap > /var/lib/keyprotect-luks/user/dmcrypt:key2
 
     - After creating wrapped keys, populate the kernel keyring by either
 

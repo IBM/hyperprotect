@@ -6,7 +6,7 @@
 #
 # Nayna Jain <nayna@linux.ibm.com>, George Wilson <gcwilson@linux.ibm.com>
 #
-# Copyright (C) 2021 IBM Corp.
+# Copyright (C) 2021,2022 IBM Corp.
 #
 
 import configparser
@@ -15,7 +15,6 @@ import os
 import subprocess
 import sys
 import keyprotect
-from keyprotect import bxauth
 
 CONFIG_FILE = '/etc/keyprotect-luks.ini'
 KEY_BYTES = 32
@@ -61,11 +60,39 @@ def parse_config(config_file):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('op', choices=['list', 'createcrk', 'createstd', 'get', 'wrap', 'genwrap', 'unwrap', 'process', 'delete'])
-    parser.add_argument('--uuid', default=None)
-    parser.add_argument('--dek', default=None)
-    parser.add_argument('--name', default=None)
+    subparsers = parser.add_subparsers(dest='op')
+
+    subparser_list = subparsers.add_parser('list', help='list keys')
+
+    subparser_create = subparsers.add_parser('create', help='create key')
+    subparser_create.add_argument('--uuid', default=None, help='UUID for CRK')
+    subparser_create.add_argument('--name', default=None, help='name for key')
+    subparser_create.add_argument('--crk', default=False, action='store_true', help='Customer Root Key')
+    subparser_create.add_argument('--std', default=False, action='store_true', help='standard key')
+    subparser_create.add_argument('--gen', default=False, action='store_true', help='generate random key rather than provide key')
+
+    subparser_get = subparsers.add_parser('get', help='get key information')
+    subparser_get.add_argument('--uuid', default=None, help='UUID for CRK')
+
+    subparser_wrap = subparsers.add_parser('wrap', help='read a key from stdin and wrap it')
+    subparser_wrap.add_argument('--uuid', default=None, help='UUID for CRK')
+    subparser_wrap.add_argument('--gen', default=False, action='store_true', help='generate random key rather than provide key')
+
+    subparser_unwrap = subparsers.add_parser('unwrap', help='unwrap a key from stdin to stdout')
+    subparser_unwrap.add_argument('--uuid', default=None, help='UUID for CRK')
+
+    subparser_process = subparsers.add_parser('process', help='populate the kernel keyring by unwrapping keys in ' + WRAPPED_KEY_DIR)
+    subparser_process.add_argument('--uuid', default=None, help='UUID for CRK')
+
+    subparser_delete = subparsers.add_parser('delete', help='delete key specified by --uuid')
+    subparser_delete.add_argument('--uuid', default=None, help='UUID for CRK')
+
     args = parser.parse_args()
+
+    if args.op == None:
+        parser.print_help()
+        exit(1)
+
     return args
 
 #
@@ -74,7 +101,7 @@ def parse_args():
 
 def tpm_unseal(config):
     if config['KP']['api_key'] == 'TPM':
-        print('Unsealing API key from TPM')
+        # print('Unsealing API key from TPM')
         unseal_proc = subprocess.Popen(('tpm_unsealdata', '-z', '-i', BLOB_FILE), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         raw_plaintext, perr = unseal_proc.communicate()
         if unseal_proc.returncode != 0:
@@ -88,7 +115,7 @@ def tpm_unseal(config):
 #
 
 def init_keyprotect(api_key, region, service_instance_id, endpoint_url):
-    tm = bxauth.TokenManager(api_key=api_key)
+    tm = keyprotect.bxauth.TokenManager(api_key=api_key)
     kp = keyprotect.Client(credentials=tm,
                            region=region,
                            service_instance_id=service_instance_id,
@@ -140,45 +167,20 @@ class key_protect_luks:
     #  Create a new root key
     #
 
-    def op_createcrk(self):
+    def op_create(self):
         if args.name == None:
-            print('Missing CRK --name option', file=sys.stderr)
+            print('Missing --name option', file=sys.stderr)
+            exit(1)
+        elif args.crk == args.std:
+            print('Specify one of --crk or --std', file=sys.stderr)
             exit(1)
         else:
-            rootkey = kp.create(name=args.name, root=True)
-            print('Created key %s' % rootkey['id'])
-
-    #
-    #  Create a new standard key
-    #
-
-    def op_createstd(self):
-        print("test createstd")
-        if args.name == None:
-            print('Missing standard key --name option', file=sys.stderr)
-            exit(1)
-        else:
-            stdkey = kp.create(name=args.name, root=False)
-            print('Created key %s' % stdkey['id'])
-
-    #
-    #  Take the key specified by --dek,  wrap it with a CRK specified by --uuid or default_crk_uuid, and write it to stdout
-    #
-
-    def op_wrap(self):
-        if args.uuid == None:
-            if config['KP']['default_crk_uuid'] == '':
-                print('No default CRK UUID in config file and missing CRK --uuid option', file=sys.stderr)
-                exit(1)
-            else:
-                args.uuid = config['KP']['default_crk_uuid']
-        if args.dek == None:
-            print('Missing --dek for wrap op', file=sys.stderr)
-            exit(1)
-        wrappedkey = kp.wrap(args.uuid, plaintext=args.dek.encode('utf-8'))
-        ciphertext = wrappedkey.get('ciphertext')
-        plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
-        print(ciphertext)
+            input_key = None;
+            if args.gen == False:
+                input_key = sys.stdin.read()
+                payload = input_key.encode('utf-8')
+            new_key = kp.create(name=args.name, root=args.crk, payload=payload)
+            print('Created key %s' % new_key['id'], file=sys.stderr)
 
     #
     #  Get the Key Protect key specified by --uuid and print its info
@@ -193,17 +195,24 @@ class key_protect_luks:
             print(key)
 
     #
-    #  Generate a 32-byte random key, wrap it with the root key specified by --uuid or default_crk_uuid, and write it to stdout
+    #  Take the key from stdin,  wrap it with a CRK specified by --uuid or default_crk_uuid, and write it to stdout
+    #
+    #  If --gen is specified, generate a random key of KEY_BYTES length rather than reading from stain
     #
 
-    def op_genwrap(self):
+    def op_wrap(self):
         if args.uuid == None:
             if config['KP']['default_crk_uuid'] == '':
                 print('No default CRK UUID in config file and missing CRK --uuid option', file=sys.stderr)
                 exit(1)
             else:
                 args.uuid = config['KP']['default_crk_uuid']
-        wrappedkey = kp.wrap(args.uuid, plaintext=os.urandom(KEY_BYTES))
+        input_key = None;
+        if args.gen == True:
+            input_key = os.urandom(KEY_BYTES)
+        else:
+             input_key = sys.stdin.read().encode('utf-8')
+        wrappedkey = kp.wrap(args.uuid, plaintext=input_key)
         ciphertext = wrappedkey.get('ciphertext')
         plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
         print(ciphertext)
@@ -247,15 +256,13 @@ class key_protect_luks:
             exit(1)
         else:
             deleted_key = kp.delete(args.uuid)
-            print('Deleted key %s' % args.uuid)
+            print('Deleted key %s' % args.uuid, file=sys.stderr)
 
     opswitch = {
         'list': op_list,
-        'createcrk': op_createcrk,
-        'createstd': op_createstd,
-        'wrap': op_wrap,
+        'create': op_create,
         'get': op_get,
-        'genwrap': op_genwrap,
+        'wrap': op_wrap,
         'unwrap': op_unwrap,
         'process': op_process,
         'delete': op_delete
@@ -274,11 +281,11 @@ class key_protect_luks:
 config = parse_config(CONFIG_FILE)
 args = parse_args()
 
-# Check for TPM case
+# Handle TPM case
 
 tpm_unseal(config)
 
-# Initialize the key management service client as specified in Authentication
+# Initialize the key management service client
 
 kp = init_keyprotect(config['KP']['api_key'],
                      config['KP']['region'],
