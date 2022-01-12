@@ -21,6 +21,7 @@ KEY_BYTES = 32
 WRAPPED_KEY_DIR = '/var/lib/keyprotect-luks'
 KEY_TYPES = ('logon', 'user')
 BLOB_FILE = WRAPPED_KEY_DIR + '/api-key-blob.txt'
+VERSION = '1.0.0'
 
 #
 #  Parse config file
@@ -60,6 +61,8 @@ def parse_config(config_file):
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--version', help='show version and exit', default=False, action='store_true')
+
     subparsers = parser.add_subparsers(dest='op')
 
     subparser_list = subparsers.add_parser('list', help='list keys')
@@ -89,7 +92,14 @@ def parse_args():
 
     args = parser.parse_args()
 
-    if args.op == None:
+    # Handle --version option as an op
+
+    if args.version == True:
+        args.op = 'version'
+
+    # Work around add_subparsers() not honoring required= in python <3.7
+
+    if  args.op == None:
         parser.print_help()
         exit(1)
 
@@ -154,6 +164,15 @@ class key_protect_luks:
             print(pout.decode('utf-8'), end='', flush=True)
             print(perr.decode('utf-8'), end='', flush=True)
 
+    #
+    #  Print version and exist
+    #
+
+    def op_version(self):
+        print(os.path.basename(sys.argv[0]) + ' version ' + VERSION, file=sys.stderr)
+        exit(0)
+
+    #
     #
     #  List Key Protect keys
     #
@@ -259,6 +278,7 @@ class key_protect_luks:
             print('Deleted key %s' % args.uuid, file=sys.stderr)
 
     opswitch = {
+        'version': op_version,
         'list': op_list,
         'create': op_create,
         'get': op_get,
