@@ -30,8 +30,7 @@ keyprotect-luks \- manage IBM HPCS Key Protect keys from Linux
 .SH "SYNOPSIS"
 .sp
 .nf
-\fIkeyprotect-luks\fR [\-\-version] [\-\-help]
-    <command> [<args>]
+\fIkeyprotect-luks\fR [\-\-version] [\-\-help] <command> [<args>]
 .fi
 .sp
 .SH "DESCRIPTION"
@@ -53,41 +52,108 @@ Prints help for commands and options and exits\&.
 .PP
 list
 .RS 4
-Lists wrapping keys in the IBM HPCS Key Protect instance\&.
+Lists the wrapping key UUID and name pairs in the IBM HPCS Key Protect instance\&.
+.sp
+Takes no arguments\&.
 .RE
 .PP
-create
+create {--crk|--std} --name <name> [--gen]
 .RS 4
 Create a wrapping key in the IBM HPCS Key Protect instance\&.
+.sp
+Arguments\&:
+.sp
+.PP
+--crk
+.RS 4
+Create a Customer Root Key\&.  One of either --crk or --std are required\&.  Mutually exclusive with --std\&.
 .RE
 .PP
-get
+--std
+.RS 4
+Create a standard key\&. One of either --crk or --std are required\&.  Mutually exclusive with --crk\&.
+.RE
+.PP
+--name <name>
+.RS 4
+Name for key\&.  Required\&.
+.RE
+.PP
+--gen
+.RS 4
+Generate a random key rather than reading a key from stdin\&.  Optional\&.
+.RE
+.RE
+.PP
+get [--uuid <uuid>]
 .RS 4
 Gets metadata for a key\&.
+.sp
+Arguments\&:
+.sp
+.PP
+--uuid <uuid>
+.RS 4
+UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration file\&.
+.RE
 .RE
 .PP
-wrap
+wrap [--uuid <uuid>] [--gen]
 .RS 4
 Wraps a key on stdin with a specified wrapping key in the IBM HPCS Key Protect instance and writes it to stdout\&.
+.sp
+Arguments\&:
+.sp
+.PP
+--uuid <uuid>
+.RS 4
+UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration file\&.
+.RE
+.RE
 .RE
 .PP
-unwrap
+unwrap [--uuid <uuid>]
 .RS 4
 Unwraps a key on stdin with a specified wrapping key in the IBM HPCS Key Protect instance and writes it to stdout\&.
+.sp
+Arguments\&:
+.sp
+.PP
+--uuid <uuid>
+.RS 4
+UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration file\&.
+.RE
 .RE
 .PP
-process
+process [--uuid <uuid>]
 .RS 4
 Processes a number of wrapped keys on disk to unwrap them with the specified wrapping key in the IBM HPCS Key Protect instance and populates the kernel keyring with them\&.
+.sp
+Arguments\&:
+.sp
+.PP
+--uuid <uuid>
+.RS 4
+UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration file\&.
+.RE
 .RE
 .PP
-delete
+delete <--uuid <uuid>>
 .RS 4
 Deletes the specified wrapping key in the IBM HPCS Key Protect instance\&.
 .sp
-.SH "CONFIGURATION"
 .sp
-The keyprotect-luks command reads configuration information from /etc/keyprotect-luks.ini\&.  The file is initially created by copying the skeleton from /usr/share/doc/keyprotect-luks/keyprotect-luks.ini to /etc/keyprotect-luks.ini and editing it\&.  Refer to the the IBM HCPS Key Protect documentation for details on IBM HPCS Key Protect options\&.
+Arguments\&:
+.sp
+.PP
+--uuid <uuid>
+.RS 4
+UUID for CRK\&.  Required\&.
+.RE
+.RE
+.SH "CONFIGURATION FILE"
+.sp
+The keyprotect-luks command reads configuration information from /etc/keyprotect-luks.ini\&.  The file must be initially created by copying the skeleton from /usr/share/doc/keyprotect-luks/keyprotect-luks.ini to /etc/keyprotect-luks.ini and editing it\&.  Refer to the the IBM HCPS Key Protect documentation for details on IBM HPCS Key Protect options\&.
 .sp
 Configuration options are as follows\&:
 .sp
@@ -116,16 +182,42 @@ Endpoint URL for the IBM HPCS Key Protect instance\&.
 .PP
 default_crk_uuid
 .RS 4
-Default CRK UUID for the default wrapping key\&.  Can be overwridded with the --uuid command line option.
+Default CRK UUID for the default wrapping key\&.  Can be overridden with the --uuid command line option\&.
 .RE
+.sp
+.SH "SYSTEMD SERVICE"
+.sp
+The keyprotect-luks package installs a systemd service called keyprotect-luks\&.  The keyprotect-luks service calls the keyprotect-luks process command to populate the kernel keyring by unwrapping keys from /var/lib/keyprotect-luks\&.  The keys populated in the keyring can subsequently be used for other services, namely LUKS\&.
+.sp
+The /var/lib/keyprotect-luks directory must be populated before the keyprotect-luks process command\&.  Please see the keyprotect-luks process command description above\&.
+.sp
+To enable the keyprotect-luks service after installing the keyprotect-luks package\&:
+.sp
+.RS 4
+systemctl enable keyprotect-luks
+systemctl start keyprotect-luks
+.RE
+.sp
+The results of the service can be seen by running\&:
+.sp
+.RS 4
+journalctl
+.RE
+.sp
+Listing keys with the keyctl command should show the keys that keyprotect-luks populated\&.
+.sp
 .SH "EXAMPLES"
 .sp
+.PP
+Configuration File
+.RS 4
 .nf
 [KP]
 api_key = AB0CdEfGHijKlMN--12OPqRStuv3wx456yZAb7CDEF8g
 #api_key = TPM
 region = us-east # Another comment
-service_instance_id = 01234567-891b-cdef-0123-456789012345
+service_instance_id = 01234567-89ab-cdef-0123-456789abcdef
 endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
 default_crk_uuid = fedcba98-7654-3210-fedc-ba9876543210
 .fi
+.RE

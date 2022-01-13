@@ -68,10 +68,9 @@ def parse_args():
     subparser_list = subparsers.add_parser('list', help='list keys')
 
     subparser_create = subparsers.add_parser('create', help='create key')
-    subparser_create.add_argument('--uuid', default=None, help='UUID for CRK')
-    subparser_create.add_argument('--name', default=None, help='name for key')
     subparser_create.add_argument('--crk', default=False, action='store_true', help='Customer Root Key')
     subparser_create.add_argument('--std', default=False, action='store_true', help='standard key')
+    subparser_create.add_argument('--name', default=None, help='name for key')
     subparser_create.add_argument('--gen', default=False, action='store_true', help='generate random key rather than provide key')
 
     subparser_get = subparsers.add_parser('get', help='get key information')
