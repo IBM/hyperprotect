@@ -1,0 +1,131 @@
+'\" t
+.\"     Title: keyprotect-luks
+.\"    Author: [see the "Authors" section]
+.\"      Date: 01/12/2022
+.\"    Manual: Keyprotect-LUKS manual
+.\"  Language: English
+.\"
+.TH "KEYPROTECT-LUKS" "1" "01/12/2022" "keyprotect-luks1\&.0" "Keyprotect-LUKS Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+keyprotect-luks \- manage IBM HPCS Key Protect keys from Linux
+.SH "SYNOPSIS"
+.sp
+.nf
+\fIkeyprotect-luks\fR [\-\-version] [\-\-help]
+    <command> [<args>]
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+The keyprotect-luks command interacts with the IBM HPCS Key Protect cloud service over a REST API via the keyprotect Python client\&.  It can create wrapping keys, wrap keys, unwrap keys, and unwrap a set of keys from disk and populate the kernel keyring with them\&.
+.sp
+.SH "OPTIONS"
+.PP
+\-\-version
+.RS 4
+Prints the keyprotect-luks version and exits\&.
+.RE
+.PP
+\-\-help
+.RS 4
+Prints help for commands and options and exits\&.
+.sp
+.SH "COMMANDS"
+.PP
+list
+.RS 4
+Lists wrapping keys in the IBM HPCS Key Protect instance\&.
+.RE
+.PP
+create
+.RS 4
+Create a wrapping key in the IBM HPCS Key Protect instance\&.
+.RE
+.PP
+get
+.RS 4
+Gets metadata for a key\&.
+.RE
+.PP
+wrap
+.RS 4
+Wraps a key on stdin with a specified wrapping key in the IBM HPCS Key Protect instance and writes it to stdout\&.
+.RE
+.PP
+unwrap
+.RS 4
+Unwraps a key on stdin with a specified wrapping key in the IBM HPCS Key Protect instance and writes it to stdout\&.
+.RE
+.PP
+process
+.RS 4
+Processes a number of wrapped keys on disk to unwrap them with the specified wrapping key in the IBM HPCS Key Protect instance and populates the kernel keyring with them\&.
+.RE
+.PP
+delete
+.RS 4
+Deletes the specified wrapping key in the IBM HPCS Key Protect instance\&.
+.sp
+.SH "CONFIGURATION"
+.sp
+The keyprotect-luks command reads configuration information from /etc/keyprotect-luks.ini\&.  The file is initially created by copying the skeleton from /usr/share/doc/keyprotect-luks/keyprotect-luks.ini to /etc/keyprotect-luks.ini and editing it\&.  Refer to the the IBM HCPS Key Protect documentation for details on IBM HPCS Key Protect options\&.
+.sp
+Configuration options are as follows\&:
+.sp
+.PP
+api_key
+.RS 4
+API key for the IBM HPCS Key Protect instance console\&.
+.sp
+Alternatively, this option can be assigned the special value TPM, in which case keyprotect-luks attempts to unseal a TPM-wrapped key from /var/lib/keyprotect-luks/api-key-blob.txt\&.  See below for details\&.
+.RE
+.PP
+region
+.RS 4
+Region specifier for the IBM HPCS Key Protect instance\&.
+.RE
+.PP
+service_instance_id
+.RS 4
+Service instance ID for the IBM HPCS Key Protect instance\&.
+.RE
+.PP
+endpoint_url
+.RS 4
+Endpoint URL for the IBM HPCS Key Protect instance\&.
+.RE
+.PP
+default_crk_uuid
+.RS 4
+Default CRK UUID for the default wrapping key\&.  Can be overwridded with the --uuid command line option.
+.RE
+.SH "EXAMPLES"
+.sp
+.nf
+[KP]
+api_key = AB0CdEfGHijKlMN--12OPqRStuv3wx456yZAb7CDEF8g
+#api_key = TPM
+region = us-east # Another comment
+service_instance_id = 01234567-891b-cdef-0123-456789012345
+endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
+default_crk_uuid = fedcba98-7654-3210-fedc-ba9876543210
+.fi
