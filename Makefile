@@ -3,6 +3,7 @@ install: \
 	$(DESTDIR)/usr/lib/systemd/system/keyprotect-luks.service \
 	$(DESTDIR)/usr/share/doc/keyprotect-luks/README.md \
 	$(DESTDIR)/usr/share/doc/keyprotect-luks/keyprotect-luks.ini \
+	$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1 \
 	$(DESTDIR)/var/lib/keyprotect-luks \
 	$(DESTDIR)/var/lib/keyprotect-luks/logon \
 	$(DESTDIR)/var/lib/keyprotect-luks/user
@@ -30,6 +31,10 @@ $(DESTDIR)/usr/share/doc/keyprotect-luks/README.md: README.md
 
 $(DESTDIR)/usr/share/doc/keyprotect-luks/keyprotect-luks.ini: keyprotect-luks.ini
 	install -m 644 -D keyprotect-luks.ini -t "$(DESTDIR)/usr/share/doc/keyprotect-luks"
+
+$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz: keyprotect-luks.1
+	gzip <keyprotect-luks.1 >"$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz"
+	chmod 644 "$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz"
 
 $(DESTDIR)/var/lib/keyprotect-luks:
 	install -m 755 -d $(DESTDIR)/var/lib/keyprotect-luks
