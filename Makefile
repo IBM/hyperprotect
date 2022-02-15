@@ -1,3 +1,14 @@
+.PHONY: clean rpm install install-dracut
+
+clean:
+	rm -f keyprotect-luks-1.0.tar.gz
+	rm -f keyprotect-luks-1.0-1.el8.noarch.rpm
+	rm -f SHA256SUMS
+
+dist: rpm
+	cp -p ~/rpmbuild/RPMS/noarch/keyprotect-luks-1.0-1.el8.noarch.rpm .
+	sha256sum keyprotect-luks-1.0-1.el8.noarch.rpm > SHA256SUMS
+
 rpm:
 	rm -f keyprotect-luks-1.0.tar.gz
 	tar --xform='s/^/keyprotect-luks-1.0\//' -cpzf keyprotect-luks-1.0.tar.gz *

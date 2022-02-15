@@ -2,6 +2,7 @@ Name:		keyprotect-luks
 Version:	1.0
 Release:	1%{?dist}
 Summary:	IBM HPCS Key Protect Integration with LUKS
+BuildArch:	noarch
 
 Group:		None
 License:	Apache 2.0
