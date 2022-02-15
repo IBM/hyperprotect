@@ -1,9 +1,17 @@
+rpm:
+	rm -f keyprotect-luks-1.0.tar.gz
+	tar --xform='s/^/keyprotect-luks-1.0\//' -cpzf keyprotect-luks-1.0.tar.gz *
+	cp -p keyprotect-luks-1.0.tar.gz ~/rpmbuild/SOURCES
+	cp -p keyprotect-luks.spec ~/rpmbuild/SPECS
+	rpmbuild -ba ~/rpmbuild/SPECS/keyprotect-luks.spec
+
+
 install: \
 	$(DESTDIR)/usr/bin/keyprotect-luks \
 	$(DESTDIR)/usr/lib/systemd/system/keyprotect-luks.service \
 	$(DESTDIR)/usr/share/doc/keyprotect-luks/README.md \
 	$(DESTDIR)/usr/share/doc/keyprotect-luks/keyprotect-luks.ini \
-	$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1 \
+	$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz \
 	$(DESTDIR)/var/lib/keyprotect-luks \
 	$(DESTDIR)/var/lib/keyprotect-luks/logon \
 	$(DESTDIR)/var/lib/keyprotect-luks/user
@@ -33,6 +41,7 @@ $(DESTDIR)/usr/share/doc/keyprotect-luks/keyprotect-luks.ini: keyprotect-luks.in
 	install -m 644 -D keyprotect-luks.ini -t "$(DESTDIR)/usr/share/doc/keyprotect-luks"
 
 $(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz: keyprotect-luks.1
+	mkdir -p "$(DESTDIR)/usr/share/man/man1"
 	gzip <keyprotect-luks.1 >"$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz"
 	chmod 644 "$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz"
 
