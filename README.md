@@ -24,10 +24,10 @@
    - Fill in each of the options using information from the IBM Cloud portal, putting a placeholder in default_crk_uuid for now:
 
 			[KP]
-			api_key = AB0CdEfGHijKlMN--12OPqRStuv3wx456yZAb7CDEF8g
 			region = us-east
-			service_instance_id = 01234567-89ab-cdef-0123-456789abcdef
 			endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
+			service_instance_id = 01234567-89ab-cdef-0123-456789abcdef
+			api_key = AB0CdEfGHijKlMN--12OPqRStuv3wx456yZAb7CDEF8g
 			default_crk_uuid = placeholder
 
 5. Generate a random CRK and add its UUID to /etc/keyprotect-luks.ini
