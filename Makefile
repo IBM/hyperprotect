@@ -19,9 +19,9 @@ rpm:
 
 install: \
 	$(DESTDIR)/usr/bin/keyprotect-luks \
+	$(DESTDIR)/etc/keyprotect-luks.ini \
 	$(DESTDIR)/usr/lib/systemd/system/keyprotect-luks.service \
 	$(DESTDIR)/usr/share/doc/keyprotect-luks/README.md \
-	$(DESTDIR)/usr/share/doc/keyprotect-luks/keyprotect-luks.ini \
 	$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz \
 	$(DESTDIR)/var/lib/keyprotect-luks \
 	$(DESTDIR)/var/lib/keyprotect-luks/logon \
@@ -48,8 +48,8 @@ $(DESTDIR)/usr/lib/systemd/system/keyprotect-luks.service: keyprotect-luks.servi
 $(DESTDIR)/usr/share/doc/keyprotect-luks/README.md: README.md
 	install -m 644 -D README.md -t "$(DESTDIR)/usr/share/doc/keyprotect-luks"
 
-$(DESTDIR)/usr/share/doc/keyprotect-luks/keyprotect-luks.ini: keyprotect-luks.ini
-	install -m 644 -D keyprotect-luks.ini -t "$(DESTDIR)/usr/share/doc/keyprotect-luks"
+$(DESTDIR)/etc/keyprotect-luks.ini: keyprotect-luks.ini
+	install -m 644 -D keyprotect-luks.ini -t "$(DESTDIR)/etc"
 
 $(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz: keyprotect-luks.1
 	mkdir -p "$(DESTDIR)/usr/share/man/man1"
