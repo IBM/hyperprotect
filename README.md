@@ -56,6 +56,10 @@
 
 7. For dm-crypt keys:
 
+    - Enable the keyprotect-luks systemd service
+
+			systemctl enable keyprotect-luks
+
     - Generate a random wrapped key and store it in the /var/lib/keyprotect-luks/logon directory
 
 			keyprotect-luks wrap --gen > /var/lib/keyprotect-luks/logon/dmcrypt:key1
@@ -85,19 +89,23 @@
 
 8. For LUKS passphrases:
 
+    - Enable the keyprotect-luks systemd service
+
+			systemctl enable keyprotect-luks
+
    - Wrap your passphrase and store it in the var/lib/keyprotect-luks/user directory
 
 			echo -n 'MyPassPhrase' | keyprotect-luks wrap > /var/lib/keyprotect-luks/user/dmcrypt:key2
 
-    - After creating wrapped keys, populate the kernel keyring by either
+   - After creating wrapped keys, populate the kernel keyring by either
 
 			shutdown -r now
 
-      so that the keyprotect-luks systemd service will populate it or
+     so that the keyprotect-luks systemd service will populate it or
 
 			keyprotect-luks process
 
-      to populate it immediately.
+     to populate it immediately.
 
    - Use cryptsetup to format the block device, assuming /dev/loop0 as the block device for this example
 
@@ -117,7 +125,7 @@
 
 			cryptsetup token add /dev/loop0 --key-description dmcrypt:key2
 
-    - Mount the encrypted device called "secrets" on a mountpoint called "/secrets"
+   - Mount the encrypted device called "secrets" on a mountpoint called "/secrets"
 
 			mkdir /secrets
 			mount /dev/mapper/secrets /secrets
