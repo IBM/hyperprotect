@@ -1,7 +1,7 @@
 Name:		keyprotect-luks
 Version:	1.0
 Release:	1%{?dist}
-Summary:	IBM HPCS Key Protect Integration with LUKS
+Summary:	IBM Key Protect Integration with LUKS
 BuildArch:	noarch
 
 Group:		None
@@ -13,7 +13,7 @@ Source0:	%{name}-%{version}.tar.gz
 Requires:	python3
 
 %description
-%{name} provides integration between IBM HPCS Key Protect
+%{name} provides integration between IBM Key Protect
 and LUKS via the kernel keyring.
 
 %global BUILD_AND_PACKAGE_DRACUT 0
@@ -35,10 +35,10 @@ make install DESTDIR=%{buildroot}
 %license LICENSE
 %doc README.md
 %attr(0755,root,root) %{_bindir}/%{name}
+%attr(0644,root,root) %{_sysconfdir}/%{name}.ini
 %attr(0644,root,root) %{_prefix}/lib/systemd/system/%{name}.service
 %attr(0644,root,root) %{_sharedstatedir}/%{name}/logon
 %attr(0644,root,root) %{_sharedstatedir}/%{name}/user
-%attr(0644,root,root) %{_docdir}/%{name}/%{name}.ini
 %attr(0644,root,root) %{_mandir}/man1/%{name}.1.gz
 %if "%{BUILD_AND_PACKAGE_DRACUT}" == "1"
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{name}/%{name}.sh
@@ -51,6 +51,10 @@ make install DESTDIR=%{buildroot}
 %endif
 
 %changelog
+* Wed Feb 16 2022 George Wilson <gcwilson@linux.ibm.com>
+- Remove HPCS from name, package ini file in /etc
+* Tue Feb 15 2022 George Wilson <gcwilson@linux.ibm.com>
+- Package manpage
 * Thu Jan 13 2022 George Wilson <gcwilson@linux.ibm.com>
 - Add BUILD_AND_PACKAGE_DRACUT conditional
 * Fri Jun 18 2021 George Wilson <gcwilson@linux.ibm.com>
