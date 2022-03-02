@@ -1,48 +1,74 @@
-.PHONY: clean rpm incr_gen_key sign install install-dracut
+COUNTFILE=${HOME}/.ibm-keyprotect-luks-key-count
+BATCHFILE=${HOME}/.ibm-keyprotect-luks-batchfile
+STATFILE=${HOME}/.ibm-keyprotect-luks-statfile
+BASE_KEYNAME=ibm-keyprotect-luks-build-
+BASE_SIGNFILE=${HOME}/.${BASE_KEYNAME}
+RPMROOT=${HOME}/rpm-user
 
-KEYNAME_BASE="ibm-keyprotect-luks-build-"
+.PHONY: clean pre-dist dist incr_gen_key sign rpm install install-dracut
 
 clean:
 	rm -f keyprotect-luks-1.0.tar.gz
 	rm -f keyprotect-luks-1.0-1.el8.noarch.rpm
 	rm -f SHA256SUMS
 
-dist: rpm
+dist: pre-dist sign
+
+pre-dist: rpm
 	cp -p ~/rpmbuild/RPMS/noarch/keyprotect-luks-1.0-1.el8.noarch.rpm .
 	sha256sum keyprotect-luks-1.0-1.el8.noarch.rpm > SHA256SUMS
 
 incr_gen_key:
-	COUNTFILE=~/.keyprotect-luks-key-count; \
-	BATCHFILE=~/.batchfile; \
-	if [ ! -f $${COUNTFILE} ]; then \
+	if [ ! -f ${COUNTFILE} ]; then \
 		KEYCOUNT=0; \
 	else \
-	        KEYCOUNT=`cat $${COUNTFILE}`; \
+	        KEYCOUNT=`cat ${COUNTFILE}`; \
 	       	KEYCOUNT=$$((KEYCOUNT+1)); \
 	fi; \
-	echo $${KEYCOUNT}; \
-	echo $${KEYCOUNT} > $${COUNTFILE}; \
+	echo "Key count = $${KEYCOUNT}" 1>&2; \
+	echo $${KEYCOUNT} > ${COUNTFILE}; \
 	\
-	PASSPHRASE=$$(dd if=/dev/random bs=1 count=32 | hexdump -e '4/8 "%016x" "\n"'); \
+	PASSPHRASE=$$(dd status=none if=/dev/random bs=1 count=32 | hexdump -e '4/8 "%016x" "\n"'); \
+	echo $${PASSPHRASE} > ${BASE_SIGNFILE}passphrase-$${KEYCOUNT}; \
 	\
-	echo "%echo Generating a GPG signing key for the keyprotect-luks package . . . "  > $${BATCHFILE}; \
-	echo "Key-Type: RSA" >> $${BATCHFILE}; \
-	echo "Key-Length: 4096" >> $${BATCHFILE}; \
-	echo "Subkey-Type: RSA" >> $${BATCHFILE}; \
-	echo "Subkey-Length: 4096" >> $${BATCHFILE}; \
-	echo "Name-Real: ibm-keyprotect-luks-build-$${KEYCOUNT}" >> $${BATCHFILE}; \
-	echo "Name-Comment: IBM Key Protect LUKS Integration Signing Key" >> $${BATCHFILE}; \
-	echo "Name-Email: gcwilson@us.ibm.com" >> $${BATCHFILE}; \
-	echo "Expire-Date: 0" >> $${BATCHFILE}; \
-	echo "Passphrase: $${PASSPHRASE}" >> $${BATCHFILE}; \
-	echo "%commit" >> $${BATCHFILE}; \
-	echo "%echo done" >> $${BATCHFILE}; \
-	gpg --status-file=/tmp/gpg.status --gen-key --pinentry-mode=loopback --batch --with-colons < $${BATCHFILE}; \
-	# cat /tmp/gpg.status \
-	# rm /tmp/gpg.status
+	echo "%echo Generating a GPG signing key for the keyprotect-luks package . . . "  > ${BATCHFILE}; \
+	echo "Key-Type: RSA" >> ${BATCHFILE}; \
+	echo "Key-Length: 2048" >> ${BATCHFILE}; \
+	echo "Subkey-Type: RSA" >> ${BATCHFILE}; \
+	echo "Subkey-Length: 2048" >> ${BATCHFILE}; \
+	echo "Name-Real: ${BASE_KEYNAME}$${KEYCOUNT}" >> ${BATCHFILE}; \
+	echo "Name-Comment: IBM Key Protect LUKS Integration RPM Signing Key" >> ${BATCHFILE}; \
+	echo "Name-Email: gcwilson@us.ibm.com" >> ${BATCHFILE}; \
+	echo "Expire-Date: 0" >> ${BATCHFILE}; \
+	echo "Passphrase: $${PASSPHRASE}" >> ${BATCHFILE}; \
+	echo "%commit" >> ${BATCHFILE}; \
+	echo "%echo done" >> ${BATCHFILE}; \
+	gpg2 --status-file=${STATFILE} --gen-key --pinentry-mode=loopback --batch --with-colons < ${BATCHFILE} 1>&2; \
+	rm -f ${BATCHFILE}; \
+	cat ${STATFILE}; 1>&2 \
+	rm -f ${STATFILE}; \
+	gpg --export -a ${BASE_KEYNAME}$${KEYCOUNT} > ${BASE_SIGNFILE}$${KEYCOUNT}; \
+	rpm --root ${RPMROOT} --import ${BASE_SIGNFILE}$${KEYCOUNT};
 
-sign: rpm
-	
+sign:
+	if [ ! -f ${COUNTFILE} ]; then \
+		KEYCOUNT=0; \
+	else \
+	        KEYCOUNT=`cat ${COUNTFILE}`; \
+	fi; \
+	rpm --define "%_gpg_name ${BASE_KEYNAME}$${KEYCOUNT}" \
+	    --define "%__gpg_sign_cmd %{__gpg} --force-v3-sigs \
+	                                     --batch \
+					     --verbose \
+					     --no-armor \
+					     --passphrase-file=${BASE_SIGNFILE}passphrase-$${KEYCOUNT} \
+					     --pinentry-mode=loopback \
+					     --no-secmem-warning \
+					     -u \"%{_gpg_name}\" \
+					     -sbo %{__signature_filename} \
+					     --digest-algo sha256 \
+					     %{__plaintext_filename}" \
+	  --addsign keyprotect-luks-1.0-1.el8.noarch.rpm
 
 rpm:
 	rm -f keyprotect-luks-1.0.tar.gz
