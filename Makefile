@@ -1,9 +1,11 @@
 COUNTFILE=${HOME}/.ibm-keyprotect-luks-key-count
 BATCHFILE=${HOME}/.ibm-keyprotect-luks-batchfile
 STATFILE=${HOME}/.ibm-keyprotect-luks-statfile
-BASE_KEYNAME=ibm-keyprotect-luks-build-
-BASE_SIGNFILE=${HOME}/.${BASE_KEYNAME}
 RPMROOT=${HOME}/rpm-user
+BASE_KEYNAME=ibm-keyprotect-luks-build-
+KEYNAME=ibm-keyprotect-luks-build-$${KEYCOUNT}
+PASSPHRASEFILE=${HOME}/.${BASE_KEYNAME}passphrase-$${KEYCOUNT}
+PUBKEYFILE=./${BASE_KEYNAME}$${KEYCOUNT}.asc
 
 .PHONY: clean pre-dist dist incr_gen_key sign rpm install install-dracut
 
@@ -29,14 +31,14 @@ incr_gen_key:
 	echo $${KEYCOUNT} > ${COUNTFILE}; \
 	\
 	PASSPHRASE=$$(dd status=none if=/dev/random bs=1 count=32 | hexdump -e '4/8 "%016x" "\n"'); \
-	echo $${PASSPHRASE} > ${BASE_SIGNFILE}passphrase-$${KEYCOUNT}; \
+	echo $${PASSPHRASE} > ${PASSPHRASEFILE}; \
 	\
 	echo "%echo Generating a GPG signing key for the keyprotect-luks package . . . "  > ${BATCHFILE}; \
 	echo "Key-Type: RSA" >> ${BATCHFILE}; \
 	echo "Key-Length: 2048" >> ${BATCHFILE}; \
 	echo "Subkey-Type: RSA" >> ${BATCHFILE}; \
 	echo "Subkey-Length: 2048" >> ${BATCHFILE}; \
-	echo "Name-Real: ${BASE_KEYNAME}$${KEYCOUNT}" >> ${BATCHFILE}; \
+	echo "Name-Real: ${KEYNAME}" >> ${BATCHFILE}; \
 	echo "Name-Comment: IBM Key Protect LUKS Integration RPM Signing Key" >> ${BATCHFILE}; \
 	echo "Name-Email: gcwilson@us.ibm.com" >> ${BATCHFILE}; \
 	echo "Expire-Date: 0" >> ${BATCHFILE}; \
@@ -47,8 +49,8 @@ incr_gen_key:
 	rm -f ${BATCHFILE}; \
 	cat ${STATFILE}; 1>&2 \
 	rm -f ${STATFILE}; \
-	gpg --export -a ${BASE_KEYNAME}$${KEYCOUNT} > ${BASE_SIGNFILE}$${KEYCOUNT}; \
-	rpm --root ${RPMROOT} --import ${BASE_SIGNFILE}$${KEYCOUNT};
+	gpg --export -a ${KEYNAME} > ${PUBKEYFILE}; \
+	rpm --root ${RPMROOT} --import ${PUBKEYFILE}
 
 sign:
 	if [ ! -f ${COUNTFILE} ]; then \
@@ -56,12 +58,12 @@ sign:
 	else \
 	        KEYCOUNT=`cat ${COUNTFILE}`; \
 	fi; \
-	rpm --define "%_gpg_name ${BASE_KEYNAME}$${KEYCOUNT}" \
+	rpm --define "%_gpg_name ${KEYNAME}" \
 	    --define "%__gpg_sign_cmd %{__gpg} --force-v3-sigs \
 	                                     --batch \
 					     --verbose \
 					     --no-armor \
-					     --passphrase-file=${BASE_SIGNFILE}passphrase-$${KEYCOUNT} \
+					     --passphrase-file=${PASSPHRASEFILE} \
 					     --pinentry-mode=loopback \
 					     --no-secmem-warning \
 					     -u \"%{_gpg_name}\" \
