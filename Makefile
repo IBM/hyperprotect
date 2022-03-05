@@ -15,10 +15,10 @@ clean:
 	rm -f SHA256SUMS
 
 dist: pre-dist sign
+	sha256sum keyprotect-luks-1.0-1.el8.noarch.rpm > SHA256SUMS
 
 pre-dist: rpm
 	cp -p ~/rpmbuild/RPMS/noarch/keyprotect-luks-1.0-1.el8.noarch.rpm .
-	sha256sum keyprotect-luks-1.0-1.el8.noarch.rpm > SHA256SUMS
 
 incr_gen_key:
 	if [ ! -f ${COUNTFILE} ]; then \
