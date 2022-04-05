@@ -13,11 +13,11 @@
 
    If using an rpm-based OS:
 
-	dnf install python3 python3-cryptography
+		dnf install python3 python3-cryptography
 
    If using an deb-based OS:
 
-	apt-get install python3 python3-cryptography
+		apt-get install python3 python3-cryptography
 
    - **IMPORTANT:** You'll have Rust problems if you try to use pip to install Python Cryptography.
 
