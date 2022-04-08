@@ -35,7 +35,7 @@ make install DESTDIR=%{buildroot}
 %license LICENSE
 %doc README.md
 %attr(0755,root,root) %{_bindir}/%{name}
-%attr(0644,root,root) %{_sysconfdir}/%{name}.ini
+%attr(0644,root,root) %config(noreplace) %{_sysconfdir}/%{name}.ini
 %attr(0644,root,root) %{_prefix}/lib/systemd/system/%{name}.service
 %attr(0644,root,root) %{_sharedstatedir}/%{name}/logon
 %attr(0644,root,root) %{_sharedstatedir}/%{name}/user
