@@ -6,6 +6,7 @@ BASE_KEYNAME=ibm-keyprotect-luks-build
 KEYNAME=${BASE_KEYNAME}-$${KEYCOUNT}
 PUBKEYFILE=./${KEYNAME}.asc
 PASSPHRASEFILE=${HOME}/.${KEYNAME}.passphrase
+DEB_BUILDROOT=${HOME}/deb-buildroot/keyprotect-luks_1.0_all
 
 .PHONY: clean pre-dist dist incr_gen_key sign rpm install install-dracut
 
@@ -19,6 +20,16 @@ dist: pre-dist sign
 
 pre-dist: rpm
 	cp -p ~/rpmbuild/RPMS/noarch/keyprotect-luks-1.0-1.el8.noarch.rpm .
+
+pre-deb-dist:
+	cp -p ${DEB_BUILDROOT}/../keyprotect-luks_1.0_all.deb .
+
+deb:
+	rm -fr ${DEB_BUILDROOT}
+	mkdir -p ${DEB_BUILDROOT}
+	make DESTDIR=${DEB_BUILDROOT} install
+	cp -pr DEBIAN ${DEB_BUILDROOT}
+	dpkg-deb --build --root-owner-group ${DEB_BUILDROOT}
 
 incr_gen_key:
 	if [ ! -f ${COUNTFILE} ]; then \
