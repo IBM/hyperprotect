@@ -2,10 +2,10 @@ COUNTFILE=${HOME}/.ibm-keyprotect-luks-key-count
 BATCHFILE=${HOME}/.ibm-keyprotect-luks-batchfile
 STATFILE=${HOME}/.ibm-keyprotect-luks-statfile
 RPMROOT=${HOME}/rpm-user
-BASE_KEYNAME=ibm-keyprotect-luks-build-
-KEYNAME=ibm-keyprotect-luks-build-$${KEYCOUNT}
-PASSPHRASEFILE=${HOME}/.${BASE_KEYNAME}passphrase-$${KEYCOUNT}
-PUBKEYFILE=./${BASE_KEYNAME}$${KEYCOUNT}.asc
+BASE_KEYNAME=ibm-keyprotect-luks-build
+KEYNAME=${BASE_KEYNAME}-$${KEYCOUNT}
+PUBKEYFILE=./${KEYNAME}.asc
+PASSPHRASEFILE=${HOME}/.${KEYNAME}.passphrase
 
 .PHONY: clean pre-dist dist incr_gen_key sign rpm install install-dracut
 
