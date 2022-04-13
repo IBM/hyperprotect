@@ -8,20 +8,22 @@ PUBKEYFILE=./${KEYNAME}.asc
 PASSPHRASEFILE=${HOME}/.${KEYNAME}.passphrase
 DEB_BUILDROOT=${HOME}/deb-buildroot/keyprotect-luks_1.0_all
 
-.PHONY: clean pre-dist dist incr_gen_key sign rpm install install-dracut
+.PHONY: clean dist pre-dist pre-dist-deb deb incr_gen_key sign rpm install install-dracut
 
 clean:
 	rm -f keyprotect-luks-1.0.tar.gz
 	rm -f keyprotect-luks-1.0-1.el8.noarch.rpm
+	rm -f keyprotect-luks_1.0_all.deb
 	rm -f SHA256SUMS
 
-dist: pre-dist sign
+dist: pre-dist pre-dist-deb sign
 	sha256sum keyprotect-luks-1.0-1.el8.noarch.rpm > SHA256SUMS
+	sha256sum keyprotect-luks_1.0_all.deb >> SHA256SUMS
 
 pre-dist: rpm
 	cp -p ~/rpmbuild/RPMS/noarch/keyprotect-luks-1.0-1.el8.noarch.rpm .
 
-pre-deb-dist:
+pre-dist-deb: deb
 	cp -p ${DEB_BUILDROOT}/../keyprotect-luks_1.0_all.deb .
 
 deb:
