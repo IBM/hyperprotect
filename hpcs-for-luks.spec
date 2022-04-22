@@ -1,4 +1,4 @@
-Name:		keyprotect-luks
+Name:		hpcs-for-luks
 Version:	1.0
 Release:	1%{?dist}
 Summary:	IBM Key Protect Integration with LUKS
@@ -16,6 +16,7 @@ Requires:	python3
 %{name} provides integration between IBM Key Protect
 and LUKS via the kernel keyring.
 
+%global UTILITY_NAME keyprotect-luks
 %global BUILD_AND_PACKAGE_DRACUT 0
 
 %prep
@@ -34,16 +35,16 @@ make install DESTDIR=%{buildroot}
 %defattr(-,root,root)
 %license LICENSE
 %doc README.md
-%attr(0755,root,root) %{_bindir}/%{name}
-%attr(0644,root,root) %config(noreplace) %{_sysconfdir}/%{name}.ini
-%attr(0644,root,root) %{_prefix}/lib/systemd/system/%{name}.service
-%attr(0644,root,root) %{_sharedstatedir}/%{name}/logon
-%attr(0644,root,root) %{_sharedstatedir}/%{name}/user
-%attr(0644,root,root) %{_mandir}/man1/%{name}.1.gz
+%attr(0755,root,root) %{_bindir}/%{UTILITY_NAME}
+%attr(0644,root,root) %config(noreplace) %{_sysconfdir}/%{UTILITY_NAME}.ini
+%attr(0644,root,root) %{_prefix}/lib/systemd/system/%{UTILITY_NAME}.service
+%attr(0644,root,root) %{_sharedstatedir}/%{UTILITY_NAME}/logon
+%attr(0644,root,root) %{_sharedstatedir}/%{UTILITY_NAME}/user
+%attr(0644,root,root) %{_mandir}/man1/%{UTILITY_NAME}.1.gz
 %if "%{BUILD_AND_PACKAGE_DRACUT}" == "1"
-%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{name}/%{name}.sh
-%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{name}/module-setup.sh
-%attr(0644,root,root) %{_sysconfdir}/dracut.conf.d/%{name}.conf
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{UTILITY_NAME}/%{UTILITY_NAME}.sh
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{UTILITY_NAME}/module-setup.sh
+%attr(0644,root,root) %{_sysconfdir}/dracut.conf.d/%{UTILITY_NAME}.conf
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/module-setup.sh
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/start-tcsd.sh
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/stop-tcsd.sh
@@ -51,6 +52,8 @@ make install DESTDIR=%{buildroot}
 %endif
 
 %changelog
+* Fri Apr 22 2022 George Wilson <gcwilson@linux.ibm.com>
+- Change package name to hpcs-for-luks
 * Wed Feb 16 2022 George Wilson <gcwilson@linux.ibm.com>
 - Remove HPCS from name, package ini file in /etc
 * Tue Feb 15 2022 George Wilson <gcwilson@linux.ibm.com>

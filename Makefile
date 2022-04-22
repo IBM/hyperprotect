@@ -1,30 +1,41 @@
-COUNTFILE=${HOME}/.ibm-keyprotect-luks-key-count
-BATCHFILE=${HOME}/.ibm-keyprotect-luks-batchfile
-STATFILE=${HOME}/.ibm-keyprotect-luks-statfile
+PACKAGENAME=hpcs-for-luks
+PACKAGEVER=1.0
+
+UTILITYNAME=keyprotect-luks
+
+TARFILE=${PACKAGENAME}-${PACKAGEVER}.tar.gz
+RPMFILE=${PACKAGENAME}-${PACKAGEVER}-1.el8.noarch.rpm
+DEBFILE=${PACKAGENAME}_${PACKAGEVER}_all.deb
+
+COUNTFILE=${HOME}/.${PACKAGENAME}-key-count
+BATCHFILE=${HOME}/.${PACKAGENAME}-batchfile
+STATFILE=${HOME}/.${PACKAGENAME}-statfile
+
 RPMROOT=${HOME}/rpm-user
-BASE_KEYNAME=ibm-keyprotect-luks-build
+DEB_BUILDROOT=${HOME}/deb-buildroot/${PACKAGENAME}_${PACKAGEVER}_all
+
+BASE_KEYNAME=${PACKAGENAME}-build
 KEYNAME=${BASE_KEYNAME}-$${KEYCOUNT}
 PUBKEYFILE=./${KEYNAME}.asc
 PASSPHRASEFILE=${HOME}/.${KEYNAME}.passphrase
-DEB_BUILDROOT=${HOME}/deb-buildroot/keyprotect-luks_1.0_all
 
 .PHONY: clean dist pre-dist pre-dist-deb deb incr_gen_key sign rpm install install-dracut
 
 clean:
-	rm -f keyprotect-luks-1.0.tar.gz
-	rm -f keyprotect-luks-1.0-1.el8.noarch.rpm
-	rm -f keyprotect-luks_1.0_all.deb
+	rm -f ${TARFILE}
+	rm -f ${RPMFILE}
+	rm -f ${DEBFILE}
 	rm -f SHA256SUMS
 
 dist: pre-dist pre-dist-deb sign
-	sha256sum keyprotect-luks-1.0-1.el8.noarch.rpm > SHA256SUMS
-	sha256sum keyprotect-luks_1.0_all.deb >> SHA256SUMS
+	sha256sum ${RPMFILE} > SHA256SUMS
+	sha256sum ${DEBFILE} >> SHA256SUMS
 
 pre-dist: rpm
-	cp -p ~/rpmbuild/RPMS/noarch/keyprotect-luks-1.0-1.el8.noarch.rpm .
+	cp -p ~/rpmbuild/RPMS/noarch/${RPMFILE} .
 
 pre-dist-deb: deb
-	cp -p ${DEB_BUILDROOT}/../keyprotect-luks_1.0_all.deb .
+	cp -p ${DEB_BUILDROOT}/../${DEBFILE} .
 
 deb:
 	rm -fr ${DEB_BUILDROOT}
@@ -46,13 +57,13 @@ incr_gen_key:
 	PASSPHRASE=$$(dd status=none if=/dev/random bs=1 count=32 | hexdump -e '4/8 "%016x" "\n"'); \
 	echo $${PASSPHRASE} > ${PASSPHRASEFILE}; \
 	\
-	echo "%echo Generating a GPG signing key for the keyprotect-luks package . . . "  > ${BATCHFILE}; \
+	echo "%echo Generating a GPG signing key for the ${PACKAGENAME} package . . . "  > ${BATCHFILE}; \
 	echo "Key-Type: RSA" >> ${BATCHFILE}; \
 	echo "Key-Length: 2048" >> ${BATCHFILE}; \
 	echo "Subkey-Type: RSA" >> ${BATCHFILE}; \
 	echo "Subkey-Length: 2048" >> ${BATCHFILE}; \
 	echo "Name-Real: ${KEYNAME}" >> ${BATCHFILE}; \
-	echo "Name-Comment: IBM Key Protect LUKS Integration RPM Signing Key" >> ${BATCHFILE}; \
+	echo "Name-Comment: IBM Key Protect LUKS Integration Package Signing Key" >> ${BATCHFILE}; \
 	echo "Name-Email: gcwilson@us.ibm.com" >> ${BATCHFILE}; \
 	echo "Expire-Date: 0" >> ${BATCHFILE}; \
 	echo "Passphrase: $${PASSPHRASE}" >> ${BATCHFILE}; \
@@ -83,31 +94,31 @@ sign:
 					     -sbo %{__signature_filename} \
 					     --digest-algo sha256 \
 					     %{__plaintext_filename}" \
-	  --addsign keyprotect-luks-1.0-1.el8.noarch.rpm
+	  --addsign ${RPMFILE}
 
 rpm:
-	rm -f keyprotect-luks-1.0.tar.gz
-	tar --xform='s/^/keyprotect-luks-1.0\//' -cpzf keyprotect-luks-1.0.tar.gz *
-	cp -p keyprotect-luks-1.0.tar.gz ~/rpmbuild/SOURCES
-	cp -p keyprotect-luks.spec ~/rpmbuild/SPECS
-	rpmbuild -ba ~/rpmbuild/SPECS/keyprotect-luks.spec
+	rm -f ${TARFILE}
+	tar --xform='s/^/${PACKAGENAME}-${PACKAGEVER}\//' -cpzf ${TARFILE} *
+	cp -p ${TARFILE} ~/rpmbuild/SOURCES
+	cp -p ${PACKAGENAME}.spec ~/rpmbuild/SPECS
+	rpmbuild -ba ~/rpmbuild/SPECS/${PACKAGENAME}.spec
 
 
 install: \
-	$(DESTDIR)/usr/bin/keyprotect-luks \
-	$(DESTDIR)/etc/keyprotect-luks.ini \
-	$(DESTDIR)/usr/lib/systemd/system/keyprotect-luks.service \
-	$(DESTDIR)/usr/share/doc/keyprotect-luks/README.md \
-	$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz \
-	$(DESTDIR)/var/lib/keyprotect-luks \
-	$(DESTDIR)/var/lib/keyprotect-luks/logon \
-	$(DESTDIR)/var/lib/keyprotect-luks/user
+	$(DESTDIR)/usr/bin/${UTILITYNAME} \
+	$(DESTDIR)/etc/${UTILITYNAME}.ini \
+	$(DESTDIR)/usr/lib/systemd/system/${UTILITYNAME}.service \
+	$(DESTDIR)/usr/share/doc/${PACKAGENAME}/README.md \
+	$(DESTDIR)/usr/share/man/man1/${UTILITYNAME}.1.gz \
+	$(DESTDIR)/var/lib/${UTILITYNAME} \
+	$(DESTDIR)/var/lib/${UTILITYNAME}/logon \
+	$(DESTDIR)/var/lib/${UTILITYNAME}/user
 
 install-dracut: \
-	$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks \
-	$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/keyprotect-luks.sh \
-	$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/module-setup.sh \
-	$(DESTDIR)/etc/dracut.conf.d/keyprotect-luks.conf \
+	$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME} \
+	$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}/${UTILITYNAME}.sh \
+	$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}/module-setup.sh \
+	$(DESTDIR)/etc/dracut.conf.d/${UTILITYNAME}.conf \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/module-setup.sh \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/start-tcsd.sh \
@@ -115,43 +126,43 @@ install-dracut: \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/run-tss-cmds.sh \
 	$(DESTDIR)/etc/dracut.conf.d/tss.conf
 
-$(DESTDIR)/usr/bin/keyprotect-luks: keyprotect-luks
-	install -m 755 -D keyprotect-luks -t "$(DESTDIR)/usr/bin"
+$(DESTDIR)/usr/bin/${UTILITYNAME}: ${UTILITYNAME}
+	install -m 755 -D ${UTILITYNAME} -t "$(DESTDIR)/usr/bin"
 
-$(DESTDIR)/usr/lib/systemd/system/keyprotect-luks.service: keyprotect-luks.service
-	install -m 644 -D keyprotect-luks.service -t "$(DESTDIR)/usr/lib/systemd/system"
+$(DESTDIR)/usr/lib/systemd/system/${UTILITYNAME}.service: ${UTILITYNAME}.service
+	install -m 644 -D ${UTILITYNAME}.service -t "$(DESTDIR)/usr/lib/systemd/system"
 
-$(DESTDIR)/usr/share/doc/keyprotect-luks/README.md: README.md
-	install -m 644 -D README.md -t "$(DESTDIR)/usr/share/doc/keyprotect-luks"
+$(DESTDIR)/usr/share/doc/${PACKAGENAME}/README.md: README.md
+	install -m 644 -D README.md -t "$(DESTDIR)/usr/share/doc/${PACKAGENAME}"
 
-$(DESTDIR)/etc/keyprotect-luks.ini: keyprotect-luks.ini
-	install -m 644 -D keyprotect-luks.ini -t "$(DESTDIR)/etc"
+$(DESTDIR)/etc/${UTILITYNAME}.ini: ${UTILITYNAME}.ini
+	install -m 644 -D ${UTILITYNAME}.ini -t "$(DESTDIR)/etc"
 
-$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz: keyprotect-luks.1
+$(DESTDIR)/usr/share/man/man1/${UTILITYNAME}.1.gz: ${UTILITYNAME}.1
 	mkdir -p "$(DESTDIR)/usr/share/man/man1"
-	gzip <keyprotect-luks.1 >"$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz"
-	chmod 644 "$(DESTDIR)/usr/share/man/man1/keyprotect-luks.1.gz"
+	gzip <${UTILITYNAME}.1 >"$(DESTDIR)/usr/share/man/man1/${UTILITYNAME}.1.gz"
+	chmod 644 "$(DESTDIR)/usr/share/man/man1/${UTILITYNAME}.1.gz"
 
-$(DESTDIR)/var/lib/keyprotect-luks:
-	install -m 755 -d $(DESTDIR)/var/lib/keyprotect-luks
+$(DESTDIR)/var/lib/${UTILITYNAME}:
+	install -m 755 -d $(DESTDIR)/var/lib/${UTILITYNAME}
 
-$(DESTDIR)/var/lib/keyprotect-luks/logon:
-	install -m 755 -d $(DESTDIR)/var/lib/keyprotect-luks/logon
+$(DESTDIR)/var/lib/${UTILITYNAME}/logon:
+	install -m 755 -d $(DESTDIR)/var/lib/${UTILITYNAME}/logon
 
-$(DESTDIR)/var/lib/keyprotect-luks/user:
-	install -m 755 -d $(DESTDIR)/var/lib/keyprotect-luks/user
+$(DESTDIR)/var/lib/${UTILITYNAME}/user:
+	install -m 755 -d $(DESTDIR)/var/lib/${UTILITYNAME}/user
 
-$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks:
-	install -m 755 -d $(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks
+$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}:
+	install -m 755 -d $(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}
 
-$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/keyprotect-luks.sh: dracut/85keyprotect-luks/keyprotect-luks.sh
-	install -m 755 -D dracut/85keyprotect-luks/keyprotect-luks.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks"
+$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}/${UTILITYNAME}.sh: dracut/85${UTILITYNAME}/${UTILITYNAME}.sh
+	install -m 755 -D dracut/85${UTILITYNAME}/${UTILITYNAME}.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}"
 
-$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks/module-setup.sh: dracut/85keyprotect-luks/module-setup.sh
-	install -m 755 -D dracut/85keyprotect-luks/module-setup.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/85keyprotect-luks"
+$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}/module-setup.sh: dracut/85${UTILITYNAME}/module-setup.sh
+	install -m 755 -D dracut/85${UTILITYNAME}/module-setup.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}"
 
-$(DESTDIR)/etc/dracut.conf.d/keyprotect-luks.conf: dracut/keyprotect-luks.conf
-	install -m 644 -D dracut/keyprotect-luks.conf -t "$(DESTDIR)/etc/dracut.conf.d"
+$(DESTDIR)/etc/dracut.conf.d/${UTILITYNAME}.conf: dracut/${UTILITYNAME}.conf
+	install -m 644 -D dracut/${UTILITYNAME}.conf -t "$(DESTDIR)/etc/dracut.conf.d"
 
 $(DESTDIR)/usr/lib/dracut/modules.d/83tss:
 	install -m 755 -d $(DESTDIR)/usr/lib/dracut/modules.d/83tss

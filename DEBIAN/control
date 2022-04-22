@@ -1,4 +1,4 @@
-Package: keyprotect-luks
+Package: hpcs-for-luks
 Version: 1.0
 Architecture: all
 Maintainer: George Wilson <gcwilson@us.ibm.com>
