@@ -25,7 +25,7 @@
 
 	pip3 install keyprotect
 
-4. Edit the initial /etc/keyprotect-luks.ini
+4. Edit the initial /etc/hpcs-for-luks.ini
 
    - Fill in each of the options using information from the IBM Cloud portal, putting a placeholder in default_crk_uuid for now:
 
@@ -36,18 +36,18 @@
 			api_key = AB0CdEfGHijKlMN--12OPqRStuv3wx456yZAb7CDEF8g
 			default_crk_uuid = placeholder
 
-5. Generate a random CRK and add its UUID to /etc/keyprotect-luks.ini
+5. Generate a random CRK and add its UUID to /etc/hpcs-for-luks.ini
 
    - Generate a random CRK
 
-			keyprotect-luks create --crk --gen --name MyCRKName
+			hpcs-for-luks create --crk --gen --name MyCRKName
 
    - List the Key Protect keys to get the UUID associated with MyCRKName
 
-			keyprotect-luks list | grep MyCRKName
+			hpcs-for-luks list | grep MyCRKName
 			fedcba98-7654-3210-fedc-ba9876543210	MyCRKName
 
-   - Edit /etc/keyprotect-luks.ini to set default_crk_uuid
+   - Edit /etc/hpcs-for-luks.ini to set default_crk_uuid
 
 			[KP]
 			api_key = AB0CdEfGHijKlMN--12OPqRStuv3wx456yZAb7CDEF8g
@@ -62,21 +62,21 @@
 
 7. For dm-crypt keys:
 
-    - Enable the keyprotect-luks systemd service
+    - Enable the hpcs-for-luks systemd service
 
-			systemctl enable keyprotect-luks
+			systemctl enable hpcs-for-luks
 
-    - Generate a random wrapped key and store it in the /var/lib/keyprotect-luks/logon directory
+    - Generate a random wrapped key and store it in the /var/lib/hpcs-for-luks/logon directory
 
-			keyprotect-luks wrap --gen > /var/lib/keyprotect-luks/logon/dmcrypt:key1
+			hpcs-for-luks wrap --gen > /var/lib/hpcs-for-luks/logon/dmcrypt:key1
 
     - After creating wrapped keys, populate the kernel keyring by either
 
 			shutdown -r now
 
-      so that the keyprotect-luks systemd service will populate it or
+      so that the hpcs-for-luks systemd service will populate it or
 
-			keyprotect-luks process
+			hpcs-for-luks process
 
       to populate it immediately.
 
@@ -95,21 +95,21 @@
 
 8. For LUKS passphrases:
 
-    - Enable the keyprotect-luks systemd service
+    - Enable the hpcs-for-luks systemd service
 
-			systemctl enable keyprotect-luks
+			systemctl enable hpcs-for-luks
 
-   - Wrap your passphrase and store it in the var/lib/keyprotect-luks/user directory
+   - Wrap your passphrase and store it in the var/lib/hpcs-for-luks/user directory
 
-			echo -n 'MyPassPhrase' | keyprotect-luks wrap > /var/lib/keyprotect-luks/user/dmcrypt:key2
+			echo -n 'MyPassPhrase' | hpcs-for-luks wrap > /var/lib/hpcs-for-luks/user/dmcrypt:key2
 
    - After creating wrapped keys, populate the kernel keyring by either
 
 			shutdown -r now
 
-     so that the keyprotect-luks systemd service will populate it or
+     so that the hpcs-for-luks systemd service will populate it or
 
-			keyprotect-luks process
+			hpcs-for-luks process
 
      to populate it immediately.
 
@@ -136,9 +136,9 @@
 			mkdir /secrets
 			mount /dev/mapper/secrets /secrets
 
-9. Enable the keyprotect-luks systemd service:
+9. Enable the hpcs-for-luks systemd service:
 
-		systemctl enable keyprotect-luks
+		systemctl enable hpcs-for-luks
 
 10. Enable the remote cryptsetup target
 
@@ -189,13 +189,13 @@ and you should now be able to show the keys
 	
 5. Seal the key in the file to PCRs, in this example PCR[4] and PCR[5]
 
-	tpm_sealdata -p 4 -p 5 -z --infile api-key.txt --outfile /var/lib/keyprotect-luks/api-key-blob.txt
+	tpm_sealdata -p 4 -p 5 -z --infile api-key.txt --outfile /var/lib/hpcs-for-luks/api-key-blob.txt
 
 6: Remove the file containing the API key plaintext
 
 	rm api-key.txt
 
-7. Edit /etc/keyprotect-luks.ini and assign api_key the special value "TPM"
+7. Edit /etc/hpcs-for-luks.ini and assign api_key the special value "TPM"
 
 	[KP]
 	api_key = TPM

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+_UTILITY_NAME=hpcs-for-luks
+
 # called by dracut
 check() {
     return 0
@@ -19,7 +21,7 @@ install() {
 	echo 'tss:x:59:59:Account used for TPM access:/dev/null:/sbin/nologin' >> "$initdir/etc/passwd"
 	echo 'tss:x:59:' >> "$initdir/etc/group"
 	inst_simple /usr/bin/tpm_unsealdata
-	inst_simple /var/lib/keyprotect-luks/api-key-blob.txt
+	inst_simple /var/lib/${_UTILITY_NAME}/api-key-blob.txt
 	inst_hook initqueue/online 15 "$moddir/run-tss-cmds.sh"
 	inst_simple run-tss-cmds.sh "$moddir/run-tss-cmds.sh"
 	inst_hook cleanup 10 "$moddir/stop-tcsd.sh"

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+_UTILITY_NAME=hpcs-for-luks
+
 parse_ini() {
 	while read INI_LINE; do
 		INI_LINE=${INI_LINE%%#*} # Eat comments
@@ -20,7 +22,7 @@ parse_ini() {
 				_DEFAULT_CRK_UUID=`echo ${INI_LINE##*=}`
 				;;
 		esac
-	done < /etc/keyprotect-luks.ini
+	done < /etc/${_UTILITY_NAME}.ini
 }
 
 authenticate() {
@@ -66,8 +68,8 @@ parse_plaintext_json() {
 }
 
 
-if grep -q "rd.keyprotect-luks" /proc/cmdline; then
-	#echo "Hello from keyprotect-luks"
+if grep -q "rd.${_UTILITY_NAME}" /proc/cmdline; then
+	#echo "Hello from ${_UTILITY_NAME}"
 	parse_ini
 	#echo "api_key = $_API_KEY"
 	#echo "region = $_REGION"
@@ -77,21 +79,21 @@ if grep -q "rd.keyprotect-luks" /proc/cmdline; then
 	if [ $_API_KEY == "TPM" ]; then
 		if grep -q "rd.tss" /proc/cmdline; then
 			echo "Unsealing API key from TPM"
-			_API_KEY=$(tpm_unsealdata -z -i /var/lib/keyprotect-luks/api-key-blob.txt)
+			_API_KEY=$(tpm_unsealdata -z -i /var/lib/${_UTILITY_NAME}/api-key-blob.txt)
 		else
-			echo "keyprotect-luks dracut module says there's TPM in the config file but rd.tss is not set on the cmdline"
+			echo "${_UTILITY_NAME} dracut module says there's TPM in the config file but rd.tss is not set on the cmdline"
 		fi
 	fi
 	authenticate
 	parse_authtoken
 	#echo $_AUTH_TOKEN
 	#list_keys
-	_CIPHERTEXT=`cat /var/lib/keyprotect-luks/user/luks:root`
+	_CIPHERTEXT=`cat /var/lib/${_UTILITY_NAME}/user/luks:root`
 	_PLAINTEXT_JSON=`unwrap_key`
 	#echo $_PLAINTEXT_JSON
 	parse_plaintext_json
 	#echo $_BASE64_PLAINTEXT
 	printf "%s" $_BASE64_PLAINTEXT | base64 --decode | keyctl padd user "luks:root" @u
 else
-	echo "keyprotect-luks dracut module says rd.keyprotect-luks is not set on the cmdline"
+	echo "${_UTILITY_NAME} dracut module says rd.${_UTILITY_NAME} is not set on the cmdline"
 fi

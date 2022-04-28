@@ -16,7 +16,7 @@ Requires:	python3
 %{name} provides integration between IBM Key Protect
 and LUKS via the kernel keyring.
 
-%global UTILITY_NAME keyprotect-luks
+%global UTILITY_NAME hpcs-for-luks
 %global BUILD_AND_PACKAGE_DRACUT 0
 
 %prep

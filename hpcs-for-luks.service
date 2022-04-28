@@ -4,12 +4,12 @@
 #
 # George Wilson <gcwilson@linux.ibm.com>
 #
-# Copyright (C) 2021 IBM Corp.
+# Copyright (C) 2021,2022 IBM Corp.
 #
 
 [Unit]
 Description=IBM HPCS Key Protect Boot Service
-Documentation=file:///usr/share/doc/keyprotect-luks/README.md
+Documentation=file:///usr/share/doc/hpcs-for-luks/README.md
 Before=remote-fs-pre.target remote-cryptsetup.target
 After=network.target network-online.target
 Wants=network.target network-online.target
@@ -17,8 +17,8 @@ Conflicts=shutdown.target
 
 [Service]
 Type=oneshot
-EnvironmentFile=-/etc/keyprotect-luks.ini
-ExecStart=/usr/bin/keyprotect-luks process
+EnvironmentFile=-/etc/hpcs-for-luks.ini
+ExecStart=/usr/bin/hpcs-for-luks process
 
 [Install]
 RequiredBy=remote-cryptsetup.target

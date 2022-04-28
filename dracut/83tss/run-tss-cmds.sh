@@ -1,9 +1,11 @@
 #!/bin/sh
 
+_UTILITY_NAME=hpcs-for-luks
+
 if grep -q "rd.tss" /proc/cmdline; then
 	echo "Running tss commands in initramfs"
-	_API_KEY=`tpm_unsealdata -i /var/lib/keyprotect-luks/api-key-blob.txt -z`
-	tpm_unsealdata -i /var/lib/keyprotect-luks/api-key-blob.txt -z
+	_API_KEY=`tpm_unsealdata -i /var/lib/${_UTILITY_NAME}/api-key-blob.txt -z`
+	tpm_unsealdata -i /var/lib/${_UTILITY_NAME}/api-key-blob.txt -z
 	if [ $? -eq 0 ]; then
 		echo "API Key ---> $_API_KEY"
 	else

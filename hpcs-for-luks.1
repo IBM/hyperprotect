@@ -1,11 +1,11 @@
 '\" t
-.\"     Title: keyprotect-luks
+.\"     Title: hpcs-for-luks
 .\"    Author: [see the "Authors" section]
 .\"      Date: 01/12/2022
-.\"    Manual: Keyprotect-LUKS manual
+.\"    Manual: HPCS for LUKS manual
 .\"  Language: English
 .\"
-.TH "KEYPROTECT-LUKS" "1" "01/12/2022" "keyprotect-luks1\&.0" "Keyprotect-LUKS Manual"
+.TH "HPCS-FOR-LUKS" "1" "01/12/2022" "hpcs-for-luks\&.0" "Key Protect for LUKS Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -22,26 +22,29 @@
 .nh
 .\" disable justification (adjust text to left margin only)
 .ad l
+.\" Package name and utility name
+.ds Pn hpcs-for-luks
+.ds Un hpcs-for-luks
 .\" -----------------------------------------------------------------
 .\" * MAIN CONTENT STARTS HERE *
 .\" -----------------------------------------------------------------
 .SH "NAME"
-keyprotect-luks \- manage IBM HPCS Key Protect keys from Linux
+\fB\*[Pn]\fR \- manage IBM HPCS Key Protect keys from Linux
 .SH "SYNOPSIS"
 .sp
 .nf
-\fIkeyprotect-luks\fR [\-\-version] [\-\-help] <command> [<args>]
+\fI\*[Pn]\fR [\-\-version] [\-\-help] <command> [<args>]
 .fi
 .sp
 .SH "DESCRIPTION"
 .sp
-The keyprotect-luks command interacts with the IBM HPCS Key Protect cloud service over a REST API via the keyprotect Python client\&.  It can create wrapping keys, wrap keys, unwrap keys, and unwrap a set of keys from disk and populate the kernel keyring with them\&.
+The \fB\*[Pn]\fR command interacts with the IBM HPCS Key Protect cloud service over a REST API via the keyprotect Python client\&.  It can create wrapping keys, wrap keys, unwrap keys, and unwrap a set of keys from disk and populate the kernel keyring with them\&.
 .sp
 .SH "OPTIONS"
 .PP
 \-\-version
 .RS 4
-Prints the keyprotect-luks version and exits\&.
+Prints the \*[Pn] version and exits\&.
 .RE
 .PP
 \-\-help
@@ -153,7 +156,7 @@ UUID for CRK\&.  Required\&.
 .RE
 .SH "CONFIGURATION FILE"
 .sp
-The keyprotect-luks command reads configuration information from /etc/keyprotect-luks.ini\&.  The file must be initially created by copying the skeleton from /usr/share/doc/keyprotect-luks/keyprotect-luks.ini to /etc/keyprotect-luks.ini and editing it\&.  Refer to the the IBM HCPS Key Protect documentation for details on IBM HPCS Key Protect options\&.
+The \fB\*[Pn]\fR command reads configuration information from \fB/etc/\*[Pn].ini\fR\&.  The file must be initially created by editing the skeleton /etc/\*[Pn].ini\&.  Refer to the the IBM HCPS Key Protect documentation for details on IBM HPCS Key Protect options\&.
 .sp
 Configuration options are as follows\&:
 .sp
@@ -162,7 +165,7 @@ api_key
 .RS 4
 API key for the IBM HPCS Key Protect instance console\&.
 .sp
-Alternatively, this option can be assigned the special value TPM, in which case keyprotect-luks attempts to unseal a TPM-wrapped key from /var/lib/keyprotect-luks/api-key-blob.txt\&.  See below for details\&.
+Alternatively, this option can be assigned the special value TPM, in which case \*[Pn] attempts to unseal a TPM-wrapped key from /var/lib/\*[Pn]/api-key-blob.txt\&.  See below for details\&.
 .RE
 .PP
 region
@@ -187,15 +190,15 @@ Default CRK UUID for the default wrapping key\&.  Can be overridden with the --u
 .sp
 .SH "SYSTEMD SERVICE"
 .sp
-The keyprotect-luks package installs a systemd service called keyprotect-luks\&.  The keyprotect-luks service calls the keyprotect-luks process command to populate the kernel keyring by unwrapping keys from /var/lib/keyprotect-luks\&.  The keys populated in the keyring can subsequently be used for other services, namely LUKS\&.
+The \*[Pn] package installs a systemd service called \fB\*[Pn]\fR\&.  The \*[Pn] service calls the \fB\*[Pn] process\fR command to populate the kernel keyring by unwrapping keys from /var/lib/\*[Pn]\&.  The keys populated in the keyring can subsequently be used for other services, namely LUKS\&.
 .sp
-The /var/lib/keyprotect-luks directory must be populated before the keyprotect-luks process command\&.  Please see the keyprotect-luks process command description above\&.
+The /var/lib/\*[Pn] directory must be populated before the \fB\*[Pn] process\fR command can successfully unwrap wrapped keys and populate the kernel keyring\&.  See the \fB\*[Pn] process\fR command description above\&.
 .sp
-To enable the keyprotect-luks service after installing the keyprotect-luks package\&:
+To enable the \*[Pn] service after installing the \*[Pn] package\&:
 .sp
 .RS 4
-systemctl enable keyprotect-luks
-systemctl start keyprotect-luks
+systemctl enable \*[Pn]
+systemctl start \*[Pn]
 .RE
 .sp
 The results of the service can be seen by running\&:
@@ -204,7 +207,7 @@ The results of the service can be seen by running\&:
 journalctl
 .RE
 .sp
-Listing keys with the keyctl command should show the keys that keyprotect-luks populated\&.
+Listing keys with the \fBkeyctl\fR command should show the keys that \*[Pn] populated\&.
 .sp
 .SH "EXAMPLES"
 .sp

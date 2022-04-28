@@ -1,7 +1,7 @@
 PACKAGENAME=hpcs-for-luks
 PACKAGEVER=1.0
 
-UTILITYNAME=keyprotect-luks
+UTILITYNAME=hpcs-for-luks
 
 TARFILE=${PACKAGENAME}-${PACKAGEVER}.tar.gz
 RPMFILE=${PACKAGENAME}-${PACKAGEVER}-1.el8.noarch.rpm
@@ -19,7 +19,9 @@ KEYNAME=${BASE_KEYNAME}-$${KEYCOUNT}
 PUBKEYFILE=./${KEYNAME}.asc
 PASSPHRASEFILE=${HOME}/.${KEYNAME}.passphrase
 
-.PHONY: clean dist pre-dist pre-dist-deb deb incr_gen_key sign rpm install install-dracut
+.PHONY: all clean dist pre-dist pre-dist-deb deb incr_gen_key sign rpm install install-dracut
+
+all: dist
 
 clean:
 	rm -f ${TARFILE}

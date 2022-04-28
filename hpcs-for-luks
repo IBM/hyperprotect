@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# Key Protect Interface for keyprotect-LUKS service via Python
+# Key Protect Interface for hpcs-for-luks service via Python
 #
 # Nayna Jain <nayna@linux.ibm.com>, George Wilson <gcwilson@linux.ibm.com>
 #
@@ -16,9 +16,9 @@ import subprocess
 import sys
 import keyprotect
 
-CONFIG_FILE = '/etc/keyprotect-luks.ini'
+CONFIG_FILE = '/etc/hpcs-for-luks.ini'
 KEY_BYTES = 32
-WRAPPED_KEY_DIR = '/var/lib/keyprotect-luks'
+WRAPPED_KEY_DIR = '/var/lib/hpcs-for-luks'
 KEY_TYPES = ('logon', 'user')
 BLOB_FILE = WRAPPED_KEY_DIR + '/api-key-blob.txt'
 VERSION = '1.0.0'
@@ -314,7 +314,7 @@ class key_protect_luks:
         sys.stdout.buffer.write(plaintext)
 
     #
-    #  Read keys from /var/lib/keyprotect-luks and add them to the kernel keyring
+    #  Read keys from /var/lib/<project-name> and add them to the kernel keyring
     #
 
     def op_process(self):
@@ -386,7 +386,7 @@ kp = init_keyprotect(config['KP']['api_key'],
                      config['KP']['service_instance_id'],
                      config['KP']['endpoint_url'])
 
-# Instantiate keyprotect-luks object
+# Instantiate key_protect_luks object
 
 kpl = key_protect_luks(config, args, kp)
 
