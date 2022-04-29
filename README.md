@@ -2,7 +2,7 @@
 
 ## Installation
 
-	git clone https://github.ibm.com/gcwilson/keyprotect-luks.git
+	git clone https://github.ibm.com/gcwilson/hpcs-for-luks.git
 	sudo make install
 
 ## Setup
