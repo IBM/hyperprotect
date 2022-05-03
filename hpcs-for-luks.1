@@ -130,7 +130,20 @@ UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration fi
 .PP
 process [--uuid <uuid>]
 .RS 4
-Processes a number of wrapped keys on disk to unwrap them with the specified wrapping key in the IBM HPCS Key Protect instance and populates the kernel keyring with them\&.
+Processes a set of wrapped keys on disk to unwrap them with the specified wrapping key in the IBM HPCS Key Protect instance and populates the kernel keyring with them\&.
+.sp
+Arguments\&:
+.sp
+.PP
+--uuid <uuid>
+.RS 4
+UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration file\&.
+.RE
+.RE
+.PP
+wipe [--uuid <uuid>]
+.RS 4
+Wipes a set of keyring keys described by filenames on disk\&.
 .sp
 Arguments\&:
 .sp
@@ -188,6 +201,10 @@ default_crk_uuid
 Default CRK UUID for the default wrapping key\&.  Can be overridden with the --uuid command line option\&.
 .RE
 .sp
+.SH "WRAPPED KEY STORAGE"
+.sp
+The \fB\*[Pn] process\fR and \fB\*[Pn] wipe\fR commands iterate over wrapped keys stored in /var/lib/\*[Pn]/logon and /var/lib/\*[Pn]/user\&.  The name of the containing directory determines the key type and the actual file name determines the key description\&.  The \fB\*[Pn] process\fR command adds keys to the keyring and the \fB\*[Pn] wipe\fR command looks key handles up based on each key's type and description and revokes them\&.  Wrapped key file names should have the form <use>:<name>\&.  "luks" is a good choice for <use>.
+.sp
 .SH "SYSTEMD SERVICE"
 .sp
 The \*[Pn] package installs a systemd service called \fB\*[Pn]\fR\&.  The \*[Pn] service calls the \fB\*[Pn] process\fR command to populate the kernel keyring by unwrapping keys from /var/lib/\*[Pn]\&.  The keys populated in the keyring can subsequently be used for other services, namely LUKS\&.
@@ -224,3 +241,14 @@ endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
 default_crk_uuid = fedcba98-7654-3210-fedc-ba9876543210
 .fi
 .RE
+.PP
+Wrapped Key File Names
+.RS 4
+.nf
+/var/lib/\*[Pn]/user/luks:key1
+/var/lib/\*[Pn]/user/luks:key2
+/var/lib/\*[Pn]/user/luks:root
+/var/lib/\*[Pn]/logon/luks:key3
+.fi
+.RE
+
