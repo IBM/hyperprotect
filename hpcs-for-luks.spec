@@ -38,6 +38,7 @@ make install DESTDIR=%{buildroot}
 %attr(0755,root,root) %{_bindir}/%{UTILITY_NAME}
 %attr(0644,root,root) %config(noreplace) %{_sysconfdir}/%{UTILITY_NAME}.ini
 %attr(0644,root,root) %{_prefix}/lib/systemd/system/%{UTILITY_NAME}.service
+%attr(0644,root,root) %{_prefix}/lib/systemd/system/%{UTILITY_NAME}-wipe.service
 %attr(0644,root,root) %{_sharedstatedir}/%{UTILITY_NAME}/logon
 %attr(0644,root,root) %{_sharedstatedir}/%{UTILITY_NAME}/user
 %attr(0644,root,root) %{_mandir}/man1/%{UTILITY_NAME}.1.gz

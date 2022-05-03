@@ -53,14 +53,14 @@ Prints help for commands and options and exits\&.
 .sp
 .SH "COMMANDS"
 .PP
-list
+\fBlist\fR
 .RS 4
 Lists the wrapping key UUID and name pairs in the IBM HPCS Key Protect instance\&.
 .sp
 Takes no arguments\&.
 .RE
 .PP
-create {--crk|--std} --name <name> [--gen]
+\fBcreate\fR {--crk|--std} --name <name> [--gen]
 .RS 4
 Create a wrapping key in the IBM HPCS Key Protect instance\&.
 .sp
@@ -88,7 +88,7 @@ Generate a random key rather than reading a key from stdin\&.  Optional\&.
 .RE
 .RE
 .PP
-get [--uuid <uuid>]
+\fBget\fR [--uuid <uuid>]
 .RS 4
 Gets metadata for a key\&.
 .sp
@@ -101,7 +101,7 @@ UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration fi
 .RE
 .RE
 .PP
-wrap [--uuid <uuid>] [--gen]
+\fBwrap\fR [--uuid <uuid>] [--gen]
 .RS 4
 Wraps a key on stdin with a specified wrapping key in the IBM HPCS Key Protect instance and writes it to stdout\&.
 .sp
@@ -115,7 +115,7 @@ UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration fi
 .RE
 .RE
 .PP
-unwrap [--uuid <uuid>]
+\fBunwrap\fR [--uuid <uuid>]
 .RS 4
 Unwraps a key on stdin with a specified wrapping key in the IBM HPCS Key Protect instance and writes it to stdout\&.
 .sp
@@ -128,7 +128,7 @@ UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration fi
 .RE
 .RE
 .PP
-process [--uuid <uuid>]
+\fBprocess\fR [--uuid <uuid>]
 .RS 4
 Processes a set of wrapped keys on disk to unwrap them with the specified wrapping key in the IBM HPCS Key Protect instance and populates the kernel keyring with them\&.
 .sp
@@ -141,7 +141,7 @@ UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration fi
 .RE
 .RE
 .PP
-wipe [--uuid <uuid>]
+\fBwipe\fR [--uuid <uuid>]
 .RS 4
 Wipes a set of keyring keys described by filenames on disk\&.
 .sp
@@ -154,7 +154,7 @@ UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration fi
 .RE
 .RE
 .PP
-delete <--uuid <uuid>>
+\fBdelete\fR <--uuid <uuid>>
 .RS 4
 Deletes the specified wrapping key in the IBM HPCS Key Protect instance\&.
 .sp
@@ -169,62 +169,91 @@ UUID for CRK\&.  Required\&.
 .RE
 .SH "CONFIGURATION FILE"
 .sp
-The \fB\*[Pn]\fR command reads configuration information from \fB/etc/\*[Pn].ini\fR\&.  The file must be initially created by editing the skeleton /etc/\*[Pn].ini\&.  Refer to the the IBM HCPS Key Protect documentation for details on IBM HPCS Key Protect options\&.
+The \fB\*[Pn]\fR command reads configuration information from \fB/etc/\*[Pn].ini\fR\&.  The file must be initially created by editing the skeleton \fB/etc/\*[Pn].ini\fR shipped in the package\&.  Refer to the the IBM HCPS Key Protect documentation for details on IBM HPCS Key Protect options\&.
 .sp
 Configuration options are as follows\&:
 .sp
 .PP
-api_key
+\fBapi_key\fR
 .RS 4
 API key for the IBM HPCS Key Protect instance console\&.
 .sp
-Alternatively, this option can be assigned the special value TPM, in which case \*[Pn] attempts to unseal a TPM-wrapped key from /var/lib/\*[Pn]/api-key-blob.txt\&.  See below for details\&.
+Alternatively, this option can be assigned the special value \fBTPM\fR, in which case \fB\*[Pn]\fR attempts to unseal a TPM-wrapped key from \fB/var/lib/\*[Pn]/api-key-blob.txt/fR\&.  See below for details\&.
 .RE
 .PP
-region
+\fBregion\fR
 .RS 4
 Region specifier for the IBM HPCS Key Protect instance\&.
 .RE
 .PP
-service_instance_id
+\fBservice_instance_id\fR
 .RS 4
 Service instance ID for the IBM HPCS Key Protect instance\&.
 .RE
 .PP
-endpoint_url
+\fBendpoint_url\fR
 .RS 4
 Endpoint URL for the IBM HPCS Key Protect instance\&.
 .RE
 .PP
-default_crk_uuid
+\fBdefault_crk_uuid\fR
 .RS 4
 Default CRK UUID for the default wrapping key\&.  Can be overridden with the --uuid command line option\&.
 .RE
 .sp
 .SH "WRAPPED KEY STORAGE"
 .sp
-The \fB\*[Pn] process\fR and \fB\*[Pn] wipe\fR commands iterate over wrapped keys stored in /var/lib/\*[Pn]/logon and /var/lib/\*[Pn]/user\&.  The name of the containing directory determines the key type and the actual file name determines the key description\&.  The \fB\*[Pn] process\fR command adds keys to the keyring and the \fB\*[Pn] wipe\fR command looks key handles up based on each key's type and description and revokes them\&.  Wrapped key file names should have the form <use>:<name>\&.  "luks" is a good choice for <use>.
+The \fB\*[Pn] process\fR and \fB\*[Pn] wipe\fR commands iterate over wrapped keys stored in \fB/var/lib/\*[Pn]/logon\fR and \fB/var/lib/\*[Pn]/user\fR\&.  The name of the containing directory determines the key type and the actual file name determines the key description\&.  The \fB\*[Pn] process\fR command adds keys to the keyring and the \fB\*[Pn] wipe\fR command looks key handles up based on each key's type and description and revokes them\&.  Wrapped key file names should have the form \fB<use>:<name>\fR\&.  "luks" is a good choice for <use>\&.
 .sp
-.SH "SYSTEMD SERVICE"
+.SH "SYSTEMD SERVICES"
 .sp
-The \*[Pn] package installs a systemd service called \fB\*[Pn]\fR\&.  The \*[Pn] service calls the \fB\*[Pn] process\fR command to populate the kernel keyring by unwrapping keys from /var/lib/\*[Pn]\&.  The keys populated in the keyring can subsequently be used for other services, namely LUKS\&.
+\fB\*[Pn].service\fR
 .sp
-The /var/lib/\*[Pn] directory must be populated before the \fB\*[Pn] process\fR command can successfully unwrap wrapped keys and populate the kernel keyring\&.  See the \fB\*[Pn] process\fR command description above\&.
+.RS 4
+The \fB\*[Pn]\fR package installs a systemd service called \fB\*[Pn]\fR\&.  The \fB\*[Pn]\fR service calls the \fB\*[Pn] process\fR command to populate the kernel keyring by unwrapping keys from \fB/var/lib/\*[Pn]\fR\&.  The keys populated in the keyring can subsequently be used for other services, namely LUKS\&.
 .sp
-To enable the \*[Pn] service after installing the \*[Pn] package\&:
+The \fB/var/lib/\*[Pn]\fR directory must be populated before the \fB\*[Pn] process\fR command can successfully unwrap wrapped keys and populate the kernel keyring\&.  See the \fB\*[Pn] process\fR command and \fBWRAPPED_KEY_STORAGE\fR descriptions above and examples below\&.
+.sp
+To enable the \fB\*[Pn]\fR service after installing the \fB\*[Pn]\fR package\&:
 .sp
 .RS 4
 systemctl enable \*[Pn]
+.RE
+.sp
+If you want to actually start the service to test it\&:
+.sp
+.RS 4
 systemctl start \*[Pn]
 .RE
 .sp
-The results of the service can be seen by running\&:
+.RE
+\fB\*[Pn]-wipe.service\fR
 .sp
 .RS 4
-journalctl
+The \fB\*[Pn]\fR package also installs another systemd service called \fB\*[Pn]-wipe\fR\&.  The \fB\*[Pn]-wipe\fR service calls the \fB\*[Pn] wipe\fR command to revoke keys in the kernel keyring based on their type and name as specified in \fB/var/lib/\*[Pn]\fR\&.
+.sp
+Enable this service if you want to revoke previous unwrapped keys populated by he \fB\*[Pn] process\fR command after they are used by the \fBremote-cryptsetup\fR target\&.
+.sp
+To enable the \fB\*[Pn]-wipe\fR service after installing the \fB\*[Pn] package\fR\&:
+.sp
+.RS 4
+systemctl enable \*[Pn]-wipe
 .RE
 .sp
-Listing keys with the \fBkeyctl\fR command should show the keys that \*[Pn] populated\&.
+If you want to actually start the service to test it\&:
+.sp
+.RS 4
+systemctl start \*[Pn]-wipe
+.RE
+.RE
+.sp
+The output from running the services can be seen (in reverse chronological order since last boot) by running\&:
+.sp
+.RS 4
+journalctl -r -b
+.RE
+.sp
+Listing keys with the \fBkeyctl\fR command should show the keys that \fB\*[Pn]\fR keys are either populated or revoked\&.
 .sp
 .SH "EXAMPLES"
 .sp

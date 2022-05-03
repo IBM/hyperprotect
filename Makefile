@@ -110,6 +110,7 @@ install: \
 	$(DESTDIR)/usr/bin/${UTILITYNAME} \
 	$(DESTDIR)/etc/${UTILITYNAME}.ini \
 	$(DESTDIR)/usr/lib/systemd/system/${UTILITYNAME}.service \
+	$(DESTDIR)/usr/lib/systemd/system/${UTILITYNAME}-wipe.service \
 	$(DESTDIR)/usr/share/doc/${PACKAGENAME}/README.md \
 	$(DESTDIR)/usr/share/man/man1/${UTILITYNAME}.1.gz \
 	$(DESTDIR)/var/lib/${UTILITYNAME} \
@@ -133,6 +134,9 @@ $(DESTDIR)/usr/bin/${UTILITYNAME}: ${UTILITYNAME}
 
 $(DESTDIR)/usr/lib/systemd/system/${UTILITYNAME}.service: ${UTILITYNAME}.service
 	install -m 644 -D ${UTILITYNAME}.service -t "$(DESTDIR)/usr/lib/systemd/system"
+
+$(DESTDIR)/usr/lib/systemd/system/${UTILITYNAME}-wipe.service: ${UTILITYNAME}-wipe.service
+	install -m 644 -D ${UTILITYNAME}-wipe.service -t "$(DESTDIR)/usr/lib/systemd/system"
 
 $(DESTDIR)/usr/share/doc/${PACKAGENAME}/README.md: README.md
 	install -m 644 -D README.md -t "$(DESTDIR)/usr/share/doc/${PACKAGENAME}"
