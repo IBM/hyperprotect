@@ -68,8 +68,9 @@ parse_plaintext_json() {
 }
 
 
+# /usr/bin/shelldrop.sh
 if grep -q "rd.${_UTILITY_NAME}" /proc/cmdline; then
-	#echo "Hello from ${_UTILITY_NAME}"
+	echo "Hello from ${_UTILITY_NAME}"
 	parse_ini
 	#echo "api_key = $_API_KEY"
 	#echo "region = $_REGION"
@@ -81,7 +82,7 @@ if grep -q "rd.${_UTILITY_NAME}" /proc/cmdline; then
 			echo "Unsealing API key from TPM"
 			_API_KEY=$(tpm_unsealdata -z -i /var/lib/${_UTILITY_NAME}/api-key-blob.txt)
 		else
-			echo "${_UTILITY_NAME} dracut module says there's TPM in the config file but rd.tss is not set on the cmdline"
+			echo "${_UTILITY_NAME}-dracut module says there's TPM in the config file but rd.tss is not set on the cmdline"
 		fi
 	fi
 	authenticate
@@ -93,7 +94,8 @@ if grep -q "rd.${_UTILITY_NAME}" /proc/cmdline; then
 	#echo $_PLAINTEXT_JSON
 	parse_plaintext_json
 	#echo $_BASE64_PLAINTEXT
-	printf "%s" $_BASE64_PLAINTEXT | base64 --decode | keyctl padd user "luks:root" @u
+	printf "%s" $_BASE64_PLAINTEXT | base64 --decode | keyctl padd user "luks:root" @s
+	keyctl show @s
 else
-	echo "${_UTILITY_NAME} dracut module says rd.${_UTILITY_NAME} is not set on the cmdline"
+	echo "${_UTILITY_NAME}-dracut module says rd.${_UTILITY_NAME} is not set on the cmdline"
 fi
