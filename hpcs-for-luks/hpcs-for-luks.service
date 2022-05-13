@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# Systemd service for getting dm-crypt/LUKS keys from HPCS Key Protect
+#
+# George Wilson <gcwilson@linux.ibm.com>
+#
+# Copyright (C) 2021,2022 IBM Corp.
+#
+
+[Unit]
+Description=IBM HPCS Key Protect Boot Service
+Documentation=file:///usr/share/doc/hpcs-for-luks/README.md
+Before=remote-fs-pre.target remote-cryptsetup.target
+After=network.target network-online.target
+Wants=network.target network-online.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/hpcs-for-luks.ini
+ExecStart=/usr/bin/hpcs-for-luks process
+
+[Install]
+RequiredBy=remote-cryptsetup.target

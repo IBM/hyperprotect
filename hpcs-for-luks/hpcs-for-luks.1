@@ -1,0 +1,283 @@
+'\" t
+.\"     Title: hpcs-for-luks
+.\"    Author: [see the "Authors" section]
+.\"      Date: 01/12/2022
+.\"    Manual: HPCS for LUKS manual
+.\"  Language: English
+.\"
+.TH "HPCS-FOR-LUKS" "1" "01/12/2022" "hpcs-for-luks\&.0" "Key Protect for LUKS Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" Package name and utility name
+.ds Pn hpcs-for-luks
+.ds Un hpcs-for-luks
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+\fB\*[Pn]\fR \- manage IBM HPCS Key Protect keys from Linux
+.SH "SYNOPSIS"
+.sp
+.nf
+\fI\*[Pn]\fR [\-\-version] [\-\-help] <command> [<args>]
+.fi
+.sp
+.SH "DESCRIPTION"
+.sp
+The \fB\*[Pn]\fR command interacts with the IBM HPCS Key Protect cloud service over a REST API via the keyprotect Python client\&.  It can create wrapping keys, wrap keys, unwrap keys, and unwrap a set of keys from disk and populate the kernel keyring with them\&.
+.sp
+.SH "OPTIONS"
+.PP
+\-\-version
+.RS 4
+Prints the \*[Pn] version and exits\&.
+.RE
+.PP
+\-\-help
+.RS 4
+Prints help for commands and options and exits\&.
+.sp
+.SH "COMMANDS"
+.PP
+\fBlist\fR
+.RS 4
+Lists the wrapping key UUID and name pairs in the IBM HPCS Key Protect instance\&.
+.sp
+Takes no arguments\&.
+.RE
+.PP
+\fBcreate\fR {--crk|--std} --name <name> [--gen]
+.RS 4
+Create a wrapping key in the IBM HPCS Key Protect instance\&.
+.sp
+Arguments\&:
+.sp
+.PP
+--crk
+.RS 4
+Create a Customer Root Key\&.  One of either --crk or --std are required\&.  Mutually exclusive with --std\&.
+.RE
+.PP
+--std
+.RS 4
+Create a standard key\&. One of either --crk or --std are required\&.  Mutually exclusive with --crk\&.
+.RE
+.PP
+--name <name>
+.RS 4
+Name for key\&.  Required\&.
+.RE
+.PP
+--gen
+.RS 4
+Generate a random key rather than reading a key from stdin\&.  Optional\&.
+.RE
+.RE
+.PP
+\fBget\fR [--uuid <uuid>]
+.RS 4
+Gets metadata for a key\&.
+.sp
+Arguments\&:
+.sp
+.PP
+--uuid <uuid>
+.RS 4
+UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration file\&.
+.RE
+.RE
+.PP
+\fBwrap\fR [--uuid <uuid>] [--gen]
+.RS 4
+Wraps a key on stdin with a specified wrapping key in the IBM HPCS Key Protect instance and writes it to stdout\&.
+.sp
+Arguments\&:
+.sp
+.PP
+--uuid <uuid>
+.RS 4
+UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration file\&.
+.RE
+.RE
+.RE
+.PP
+\fBunwrap\fR [--uuid <uuid>]
+.RS 4
+Unwraps a key on stdin with a specified wrapping key in the IBM HPCS Key Protect instance and writes it to stdout\&.
+.sp
+Arguments\&:
+.sp
+.PP
+--uuid <uuid>
+.RS 4
+UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration file\&.
+.RE
+.RE
+.PP
+\fBprocess\fR [--uuid <uuid>]
+.RS 4
+Processes a set of wrapped keys on disk to unwrap them with the specified wrapping key in the IBM HPCS Key Protect instance and populates the kernel keyring with them\&.
+.sp
+Arguments\&:
+.sp
+.PP
+--uuid <uuid>
+.RS 4
+UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration file\&.
+.RE
+.RE
+.PP
+\fBwipe\fR [--uuid <uuid>]
+.RS 4
+Wipes a set of keyring keys described by filenames on disk\&.
+.sp
+Arguments\&:
+.sp
+.PP
+--uuid <uuid>
+.RS 4
+UUID for CRK\&.  Optional if default_crk_uuid is defined in the configuration file\&.
+.RE
+.RE
+.PP
+\fBdelete\fR <--uuid <uuid>>
+.RS 4
+Deletes the specified wrapping key in the IBM HPCS Key Protect instance\&.
+.sp
+.sp
+Arguments\&:
+.sp
+.PP
+--uuid <uuid>
+.RS 4
+UUID for CRK\&.  Required\&.
+.RE
+.RE
+.SH "CONFIGURATION FILE"
+.sp
+The \fB\*[Pn]\fR command reads configuration information from \fB/etc/\*[Pn].ini\fR\&.  The file must be initially created by editing the skeleton \fB/etc/\*[Pn].ini\fR shipped in the package\&.  Refer to the the IBM HCPS Key Protect documentation for details on IBM HPCS Key Protect options\&.
+.sp
+Configuration options are as follows\&:
+.sp
+.PP
+\fBapi_key\fR
+.RS 4
+API key for the IBM HPCS Key Protect instance console\&.
+.sp
+Alternatively, this option can be assigned the special value \fBTPM\fR, in which case \fB\*[Pn]\fR attempts to unseal a TPM-wrapped key from \fB/var/lib/\*[Pn]/api-key-blob.txt/fR\&.  See below for details\&.
+.RE
+.PP
+\fBregion\fR
+.RS 4
+Region specifier for the IBM HPCS Key Protect instance\&.
+.RE
+.PP
+\fBservice_instance_id\fR
+.RS 4
+Service instance ID for the IBM HPCS Key Protect instance\&.
+.RE
+.PP
+\fBendpoint_url\fR
+.RS 4
+Endpoint URL for the IBM HPCS Key Protect instance\&.
+.RE
+.PP
+\fBdefault_crk_uuid\fR
+.RS 4
+Default CRK UUID for the default wrapping key\&.  Can be overridden with the --uuid command line option\&.
+.RE
+.sp
+.SH "WRAPPED KEY STORAGE"
+.sp
+The \fB\*[Pn] process\fR and \fB\*[Pn] wipe\fR commands iterate over wrapped keys stored in \fB/var/lib/\*[Pn]/logon\fR and \fB/var/lib/\*[Pn]/user\fR\&.  The name of the containing directory determines the key type and the actual file name determines the key description\&.  The \fB\*[Pn] process\fR command adds keys to the keyring and the \fB\*[Pn] wipe\fR command looks key handles up based on each key's type and description and revokes them\&.  Wrapped key file names should have the form \fB<use>:<name>\fR\&.  "luks" is a good choice for <use>\&.
+.sp
+.SH "SYSTEMD SERVICES"
+.sp
+\fB\*[Pn].service\fR
+.sp
+.RS 4
+The \fB\*[Pn]\fR package installs a systemd service called \fB\*[Pn]\fR\&.  The \fB\*[Pn]\fR service calls the \fB\*[Pn] process\fR command to populate the kernel keyring by unwrapping keys from \fB/var/lib/\*[Pn]\fR\&.  The keys populated in the keyring can subsequently be used for other services, namely LUKS\&.
+.sp
+The \fB/var/lib/\*[Pn]\fR directory must be populated before the \fB\*[Pn] process\fR command can successfully unwrap wrapped keys and populate the kernel keyring\&.  See the \fB\*[Pn] process\fR command and \fBWRAPPED_KEY_STORAGE\fR descriptions above and examples below\&.
+.sp
+To enable the \fB\*[Pn]\fR service after installing the \fB\*[Pn]\fR package\&:
+.sp
+.RS 4
+systemctl enable \*[Pn]
+.RE
+.sp
+If you want to actually start the service to test it\&:
+.sp
+.RS 4
+systemctl start \*[Pn]
+.RE
+.sp
+.RE
+\fB\*[Pn]-wipe.service\fR
+.sp
+.RS 4
+The \fB\*[Pn]\fR package also installs another systemd service called \fB\*[Pn]-wipe\fR\&.  The \fB\*[Pn]-wipe\fR service calls the \fB\*[Pn] wipe\fR command to revoke keys in the kernel keyring based on their type and name as specified in \fB/var/lib/\*[Pn]\fR\&.
+.sp
+Enable this service if you want to revoke previous unwrapped keys populated by he \fB\*[Pn] process\fR command after they are used by the \fBremote-cryptsetup\fR target\&.
+.sp
+To enable the \fB\*[Pn]-wipe\fR service after installing the \fB\*[Pn] package\fR\&:
+.sp
+.RS 4
+systemctl enable \*[Pn]-wipe
+.RE
+.sp
+If you want to actually start the service to test it\&:
+.sp
+.RS 4
+systemctl start \*[Pn]-wipe
+.RE
+.RE
+.sp
+The output from running the services can be seen (in reverse chronological order since last boot) by running\&:
+.sp
+.RS 4
+journalctl -r -b
+.RE
+.sp
+Listing keys with the \fBkeyctl\fR command should show the keys that \fB\*[Pn]\fR keys are either populated or revoked\&.
+.sp
+.SH "EXAMPLES"
+.sp
+.PP
+Configuration File
+.RS 4
+.nf
+[KP]
+api_key = AB0CdEfGHijKlMN--12OPqRStuv3wx456yZAb7CDEF8g
+#api_key = TPM
+region = us-east # Another comment
+service_instance_id = 01234567-89ab-cdef-0123-456789abcdef
+endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
+default_crk_uuid = fedcba98-7654-3210-fedc-ba9876543210
+.fi
+.RE
+.PP
+Wrapped Key File Names
+.RS 4
+.nf
+/var/lib/\*[Pn]/user/luks:key1
+/var/lib/\*[Pn]/user/luks:key2
+/var/lib/\*[Pn]/user/luks:root
+/var/lib/\*[Pn]/logon/luks:key3
+.fi
+.RE
+

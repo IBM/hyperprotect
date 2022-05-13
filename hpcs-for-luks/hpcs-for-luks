@@ -1,0 +1,466 @@
+#!/usr/bin/env python3
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Key Protect Interface for hpcs-for-luks service via Python
+#
+# Nayna Jain <nayna@linux.ibm.com>, George Wilson <gcwilson@linux.ibm.com>
+#
+# Copyright (C) 2021,2022 IBM Corp.
+#
+
+import configparser
+import argparse
+import os
+import subprocess
+import sys
+import keyprotect
+
+CONFIG_FILE = '/etc/hpcs-for-luks.ini'
+KEY_BYTES = 32
+WRAPPED_KEY_DIR = '/var/lib/hpcs-for-luks'
+KEY_TYPES = ('logon', 'user')
+BLOB_FILE = WRAPPED_KEY_DIR + '/api-key-blob.txt'
+VERSION = '1.0.0'
+
+#
+#  Parse config file
+#
+
+def parse_config(config_file):
+
+    bad_value = False
+    config = configparser.ConfigParser(defaults=None)
+
+    try:
+        config.read(CONFIG_FILE)
+    except:
+        print('Error reading configuration file ' + config_file + ': ' + sys.exc_info()[0], file=sys.stderr)
+
+    # Check the mandatory KP section exists.
+
+    try:
+        if config['KP'] == None:
+            pass
+    except:
+        print('KP section missing from configuration file ' + config_file, file=sys.stderr)
+        exit(1)
+
+    # Check that the mandatory subsections under KP exist and are assigned a value.
+
+    for section in ('api_key', 'region', 'service_instance_id', 'endpoint_url'):
+        try:
+            if config['KP'][section] == None or config['KP'][section] == '' or config['KP'][section] == ' ':
+                print(section + ' value missing from configuration file ' + config_file, file=sys.stderr)
+                bad_value = True
+        except:
+            print(section + ' key missing from configuration file ' + config_file, file=sys.stderr)
+            exit(1)
+
+    # Exit if we got a bad value from check loop
+
+    if bad_value == True:
+        exit(1)
+
+    # If optonal default_crk_uuid isn't set, set it to the empty string.
+
+    try:
+        if config['KP']['default_crk_uuid'] == None:
+            pass
+    except:
+        config['KP']['default_crk_uuid'] = ''
+
+    # Check the optional HFL section exists; if not, set it to the None object.
+
+    try:
+        if config['HFL'] == None:
+            pass
+    except:
+        config['HFL'] = {}
+
+    # Check for the wipe option; if not set, set it to the empty string.
+
+    try:
+        if config['HFL']['wipe'] == None:
+            pass
+    except:
+        config['HFL']['wipe'] = ''
+
+    return config
+
+#
+#  Parse args
+#
+
+def parse_args():
+
+    parser = argparse.ArgumentParser()
+
+    # --version is an argument but it will be turned into an op below
+
+    parser.add_argument('--version', help='show version and exit', default=False, action='store_true')
+
+    # op receives the selected subcommand's title
+
+    subparsers = parser.add_subparsers(dest='op')
+
+    # list
+
+    subparser_list = subparsers.add_parser('list', help='list keys')
+
+    # create
+
+    subparser_create = subparsers.add_parser('create', help='create key')
+    subparser_create.add_argument('--crk', default=False, action='store_true', help='Customer Root Key')
+    subparser_create.add_argument('--std', default=False, action='store_true', help='standard key')
+    subparser_create.add_argument('--name', default=None, help='name for key')
+    subparser_create.add_argument('--gen', default=False, action='store_true', help='generate random key rather than provide key')
+
+    # get
+
+    subparser_get = subparsers.add_parser('get', help='get key information')
+    subparser_get.add_argument('--uuid', default=None, help='UUID for CRK')
+
+    # wrap
+
+    subparser_wrap = subparsers.add_parser('wrap', help='read a key from stdin and wrap it')
+    subparser_wrap.add_argument('--uuid', default=None, help='UUID for CRK')
+    subparser_wrap.add_argument('--gen', default=False, action='store_true', help='generate random key rather than provide key')
+
+    # unwrap
+
+    subparser_unwrap = subparsers.add_parser('unwrap', help='unwrap a key from stdin to stdout')
+    subparser_unwrap.add_argument('--uuid', default=None, help='UUID for CRK')
+
+    # process
+
+    subparser_process = subparsers.add_parser('process', help='populate the kernel keyring by unwrapping keys in ' + WRAPPED_KEY_DIR)
+    subparser_process.add_argument('--uuid', default=None, help='UUID for CRK')
+
+    # wipe
+
+    subparser_process = subparsers.add_parser('wipe', help='wipe the kernel keyring by iterating over keys in ' + WRAPPED_KEY_DIR)
+    subparser_process.add_argument('--uuid', default=None, help='UUID for CRK')
+
+    # delete
+
+    subparser_delete = subparsers.add_parser('delete', help='delete key specified by --uuid')
+    subparser_delete.add_argument('--uuid', default=None, help='UUID for CRK')
+
+    args = parser.parse_args()
+
+    # Convert --version option to an op string and handle as though it were an op
+
+    if args.version == True:
+        args.op = 'version'
+
+    # Work around add_subparsers() not honoring required= in python <3.7 and print help
+
+    if  args.op == None:
+        parser.print_help()
+        exit(1)
+
+    return args
+
+#
+# Check for TPM special case, attempt unseal, replace config['KP']['api_key'] on success
+# TPM/TSS 1.2 only right now.
+#
+
+def tpm_unseal(config):
+
+    if config['KP']['api_key'] == 'TPM':
+
+        unseal_proc = subprocess.Popen(('tpm_unsealdata', '-z', '-i', BLOB_FILE), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        raw_plaintext, perr = unseal_proc.communicate()
+
+        if unseal_proc.returncode != 0:
+            print('Cannot obtain API key from TPM: ' + perr.decode('utf-8') + ", rc =", unseal_proc.returncode, file=sys.stderr)
+            exit(1)
+
+        print(perr.decode('utf-8'), end='', flush=True)
+        config['KP']['api_key'] = raw_plaintext.decode('utf-8')
+
+#
+#  Initialize key protect
+#
+
+def init_keyprotect(api_key, region, service_instance_id, endpoint_url):
+
+    tm = keyprotect.bxauth.TokenManager(api_key=api_key)
+    kp = keyprotect.Client(credentials=tm,
+                           region=region,
+                           service_instance_id=service_instance_id,
+                           endpoint_url=endpoint_url)
+
+    return kp
+
+#
+#  Key Protect LUKS class
+#
+
+class key_protect_luks:
+
+    #
+    #  Constructor
+    #
+
+    def __init__(self, config, args, kp):
+        self.config = config
+        self.args = args
+        self.kp = kp
+
+    #
+    #  Iterate over keys in a directory for a given type and create or wipe keyring keys
+    #
+
+    def process_keys_of_type(self, key_type, wipe = False):
+
+        wrapped_key_dir_of_type = WRAPPED_KEY_DIR + '/' + key_type
+
+        if wipe == True:
+
+            for filename in os.listdir(wrapped_key_dir_of_type):
+
+                print('revoke ' + key_type, end=' ')
+                print(filename)
+
+                # Lookup the key handle from the type and filename as the description
+
+                keyctl_proc = subprocess.Popen(('keyctl', 'request', key_type, filename), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                pout, perr = keyctl_proc.communicate()
+                print(pout.decode('utf-8'), end='', flush=True)
+                print(perr.decode('utf-8'), end='', flush=True)
+
+                # Revoke the key if lookup succeeded 
+
+                if keyctl_proc.returncode == 0:
+                    keyctl_proc2 = subprocess.Popen(('keyctl', 'revoke', pout.strip()), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    pout2, perr2 = keyctl_proc2.communicate()
+                    print(pout2.decode('utf-8'), end='', flush=True)
+                    print(perr2.decode('utf-8'), end='', flush=True)
+
+        else:
+
+            for filename in os.listdir(wrapped_key_dir_of_type):
+
+                print('add ' + key_type, end=' ')
+                print(filename)
+
+                # Open the file and read it
+
+                file = open(wrapped_key_dir_of_type + '/' + filename)
+                ciphertext = file.read()
+
+                # Unwrap the key
+
+                plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
+
+                # Add it to the keyring using the filename as the description
+
+                keyctl_proc = subprocess.Popen(('keyctl', 'padd', key_type, filename, '@u'), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                pout, perr = keyctl_proc.communicate(input=plaintext)
+                print(pout.decode('utf-8'), end='', flush=True)
+                print(perr.decode('utf-8'), end='', flush=True)
+
+    #
+    #  Print version and exist
+    #
+
+    def op_version(self):
+
+        print(os.path.basename(sys.argv[0]) + ' version ' + VERSION, file=sys.stderr)
+        exit(0)
+
+    #
+    #
+    #  List Key Protect keys
+    #
+
+    def op_list(self):
+
+        keys = kp.keys()
+
+        for key in kp.keys():
+            print('%s\t%s' % (key['id'], key['name']))
+
+    #
+    #  Create a new root key
+    #
+
+    def op_create(self):
+
+        if args.name == None:
+            print('Missing --name option', file=sys.stderr)
+            exit(1)
+
+        elif args.crk == args.std:
+            print('Specify one of --crk or --std', file=sys.stderr)
+            exit(1)
+
+        else:
+            input_key = None;
+
+            if args.gen == False:
+                input_key = sys.stdin.read()
+                payload = input_key.encode('utf-8')
+
+            new_key = kp.create(name=args.name, root=args.crk, payload=payload)
+            print('Created key %s' % new_key['id'], file=sys.stderr)
+
+    #
+    #  Get the Key Protect key specified by --uuid and print its info
+    #
+
+    def op_get(self):
+
+        if args.uuid == None:
+            print('Missing --uuid for get op', file=sys.stderr)
+            exit(1)
+
+        else:
+            key = kp.get(args.uuid)
+            print(key)
+
+    #
+    #  Take the key from stdin,  wrap it with a CRK specified by --uuid or default_crk_uuid, and write it to stdout
+    #
+    #  If --gen is specified, generate a random key of KEY_BYTES length rather than reading from stdin
+    #
+
+    def op_wrap(self):
+
+        if args.uuid == None:
+            if config['KP']['default_crk_uuid'] == '':
+                print('No default CRK UUID in config file and missing CRK --uuid option', file=sys.stderr)
+                exit(1)
+            else:
+                args.uuid = config['KP']['default_crk_uuid']
+
+        input_key = None;
+
+        if args.gen == True:
+            input_key = os.urandom(KEY_BYTES)
+        else:
+             input_key = sys.stdin.read().encode('utf-8')
+
+        wrappedkey = kp.wrap(args.uuid, plaintext=input_key)
+        ciphertext = wrappedkey.get('ciphertext')
+        plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
+        print(ciphertext)
+
+    #
+    #  Read a wrapped key from stdin, unwrap it with the key specified by --uuid or default_crk_uuid, and write it to stdout
+    #
+
+    def op_unwrap(self):
+
+        if args.uuid == None:
+            if config['KP']['default_crk_uuid'] == '':
+                print('No default CRK UUID in config file and missing CRK --uuid option', file=sys.stderr)
+                exit(1)
+            else:
+                args.uuid = config['KP']['default_crk_uuid']
+
+        ciphertext = sys.stdin.read()
+        plaintext = kp.unwrap(key_id=args.uuid, ciphertext=ciphertext)
+        sys.stdout.buffer.write(plaintext)
+
+    #
+    #  Read keys from /var/lib/<project-name> and add them to the kernel keyring
+    #
+
+    def op_process(self):
+
+        if args.uuid == None:
+            if config['KP']['default_crk_uuid'] == '':
+                print('No default CRK UUID in config file and missing CRK --uuid option', file=sys.stderr)
+                exit(1)
+            else:
+                args.uuid = config['KP']['default_crk_uuid']
+
+        for key_type in KEY_TYPES:
+            self.process_keys_of_type(key_type)
+
+    #
+    #
+    #  Read keys from /var/lib/<project-name> and revoke them in the kernel keyring
+    #
+
+    def op_wipe(self):
+
+        if args.uuid == None:
+            if config['KP']['default_crk_uuid'] == '':
+                print('No default CRK UUID in config file and missing CRK --uuid option', file=sys.stderr)
+                exit(1)
+            else:
+                args.uuid = config['KP']['default_crk_uuid']
+
+        for key_type in KEY_TYPES:
+            self.process_keys_of_type(key_type, wipe=True)
+
+    #
+    #  Delete Key Protect key specified by --uuid
+    #
+
+    def op_delete(self):
+
+        if args.uuid == None:
+            print('Missing root key --uuid option', file=sys.stderr)
+            exit(1)
+        else:
+            deleted_key = kp.delete(args.uuid)
+            print('Deleted key %s' % args.uuid, file=sys.stderr)
+
+    #
+    # Map of op strings to functions
+    #
+
+    opswitch = {
+        'version': op_version,
+        'list': op_list,
+        'create': op_create,
+        'get': op_get,
+        'wrap': op_wrap,
+        'unwrap': op_unwrap,
+        'process': op_process,
+        'wipe': op_wipe,
+        'delete': op_delete
+    }
+
+    #
+    # Run the op function based on the selected op string
+    #
+
+    def run_op(self, op):
+
+        func = self.opswitch.get(op, None)
+        return func(self)
+
+#
+#  Main
+#
+
+# Read config file and parse args
+
+config = parse_config(CONFIG_FILE)
+args = parse_args()
+
+# Handle TPM case
+
+tpm_unseal(config)
+
+# Initialize the key management service client
+
+kp = init_keyprotect(config['KP']['api_key'],
+                     config['KP']['region'],
+                     config['KP']['service_instance_id'],
+                     config['KP']['endpoint_url'])
+
+# Instantiate key_protect_luks object
+
+kpl = key_protect_luks(config, args, kp)
+
+# Process op
+
+kpl.run_op(args.op)

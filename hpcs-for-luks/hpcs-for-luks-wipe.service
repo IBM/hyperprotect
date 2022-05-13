@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# Systemd service for wiping HPCS Key Protect dm-crypt/LUKS keys from kernel
+# keyring
+#
+# George Wilson <gcwilson@linux.ibm.com>
+#
+# Copyright (C) 2021,2022 IBM Corp.
+#
+
+[Unit]
+Description=IBM HPCS Key Protect Wipe Boot Service
+Documentation=file:///usr/share/doc/hpcs-for-luks/README.md
+After=remote-fs-pre.target remote-cryptsetup.target
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/hpcs-for-luks.ini
+ExecStart=/usr/bin/hpcs-for-luks wipe
+
+[Install]
+RequiredBy=multi-user.target
