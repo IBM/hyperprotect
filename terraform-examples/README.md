@@ -97,7 +97,17 @@ Let's look at **Method_2**.  At the end of it, we should see a HPCS instance cre
 export IC_API_KEY = <API key that you created before>
 git clone https://github.com/IBM/hyperprotect/terraform-examples/
 cd terraform-examples/hpcs_full/
-# Create the TKE admin key that will be used for key ceremony
+
+# Install `ibmcloud` CLI
+# Refer: https://cloud.ibm.com/docs/cli?topic=cli-getting-started
+
+# After installing `ibmcloud`, install TKE plugin and setup the TKE files directory
+ibmcloud plugin install tke
+mkdir tke_files
+export CLOUDTKEFILES=</path/to/tke_files/>
+
+# Create the TKE admin key that will be used for key ceremony. This key will be
+# created in tke_files directory
 ibmcloud tke sigkey-add (If you want to use the terraform sample code AS-IS, make sure you give the name as `Admin` and password as `passw0rd` when it prompts. If you want to use another name and password, make appropriate updates to the hpcs.tf)
 terraform init
 terraform plan (Make sure everything is per expectation)
