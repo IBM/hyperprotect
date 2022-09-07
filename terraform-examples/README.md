@@ -38,7 +38,7 @@ In this example, `Free` plan is used.
 
 ```
 export IC_API_KEY = <API key that you created before>
-git clone https://github.com/hyperprotect/terraform-examples/
+git clone https://github.com/IBM/hyperprotect/terraform-examples/
 cd terraform-examples/hpvs/
 terraform init
 terraform plan (Make sure everything is per expectation)
@@ -77,7 +77,7 @@ Provisioning HPCS is an interesting task. Please note that there are no free pla
 Let's look at **Method_1**. At the end of it, we shoud see a HPCS instance created waiting for you to do the Master key ceremony.
 ```
 export IC_API_KEY = <API key that you created before>
-git clone https://github.com/hyperprotect/terraform-examples/
+git clone https://github.com/IBM/hyperprotect/terraform-examples/
 cd terraform-examples/hpcs_minimal/
 terraform init
 terraform plan (Make sure everything is per expectation)
@@ -95,7 +95,7 @@ Now that the HPCS instance is created, please initialize the HSM via Master Key 
 Let's look at **Method_2**.  At the end of it, we should see a HPCS instance created with Master Key initialisation successfully completed, and ready to be used.
 ```
 export IC_API_KEY = <API key that you created before>
-git clone https://github.com/hyperprotect/terraform-examples/
+git clone https://github.com/IBM/hyperprotect/terraform-examples/
 cd terraform-examples/hpcs_full/
 # Create the TKE admin key that will be used for key ceremony
 ibmcloud tke sigkey-add (If you want to use the terraform sample code AS-IS, make sure you give the name as `Admin` and password as `passw0rd` when it prompts. If you want to use another name and password, make appropriate updates to the hpcs.tf)
@@ -118,7 +118,7 @@ Alright, congratulations on setting up HPVS and HPCS. In the next section, we wi
 - ***Let's create an instance of [Hyper Protect DBaaS for MongoDB now](https://cloud.ibm.com/catalog/services/hyper-protect-dbaas-for-mongodb), and will get to Postgresql after this***. At the end of this, you should have a fully provisioned MongoDB instance that is ready to be used. 
 ```
 export IC_API_KEY = <API key that you created before>
-git clone https://github.com/hyperprotect/terraform-examples/
+git clone https://github.com/IBM/hyperprotect/terraform-examples/
 cd terraform-examples/hpdbass/mongodb/
 terraform init
 terraform plan (Make sure everything is per expectation)
@@ -137,7 +137,7 @@ Make sure to execute `terraform destroy` when you are done.
 At the end of this, you should have a fully provisioned PostgresqlDB instance that is ready to be used. 
 ```
 export IC_API_KEY = <API key that you created before>
-git clone https://github.com/hyperprotect/terraform-examples/
+git clone https://github.com/IBM/hyperprotect/terraform-examples/
 cd terraform-examples/hpdbass/postgresql/
 terraform init
 terraform plan (Make sure everything is per expectation)
