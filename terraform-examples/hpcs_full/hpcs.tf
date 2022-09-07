@@ -48,7 +48,10 @@ resource ibm_hpcs hpcs {
   # does the TKE master key ceremony to initialize the instance.
   admins {
     name  = "Admin"
-    key   = "1.sigkey"
+    # 1.sigkey will be in tke_files directory. This code assumes that tke_files
+    # is present in the same directory as this terraform file.
+    # If not, put the complete path to the file
+    key   = "./tke_files/1.sigkey"
     token = "passw0rd"
   }
 
