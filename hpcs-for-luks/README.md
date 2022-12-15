@@ -42,7 +42,7 @@
 
 			hpcs-for-luks create --crk --gen --name MyCRKName
 
-   - List the Key Protect keys to get the UUID associated with MyCRKName
+   - List the HPCS keys to get the UUID associated with MyCRKName
 
 			hpcs-for-luks list | grep MyCRKName
 			fedcba98-7654-3210-fedc-ba9876543210	MyCRKName
