@@ -1,5 +1,5 @@
 Name:		hpcs-for-luks
-Version:	1.0
+Version:	1.1
 Release:	1%{?dist}
 Summary:	IBM Key Protect Integration with LUKS
 BuildArch:	noarch

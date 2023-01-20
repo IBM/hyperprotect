@@ -1,5 +1,5 @@
 PACKAGENAME=hpcs-for-luks
-PACKAGEVER=1.0
+PACKAGEVER=1.1
 
 UTILITYNAME=hpcs-for-luks
 

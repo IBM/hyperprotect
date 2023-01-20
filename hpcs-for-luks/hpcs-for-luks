@@ -304,8 +304,10 @@ class key_protect_luks:
             if args.gen == False:
                 input_key = sys.stdin.read()
                 payload = input_key.encode('utf-8')
+                new_key = kp.create(name=args.name, root=args.crk, payload=payload)
+            else:
+                new_key = kp.create(name=args.name, root=args.crk)
 
-            new_key = kp.create(name=args.name, root=args.crk, payload=payload)
             print('Created key %s' % new_key['id'], file=sys.stderr)
 
     #
