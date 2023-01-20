@@ -1,5 +1,5 @@
 Package: hpcs-for-luks
-Version: 1.0
+Version: 1.1
 Architecture: all
 Maintainer: George Wilson <gcwilson@us.ibm.com>
 Description: Integration between IBM Key Protect and LUKS
