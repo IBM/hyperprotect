@@ -229,11 +229,11 @@ class key_protect_luks:
                 print(pout.decode('utf-8'), end='', flush=True)
                 print(perr.decode('utf-8'), end='', flush=True)
 
-                # Revoke the key if lookup succeeded and there's no symlink in the linger directory
+                # Revoke the key if lookup succeeded and there's no file of the same name (usually a symlink) in the linger/key_type directory
 
                 if keyctl_proc.returncode == 0:
-                    if not os.path.exists(WRAPPED_KEY_DIR + '/linger/' + filename):
-                        print("Revoking " + filename)
+                    if not os.path.exists(WRAPPED_KEY_DIR + '/linger/' + key_type + '/' + filename):
+                        print("Revoking " + key_type + '/' + filename)
                         keyctl_proc2 = subprocess.Popen(('keyctl', 'revoke', pout.strip()), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         pout2, perr2 = keyctl_proc2.communicate()
                         print(pout2.decode('utf-8'), end='', flush=True)
