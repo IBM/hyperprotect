@@ -168,6 +168,24 @@ and you should now be able to show the keys
 
 	keyctl show @s
 
+## Notes on Reducing cryptsetup Memory
+
+	When executing multiple cryptsetup instances in parallel, as occurs setting up multiple encrypted volumes via systemd, beware that the LUKS2 default KDF, Argon2i, will consume large amounts of memory.  This is by design because it utilizes a memory-hard problem.  However, such a configuration can consume all system memory trigger the OOM killer during bootup.
+
+	There are a couple of different options to handle this situation.
+
+	1. When formatting encrypted volumes with cryptsetup luksFormat, use PKKDF2, which implements a time-hard rather than memory-hard problem.  Updating the example above:
+
+		cryptsetup luksFormat --type luks2 --pbkdf pbkdf2 /dev/loop0
+
+	2. By default, Argon2i uses half the available system memory.  It is possible to reduce Argon2i memory utilization using the --pbkdf-memory option.  Updating the same example to limit Argon2i to 256K:
+
+		cryptsetup luksFormat --type luks2 --pbkdf-memory 256 /dev/loop0
+
+	It is worth noting that /usr/sbin/cryptsetup luksOpen offers a --serialize-memory-hard-pbkdf option to serialize cryptsetup memory-hard KDF instances.  However, /usr/lib/systemd/systemd-cryptsetup, utilized by systemd to setup encrypted volumes during boot, does not.
+
+	Information taken from https://bugzilla.redhat.com/show_bug.cgi?id=1969569 and https://gitlab.com/cryptsetup/cryptsetup/-/issues/372.
+
 ## Sealing the API key to TPM 1.2 PCRs
 
 1. Enable the vTPM 1.2 from the HMC or disable and re-enable it in order to clear it
@@ -241,17 +259,18 @@ Here's an example of how to setup a key token on a LUKS-encrypted device assumin
 
 	/dev/mapper/secrets   /secrets      ext4    defaults,_netdev 0 0
 
-## Networking in the initramfs
 
-### Dracut modules
-
-!!!THIS WORK IS INCOMPLETE AND SHOULD NOT BE USED YET!!!
+!!!DRACUT WORK FOR HPCS FOR LUKS IS INCOMPLETE AND SHOULD NOT BE USED YET!!!
 
 First, install the dracut modules by running
 
 	make install-dracut
 
 Add the following Dracut module files to /etc/dracut.conf.d
+
+## Networking in the initramfs
+
+### Dracut modules
 
 #### ifcfg.confg
 
