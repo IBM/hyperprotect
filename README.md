@@ -192,35 +192,34 @@ Information taken from https://bugzilla.redhat.com/show_bug.cgi?id=1969569 and h
 
 2. Install TrouSerS and tpm-tools and ensure tcsd is running
 
-	dnf install trousers tpm-tools
-	systemctl enable tcsd
-	systemctl start tcsd
+		dnf install trousers tpm-tools
+		systemctl enable tcsd
+		systemctl start tcsd
 
 3. Take ownership of the vTPM using well-known secrets
 
-	tpm_takeownership -y -z
+		tpm_takeownership -y -z
 
 4. Create a file containing the API key
 
-	echo -n 'AB0CdEfGHijKlMN--12OPqRStuv3wx456yZAb7CDEF8g' > api-key.txt
-
+		echo -n 'AB0CdEfGHijKlMN--12OPqRStuv3wx456yZAb7CDEF8g' > api-key.txt
 	
 5. Seal the key in the file to PCRs, in this example PCR[4] and PCR[5]
 
-	tpm_sealdata -p 4 -p 5 -z --infile api-key.txt --outfile /var/lib/hpcs-for-luks/api-key-blob.txt
+		tpm_sealdata -p 4 -p 5 -z --infile api-key.txt --outfile /var/lib/hpcs-for-luks/api-key-blob.txt
 
-6: Remove the file containing the API key plaintext
+6. Remove the file containing the API key plaintext
 
-	rm api-key.txt
+		rm api-key.txt
 
 7. Edit /etc/hpcs-for-luks.ini and assign api_key the special value "TPM"
 
-	[KP]
-	api_key = TPM
-	region = us-east
-	service_instance_id = 01234567-89ab-cdef-0123-456789abcdef
-	endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
-	default_crk_uuid = fedcba98-7654-3210-fedc-ba9876543210
+		[KP]
+		api_key = TPM
+		region = us-east
+		service_instance_id = 01234567-89ab-cdef-0123-456789abcdef
+		endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
+		default_crk_uuid = fedcba98-7654-3210-fedc-ba9876543210
  
 ## Use
 
