@@ -170,21 +170,21 @@ and you should now be able to show the keys
 
 ## Notes on Reducing cryptsetup Memory
 
-	When executing multiple cryptsetup instances in parallel, as occurs setting up multiple encrypted volumes via systemd, beware that the LUKS2 default KDF, Argon2i, will consume large amounts of memory.  This is by design because it utilizes a memory-hard problem.  However, such a configuration can consume all system memory trigger the OOM killer during bootup.
+When executing multiple cryptsetup instances in parallel, as occurs setting up multiple encrypted volumes via systemd, beware that the LUKS2 default KDF, Argon2i, will consume large amounts of memory.  This is by design because it utilizes a memory-hard problem.  However, such a configuration can consume all system memory trigger the OOM killer during bootup.
 
-	There are a couple of different options to handle this situation.
+There are a couple of different options to handle this situation.
 
-	1. When formatting encrypted volumes with cryptsetup luksFormat, use PKKDF2, which implements a time-hard rather than memory-hard problem.  Updating the example above:
+1. When formatting encrypted volumes with cryptsetup luksFormat, use PKKDF2, which implements a time-hard rather than memory-hard problem.  Updating the example above:
 
 		cryptsetup luksFormat --type luks2 --pbkdf pbkdf2 /dev/loop0
 
-	2. By default, Argon2i uses half the available system memory.  It is possible to reduce Argon2i memory utilization using the --pbkdf-memory option.  Updating the same example to limit Argon2i to 256K:
+2. By default, Argon2i uses half the available system memory.  It is possible to reduce Argon2i memory utilization using the --pbkdf-memory option.  Updating the same example to limit Argon2i to 256K:
 
 		cryptsetup luksFormat --type luks2 --pbkdf-memory 256 /dev/loop0
 
-	It is worth noting that /usr/sbin/cryptsetup luksOpen offers a --serialize-memory-hard-pbkdf option to serialize cryptsetup memory-hard KDF instances.  However, /usr/lib/systemd/systemd-cryptsetup, utilized by systemd to setup encrypted volumes during boot, does not.
+It is worth noting that /usr/sbin/cryptsetup luksOpen offers a --serialize-memory-hard-pbkdf option to serialize cryptsetup memory-hard KDF instances.  However, /usr/lib/systemd/systemd-cryptsetup, utilized by systemd to setup encrypted volumes during boot, does not.
 
-	Information taken from https://bugzilla.redhat.com/show_bug.cgi?id=1969569 and https://gitlab.com/cryptsetup/cryptsetup/-/issues/372.
+Information taken from https://bugzilla.redhat.com/show_bug.cgi?id=1969569 and https://gitlab.com/cryptsetup/cryptsetup/-/issues/372.
 
 ## Sealing the API key to TPM 1.2 PCRs
 
