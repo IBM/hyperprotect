@@ -2,7 +2,8 @@
 
 ## Installation
 
-	git clone https://github.ibm.com/gcwilson/hpcs-for-luks.git
+	git clone https://github.ibm.com/ibm/hyperprotect/
+	cd hpcs-for-luks
 	sudo make install
 
 ## Setup
