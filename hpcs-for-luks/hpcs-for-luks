@@ -70,6 +70,15 @@ def parse_config(config_file):
     except:
         config['KP']['default_crk_uuid'] = ''
 
+    # If optonal iam_endpoint_url isn't set, set it to the default public URL
+
+    try:
+        if config['KP']['iam_endpoint_url'] == None:
+            pass
+    except:
+        config['KP']['iam_endpoint_url'] = 'https://iam.cloud.ibm.com'
+
+
     # Check the optional HFL section exists; if not, set it to the None object.
 
     try:
@@ -185,9 +194,9 @@ def tpm_unseal(config):
 #  Initialize key protect
 #
 
-def init_keyprotect(api_key, region, service_instance_id, endpoint_url):
+def init_keyprotect(api_key, region, service_instance_id, endpoint_url, iam_endpoint):
 
-    tm = keyprotect.bxauth.TokenManager(api_key=api_key)
+    tm = keyprotect.bxauth.TokenManager(api_key=api_key, iam_endpoint=iam_endpoint)
     kp = keyprotect.Client(credentials=tm,
                            region=region,
                            service_instance_id=service_instance_id,
@@ -457,7 +466,8 @@ tpm_unseal(config)
 kp = init_keyprotect(config['KP']['api_key'],
                      config['KP']['region'],
                      config['KP']['service_instance_id'],
-                     config['KP']['endpoint_url'])
+                     config['KP']['endpoint_url'],
+                     config['KP']['iam_endpoint_url'])
 
 # Instantiate key_protect_luks object
 
