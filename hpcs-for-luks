@@ -4,14 +4,15 @@
 #
 # Key Protect Interface for hpcs-for-luks service via Python
 #
-# Nayna Jain <nayna@linux.ibm.com>, George Wilson <gcwilson@linux.ibm.com>
+# Nayna Jain <nayna@linux.ibm.com>, George Wilson <gcwilson@linux.ibm.com>, Samuel Matzek <smatzek@us.ibm.com>
 #
-# Copyright (C) 2021,2022 IBM Corp.
+# Copyright (C) 2021,2023 IBM Corp.
 #
 
 import configparser
 import argparse
 import os
+import requests
 import subprocess
 import sys
 import keyprotect
@@ -21,7 +22,76 @@ KEY_BYTES = 32
 WRAPPED_KEY_DIR = '/var/lib/hpcs-for-luks'
 KEY_TYPES = ('logon', 'user')
 BLOB_FILE = WRAPPED_KEY_DIR + '/api-key-blob.txt'
-VERSION = '1.0.0'
+VERSION = '1.0.1'
+
+
+#
+#  Patched method for redstone.auth to support private IAM endpoints
+#  Issue: https://github.com/IBM/redstone/issues/23
+#
+
+def monkey_patch_redstone_auth(
+    username=None, password=None, apikey=None, refresh_token=None, iam_endpoint=None
+):
+    """
+    Makes a authentication request to the IAM API to retrieve an IAM token and
+    IAM Refresh token.
+
+    :param username: Username
+    :param password: Password
+    :param apikey: IBMCloud/Bluemix API Key
+    :param refresh_token: IBM IAM Refresh Token,
+        if specified the refresh token is used to authenticate,
+        instead of the API key
+    :param iam_endpoint: base URL that can be specified
+        to override the default IAM endpoint, if one, for example,
+        wanted to test against their own IAM or an internal server
+    :return: Response
+    """
+    if not iam_endpoint:
+        iam_endpoint = "https://iam.cloud.ibm.com/"
+
+    if iam_endpoint[-1] == "/":
+        iam_endpoint = iam_endpoint[:-1]
+
+    api_endpoint = iam_endpoint + "/identity/token"
+
+    # HTTP Headers
+    headers = {"Authorization": "Basic Yng6Yng=", "Accept": "application/json"}
+
+    # HTTP Payload
+    data = {
+        "response_type": "cloud_iam",
+        "uaa_client_id": "cf",
+        "uaa_client_secret": "",
+    }
+
+    # Setup grant type
+    if apikey:
+        data["grant_type"] = "urn:ibm:params:oauth:grant-type:apikey"
+        data["apikey"] = apikey
+    elif refresh_token:
+        data["grant_type"] = "refresh_token"
+        data["refresh_token"] = refresh_token
+    elif username and password:
+        data["grant_type"] = "password"
+        data["username"] = username
+        data["password"] = password
+    else:
+        raise ValueError(
+            "Must specify one of username/password, apikey, or refresh_token!"
+        )
+
+    resp = requests.post(api_endpoint, data=data, headers=headers)
+
+    if resp.status_code == 200:
+        return resp.json()
+
+    return resp.text
+
+# Monkey patch redstone auth
+import redstone
+redstone.auth.auth=monkey_patch_redstone_auth
 
 #
 #  Parse config file
@@ -69,6 +139,15 @@ def parse_config(config_file):
             pass
     except:
         config['KP']['default_crk_uuid'] = ''
+
+    # If optonal iam_endpoint_url isn't set, set it to the default public URL
+
+    try:
+        if config['KP']['iam_endpoint_url'] == None:
+            pass
+    except:
+        config['KP']['iam_endpoint_url'] = 'https://iam.cloud.ibm.com'
+
 
     # Check the optional HFL section exists; if not, set it to the None object.
 
@@ -185,9 +264,9 @@ def tpm_unseal(config):
 #  Initialize key protect
 #
 
-def init_keyprotect(api_key, region, service_instance_id, endpoint_url):
+def init_keyprotect(api_key, region, service_instance_id, endpoint_url, iam_endpoint):
 
-    tm = keyprotect.bxauth.TokenManager(api_key=api_key)
+    tm = keyprotect.bxauth.TokenManager(api_key=api_key, iam_endpoint=iam_endpoint)
     kp = keyprotect.Client(credentials=tm,
                            region=region,
                            service_instance_id=service_instance_id,
@@ -455,12 +534,12 @@ args = parse_args()
 
 tpm_unseal(config)
 
-# Initialize the key management service client
-
+# Initialize the key management service client for operations that require it
 kp = init_keyprotect(config['KP']['api_key'],
-                     config['KP']['region'],
-                     config['KP']['service_instance_id'],
-                     config['KP']['endpoint_url'])
+                    config['KP']['region'],
+                    config['KP']['service_instance_id'],
+                    config['KP']['endpoint_url'],
+                    config['KP']['iam_endpoint_url'])
 
 # Instantiate key_protect_luks object
 

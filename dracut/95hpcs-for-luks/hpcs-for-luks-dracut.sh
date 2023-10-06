@@ -23,13 +23,16 @@ parse_ini() {
 			default_crk_uuid*)
 				_DEFAULT_CRK_UUID=`echo ${INI_LINE##*=}`
 				;;
+			iam_endpoint_url*)
+				_IAM_ENDPOINT_URL=`echo ${INI_LINE##*=}`
+				;;
 		esac
 	done < /etc/${_UTILITY_NAME}.ini
 }
 
 authenticate() {
 	_AUTH_JSON=`curl -X POST \
-	"https://iam.cloud.ibm.com/identity/token" \
+	"$_IAM_ENDPOINT_URL/identity/token" \
 	--header 'Content-Type: application/x-www-form-urlencoded' \
 	--header 'Accept: application/json' \
 	--data-urlencode 'grant_type=urn:ibm:params:oauth:grant-type:apikey' \
