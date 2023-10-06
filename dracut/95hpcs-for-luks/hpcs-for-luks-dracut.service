@@ -10,13 +10,11 @@
 [Unit]
 Description=IBM HPCS Key Protect Dracut Service
 Documentation=file:///usr/share/doc/hpcs-for-luks/README.md
-Before=remote-fs.target remote-cryptsetup.target
+Before=cryptsetup-pre.target
 After=network.target network-online.target
-#After=network-online.target
-#After=dracut-pre-mount.service
-#After=sysinit.target
-Wants=network.target network-online.target
+Wants=cryptsetup-pre.target network.target network-online.target
 Conflicts=shutdown.target
+DefaultDependencies=no
 
 [Service]
 Type=oneshot
@@ -24,6 +22,4 @@ EnvironmentFile=-/etc/hpcs-for-luks.ini
 ExecStart=/usr/bin/hpcs-for-luks-dracut.sh
 
 [Install]
-#RequiredBy=local-fs-pre.target initrd-root-device.target cryptsetup.target
-RequiredBy=remote-cryptsetup.target
-RequiredBy=dracut-pre-mount.service
+RequiredBy=cryptsetup.target

@@ -118,9 +118,10 @@ install: \
 	$(DESTDIR)/var/lib/${UTILITYNAME}/user
 
 install-dracut: \
-	$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME} \
-	$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}/${UTILITYNAME}.sh \
-	$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}/module-setup.sh \
+	$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME} \
+	$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/${UTILITYNAME}-dracut.sh \
+	$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/${UTILITYNAME}-dracut.service \
+	$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/module-setup.sh \
 	$(DESTDIR)/etc/dracut.conf.d/${UTILITYNAME}.conf \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/module-setup.sh \
@@ -158,14 +159,17 @@ $(DESTDIR)/var/lib/${UTILITYNAME}/logon:
 $(DESTDIR)/var/lib/${UTILITYNAME}/user:
 	install -m 755 -d $(DESTDIR)/var/lib/${UTILITYNAME}/user
 
-$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}:
-	install -m 755 -d $(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}
+$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}:
+	install -m 755 -d $(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}
 
-$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}/${UTILITYNAME}.sh: dracut/85${UTILITYNAME}/${UTILITYNAME}.sh
-	install -m 755 -D dracut/85${UTILITYNAME}/${UTILITYNAME}.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}"
+$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/${UTILITYNAME}-dracut.sh: dracut/95${UTILITYNAME}/${UTILITYNAME}-dracut.sh
+	install -m 755 -D dracut/95${UTILITYNAME}/${UTILITYNAME}-dracut.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}"
 
-$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}/module-setup.sh: dracut/85${UTILITYNAME}/module-setup.sh
-	install -m 755 -D dracut/85${UTILITYNAME}/module-setup.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}"
+$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/${UTILITYNAME}-dracut.service: dracut/95${UTILITYNAME}/${UTILITYNAME}-dracut.service
+	install -m 644 -D dracut/95${UTILITYNAME}/${UTILITYNAME}-dracut.service -t "$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}"
+
+$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/module-setup.sh: dracut/95${UTILITYNAME}/module-setup.sh
+	install -m 755 -D dracut/95${UTILITYNAME}/module-setup.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}"
 
 $(DESTDIR)/etc/dracut.conf.d/${UTILITYNAME}.conf: dracut/${UTILITYNAME}.conf
 	install -m 644 -D dracut/${UTILITYNAME}.conf -t "$(DESTDIR)/etc/dracut.conf.d"

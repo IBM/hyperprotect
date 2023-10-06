@@ -1,5 +1,7 @@
 #!/bin/sh
 
+type getcmdline > /dev/null 2>&1 || . /lib/dracut-lib.sh
+
 _UTILITY_NAME=hpcs-for-luks
 
 parse_ini() {
@@ -70,14 +72,14 @@ parse_plaintext_json() {
 
 # /usr/bin/shelldrop.sh
 if grep -q "rd.${_UTILITY_NAME}" /proc/cmdline; then
-	echo "Hello from ${_UTILITY_NAME}"
+	#echo "Hello from ${_UTILITY_NAME}"
 	parse_ini
 	#echo "api_key = $_API_KEY"
 	#echo "region = $_REGION"
 	#echo "endpoint_url = $_ENDPOINT_URL"
 	#echo "service_instance_id = $_SERVICE_INSTANCE_ID"
 	#echo "default_crk_uuid = $_DEFAULT_CRK_UUID"
-	if [ $_API_KEY == "TPM" ]; then
+	if [ "$_API_KEY" == "TPM" ]; then
 		if grep -q "rd.tss" /proc/cmdline; then
 			echo "Unsealing API key from TPM"
 			_API_KEY=$(tpm_unsealdata -z -i /var/lib/${_UTILITY_NAME}/api-key-blob.txt)
@@ -94,8 +96,14 @@ if grep -q "rd.${_UTILITY_NAME}" /proc/cmdline; then
 	#echo $_PLAINTEXT_JSON
 	parse_plaintext_json
 	#echo $_BASE64_PLAINTEXT
-	printf "%s" $_BASE64_PLAINTEXT | base64 --decode | keyctl padd user "luks:root" @s
-	keyctl show @s
+	printf "%s" $_BASE64_PLAINTEXT | base64 --decode | keyctl padd user "luks:root" @u
+	keyctl show @u
+
+	# when using systemd in dracut for encrypted root partitions we need to pivot back
+	# to the initramfs on shutdown to gracefully unmount the root mount. Note that
+	# 90crypt's non-systemd path and 90lvm trigger need_shutdown, so this need_shutdown
+	# call specifically ensures the shutdown pivot for encrypted roots.
+	need_shutdown
 else
 	echo "${_UTILITY_NAME}-dracut module says rd.${_UTILITY_NAME} is not set on the cmdline"
 fi

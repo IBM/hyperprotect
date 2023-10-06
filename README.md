@@ -1,4 +1,4 @@
-# Integration of HPCS Key Protect with dm-crypt/LUKS
+# Integration of IBM Cloud Hyper Protect Crypto Services and IBM Key Protect with dm-crypt/LUKS
 
 ## Installation
 
@@ -7,7 +7,7 @@
 
 ## Setup
 
-1. Generate an HPCS Key Protect API key on the IBM Cloud portal
+1. Generate an IAM API key on the IBM Cloud portal
 
 2. Install python3 and python3-cryptography packages
 
@@ -21,7 +21,7 @@
 
    - **IMPORTANT:** You'll have Rust problems if you try to use pip to install Python Cryptography.
 
-3. Install IBM Key Protect
+3. Install the IBM Key Protect Python module
 
 	pip3 install keyprotect
 
@@ -259,29 +259,23 @@ Here's an example of how to setup a key token on a LUKS-encrypted device assumin
 	/dev/mapper/secrets   /secrets      ext4    defaults,_netdev 0 0
 
 
-!!!DRACUT WORK FOR HPCS FOR LUKS IS INCOMPLETE AND SHOULD NOT BE USED YET!!!
-
 First, install the dracut modules by running
 
 	make install-dracut
 
 Add the following Dracut module files to /etc/dracut.conf.d
-
-## Networking in the initramfs
-
 ### Dracut modules
 
-#### ifcfg.confg
+#### crypt.conf
+
+	add_dracutmodules+=" crypt "
+#### ifcfg.conf
 
 	add_dracutmodules+=" ifcfg "
 
 #### network.conf
 
 	add_dracutmodules+=" network "
-
-#### network-legacy.conf
-
-	add_dracutmodules+=" network-legacy "
 
 #### network-manager.conf
 
@@ -297,14 +291,24 @@ Add the following Dracut module files to /etc/dracut.conf.d
 
 ### Kernel cmdline
 
-Use grub2-editenv to append the following options to the kernel cmdline.  For example:
+Use grubby to set the kernel command line. For example:
 
-	grub2-editenv /boot/grub2/grubenv set kernelopts="root=UUID=96fa7ba7-5229-4f32-a9d3-849404febb0e ro crashkernel=auto biosdevname=0 ip=9.114.227.82::9.114.224.1:22:jelly.pok.stglabs.ibm.com:net0:none:9.12.18.2 rd.neednet=1 rd.shell rd.debug log_buf_len=1M "
+	grubby --update-kernel=0 --args="ro console=tty0 console=ttyS0,115200n8 no_timer_check net.ifnames=0 rd.hpcs-for-luks rd.neednet=1 root=/dev/mapper/rootpart rd.luks.name=21b37968-31ee-4893-8c6a-bf16dcfbbf5a=rootpart ip=dhcp"
 
-#### Network 
+The value of `rd.luks.name` is the UUID of an encrypted LUKS partition and the `root` value is the name of the Device Mapper device that dm-crypt will create for the opened LUKS partition. This value should match the name used on the `root` kernel parameter.
 
-	ip=9.114.227.82::9.114.224.1:22:jelly.pok.stglabs.ibm.com:net0:none:9.12.18.2
+#### Network
 
-#### Debug
+Networking must be configured via the kernel command line. The networking confugration must include DNS configuration so the hostnames of IBM Cloud IAM and the key management system can be resolved.
 
-	rd.neednet=1 rd.shell rd.debug log_buf_len=1M
+A simple DHCP based configuration is used above:
+
+	ip=dhcp
+
+A static IP configuration can also be used:
+
+	ip=10.17.37.5::10.17.37.1:255.255.255.0::eth0:off nameserver=10.26.0.7 nameserver=10.26.0.8
+
+The hpcs-for-luks module works with or without `net.ifnames=0`.
+
+See the dracut command line documentation for more information on network parameters.

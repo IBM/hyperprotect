@@ -43,8 +43,10 @@ make install DESTDIR=%{buildroot}
 %attr(0644,root,root) %{_sharedstatedir}/%{UTILITY_NAME}/user
 %attr(0644,root,root) %{_mandir}/man1/%{UTILITY_NAME}.1.gz
 %if "%{BUILD_AND_PACKAGE_DRACUT}" == "1"
-%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{UTILITY_NAME}/%{UTILITY_NAME}.sh
-%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{UTILITY_NAME}/module-setup.sh
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/95%{UTILITY_NAME}/%{UTILITY_NAME}-dracut.sh
+%attr(0644,root,root) %{_prefix}/lib/dracut/modules.d/95%{UTILITY_NAME}/%{UTILITY_NAME}-dracut.service
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/95%{UTILITY_NAME}/module-setup.sh
+%attr(0644,root,root) %{_sysconfdir}/dracut.conf.d/95%{UTILITY_NAME}/cryptsetup-tmpfiles.conf
 %attr(0644,root,root) %{_sysconfdir}/dracut.conf.d/%{UTILITY_NAME}.conf
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/module-setup.sh
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/start-tcsd.sh
@@ -53,6 +55,8 @@ make install DESTDIR=%{buildroot}
 %endif
 
 %changelog
+* Fri Oct 22 2023 Sam Matzek <smatzek@us.ibm.com>
+- Complete dracut module
 * Fri Apr 22 2022 George Wilson <gcwilson@linux.ibm.com>
 - Change package name to hpcs-for-luks
 * Wed Feb 16 2022 George Wilson <gcwilson@linux.ibm.com>
