@@ -94,6 +94,20 @@ import redstone
 redstone.auth.auth=monkey_patch_redstone_auth
 
 #
+#  Debug method to print out keyrings
+#
+
+def print_keyrings(tag):
+    print('Keyrings at %s' % tag, flush=True)
+    for kr in ("@u", "@s", "@p", "@us"):
+        # print out the current keyrings
+        keyctl_proc = subprocess.Popen(('keyctl', 'show', kr), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        pout, perr = keyctl_proc.communicate()
+        print("%s keys: " % kr, pout.decode('utf-8'), end='', flush=True)
+        print(perr.decode('utf-8'), end='', flush=True)
+
+
+#
 #  Parse config file
 #
 
@@ -295,6 +309,7 @@ class key_protect_luks:
 
     def process_keys_of_type(self, key_type, wipe = False):
 
+        # print_keyrings('process type=%s wipe=%s'%(key_type, wipe))
         wrapped_key_dir_of_type = WRAPPED_KEY_DIR + '/' + key_type
 
         if wipe == True:
@@ -303,7 +318,7 @@ class key_protect_luks:
 
                 # Lookup the key handle from the type and filename as the description
 
-                keyctl_proc = subprocess.Popen(('keyctl', 'request', key_type, filename), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                keyctl_proc = subprocess.Popen(('keyctl', 'search', '@u', key_type, filename), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 pout, perr = keyctl_proc.communicate()
                 print(pout.decode('utf-8'), end='', flush=True)
                 print(perr.decode('utf-8'), end='', flush=True)
@@ -311,9 +326,10 @@ class key_protect_luks:
                 # Revoke the key if lookup succeeded and there's no file of the same name (usually a symlink) in the linger/key_type directory
 
                 if keyctl_proc.returncode == 0:
+                    key_id = pout.decode('utf-8').strip()
                     if not os.path.exists(WRAPPED_KEY_DIR + '/linger/' + key_type + '/' + filename):
                         print("Revoking " + key_type + '/' + filename)
-                        keyctl_proc2 = subprocess.Popen(('keyctl', 'revoke', pout.strip()), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        keyctl_proc2 = subprocess.Popen(('keyctl', 'revoke', key_id), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         pout2, perr2 = keyctl_proc2.communicate()
                         print(pout2.decode('utf-8'), end='', flush=True)
                         print(perr2.decode('utf-8'), end='', flush=True)
@@ -479,6 +495,13 @@ class key_protect_luks:
                 exit(1)
             else:
                 args.uuid = config['KP']['default_crk_uuid']
+
+        # Link sessions
+        print("Linking keyring @u to @s ")
+        keyctl_proc = subprocess.Popen(('keyctl', 'link', '@u', '@s'), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        pout, perr = keyctl_proc.communicate()
+        print(pout.decode('utf-8'), end='', flush=True)
+        print(perr.decode('utf-8'), end='', flush=True)
 
         for key_type in KEY_TYPES:
             self.process_keys_of_type(key_type, wipe=True)
