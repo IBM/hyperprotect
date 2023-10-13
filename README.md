@@ -59,103 +59,104 @@
 			endpoint_url = https://api.us-east.hs-crypto.cloud.ibm.com:9730
 			default_crk_uuid = fedcba98-7654-3210-fedc-ba9876543210
 
-6. Note on the dm-crypt and LUKS insturctions below:
+## dm-crypt and LUKS usage
+Note on the dm-crypt and LUKS instructions below:
+The following examples assume that /dev/loop0 is the encrypted block device. Substitute it with the actual encrypted block device if not using /dev/loop0.
 
-    - The following examples assume that /dev/loop0 is the encrypted block device.  Substitute it with the actual encrypted block device if not using /dev/loop0.
+### dm-crypt keys
 
-7. For dm-crypt keys:
+1. Enable the hpcs-for-luks systemd service:
 
-    - Enable the hpcs-for-luks systemd service
+		systemctl enable hpcs-for-luks
 
-			systemctl enable hpcs-for-luks
-
-    - Generate a random wrapped key and store it in the /var/lib/hpcs-for-luks/logon directory
+2. Generate a random wrapped key and store it in the /var/lib/hpcs-for-luks/logon directory
 
 			hpcs-for-luks wrap --gen > /var/lib/hpcs-for-luks/logon/dmcrypt:key1
 
-    - After creating wrapped keys, populate the kernel keyring by either
+3. After creating wrapped keys, populate the kernel keyring by either
 
 			shutdown -r now
 
-      so that the hpcs-for-luks systemd service will populate it or
+    so that the hpcs-for-luks systemd service will populate it or
 
 			hpcs-for-luks process
 
-      to populate it immediately.
+    to populate it immediately.
 
-    - Use dmsetup to setup a crypt target for the block device, assuming /dev/loop0 as the block device for this example and secrets as the mapped name
+4. Use dmsetup to setup a crypt target for the block device, assuming /dev/loop0 as the block device for this example and secrets as the mapped name
 
 			dmsetup create secrets --table "0 $(blockdev --getsz /dev/loop0) crypt aes-xts-plain64 :32:logon:dmcrypt:key1 0 /dev/loop0 0"
 
-   - Format the mapped device with your favorite filesystem, in this case ext4:
+5. Format the mapped device with your favorite filesystem, in this case ext4:
 
 			mkfs -t ext4 /dev/mapper/secrets
 
-    - Mount the encrypted device called "secrets" on a mountpoint called "/secrets"
+6. Mount the encrypted device called "secrets" on a mountpoint called "/secrets"
 
 			mkdir /secrets
 			mount /dev/mapper/secrets /secrets
 
-8. For LUKS passphrases:
+7. You can directly use they keys with dmsetup create
 
-    - Enable the hpcs-for-luks systemd service
+## LUKS passphrases
 
-			systemctl enable hpcs-for-luks
+1. Wrap your passphrase and store it in the var/lib/hpcs-for-luks/user directory
 
-   - Wrap your passphrase and store it in the var/lib/hpcs-for-luks/user directory
+			echo -n 'MyPassPhrase' | hpcs-for-luks wrap > /var/lib/hpcs-for-luks/user/luks:key2
 
-			echo -n 'MyPassPhrase' | hpcs-for-luks wrap > /var/lib/hpcs-for-luks/user/dmcrypt:key2
-
-   - After creating wrapped keys, populate the kernel keyring by either
+2. After creating wrapped keys, populate the kernel keyring by either
 
 			shutdown -r now
 
-     so that the hpcs-for-luks systemd service will populate it or
+	so that the hpcs-for-luks systemd service will populate it or
 
 			hpcs-for-luks process
 
      to populate it immediately.
 
-   - Use cryptsetup to format the block device, assuming /dev/loop0 as the block device for this example
+3. Use cryptsetup to format the block device, assuming /dev/loop0 as the block device for this example
 
 			cryptsetup luksFormat --type luks2 /dev/loop0
 
-   - Provide MyPassPhase as the passphrase when prompted
+   Provide MyPassPhase as the passphrase when prompted
 
-   - Open the LUKS volume and map it to the name "secrets"
+4. Open the LUKS volume and map it to the name "secrets"
 
 			cryptsetup luksOpen /dev/loop0 secrets
 
-   - Format the mapped device with your favorite filesystem, in this case ext4:
+5. Format the mapped device with your favorite filesystem, in this case ext4:
 
 			mkfs -t ext4 /dev/mapper/secrets
 
-   - Add a key token to the LUKS header
+6. Add a key token to the LUKS header
 
-			cryptsetup token add /dev/loop0 --key-description dmcrypt:key2
+			cryptsetup token add /dev/loop0 --key-description luks:key2
 
-   - Mount the encrypted device called "secrets" on a mountpoint called "/secrets"
+7. Mount the encrypted device called "secrets" on a mountpoint called "/secrets"
 
 			mkdir /secrets
 			mount /dev/mapper/secrets /secrets
 
-9. Enable the hpcs-for-luks systemd service:
+8. Enable the hpcs-for-luks and hpcs-for-luks-wipe systemd services:
 
 		systemctl enable hpcs-for-luks
 
-10. Enable the remote cryptsetup target
+9.  Enable the remote cryptsetup target
 
 		systemctl enable remote-cryptsetup.target
 
-11. Reboot
+10. Reboot
 
-12. You should see a logon key type called dmcrypt:key1 and user key type called dmcrypt:key2 in root's @u keyring
+11. You should see a user key type called luks:key2 in root's @u keyring
 
-		keyctl show @s
+		keyctl show @u
 
-13. You can directly use they keys with dmsetup create
+12. cryptsetup should NOT prompt for a key when you luksOpen the LUKS device
+    
+13. For additional security the hpcs-for-luks-wipe service can be enabled to revoke the keys after the encrypted devices have been opened during boot.
 
-14. cryptsetup should NOT prompt for a key when you luksOpen the LUKS device
+		systemctl enable hpcs-for-luks-wipe
+
 
 **IMPORTANT**
 
@@ -254,20 +255,37 @@ Here's an example of how to setup a key token on a LUKS-encrypted device assumin
 
 ## Example /etc/crypttab entry
 
+
 	#volume-name encrypted-device key-file options
 	secrets /root/secrets.img none _netdev,timeout=1
+
+Note the `_netdev` value in the options is required to delay the opening of the encrypted device until after networking is available and HPCS or Key Protect have been used to unwrap the key/passphrase and add it to the kernel keyring.
 
 ## Example /etc/fstab entry
 
 	/dev/mapper/secrets   /secrets      ext4    defaults,_netdev 0 0
 
+Note the `_netdev` value in the options is required to delay the opening of the encrypted device until after networking is available and HPCS or Key Protect have been used to unwrap the key/passphrase and add it to the kernel keyring.
 
-First, install the dracut modules by running
+## Dracut modules for encrypted root partitions
+
+The dracut modules can be used for automatically opening encrypted root partitions during boot.
+
+The dracut modules require the wrapped passphrase for the root to be in a file named `luks:root`. For example:
+
+	echo -n 'MyPassPhrase' | hpcs-for-luks wrap > /var/lib/hpcs-for-luks/user/luks:root
+
+Likewise, the keyring token name for root must be `luks:root`. For example:
+
+	cryptsetup token add /dev/vda3 --key-description luks:root
+  where `/dev/vda3` is the root partition.
+
+### Install the dracut modules
+Install the dracut modules by running
 
 	make install-dracut
 
 Add the following Dracut module files to /etc/dracut.conf.d
-### Dracut modules
 
 #### crypt.conf
 
@@ -292,13 +310,18 @@ Add the following Dracut module files to /etc/dracut.conf.d
 
 	dracut --regenerate-all --force --verbose
 
+### Enable the hpcs-for-luks-wipe service
+For additional security the hpcs-for-luks-wipe service can be enabled to revoke the keys after the encrypted devices have been opened during boot.
+
+		systemctl enable hpcs-for-luks-wipe
+
 ### Kernel cmdline
 
 Use grubby to set the kernel command line. For example:
 
 	grubby --update-kernel=0 --args="ro console=tty0 console=ttyS0,115200n8 no_timer_check net.ifnames=0 rd.hpcs-for-luks rd.neednet=1 root=/dev/mapper/rootpart rd.luks.name=21b37968-31ee-4893-8c6a-bf16dcfbbf5a=rootpart ip=dhcp"
 
-The value of `rd.luks.name` is the UUID of an encrypted LUKS partition and the `root` value is the name of the Device Mapper device that dm-crypt will create for the opened LUKS partition. This value should match the name used on the `root` kernel parameter.
+The value of `rd.luks.name` is the UUID of an encrypted LUKS partition and the `rootpart` value is the name of the Device Mapper device that dm-crypt will create for the opened LUKS partition. This value should match the name used on the `rootpart` kernel parameter.
 
 #### Network
 
