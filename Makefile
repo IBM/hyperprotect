@@ -1,10 +1,11 @@
 PACKAGENAME=hpcs-for-luks
-PACKAGEVER=1.1
-
 UTILITYNAME=hpcs-for-luks
 
+# The utility itself is the central source of the version for all purposes
+PACKAGEVER=$(shell __VERSION=$$(./${UTILITYNAME} --version 2>&1) && echo $${__VERSION##* })
+
 TARFILE=${PACKAGENAME}-${PACKAGEVER}.tar.gz
-RPMFILE=${PACKAGENAME}-${PACKAGEVER}-1.el8.noarch.rpm
+RPMFILE=${PACKAGENAME}-${PACKAGEVER}-1.*.noarch.rpm
 DEBFILE=${PACKAGENAME}_${PACKAGEVER}_all.deb
 
 COUNTFILE=${HOME}/.${PACKAGENAME}-key-count
@@ -24,6 +25,7 @@ PASSPHRASEFILE=${HOME}/.${KEYNAME}.passphrase
 all: dist
 
 clean:
+	rm -f version.inc
 	rm -f ${TARFILE}
 	rm -f ${RPMFILE}
 	rm -f ${DEBFILE}
@@ -44,6 +46,7 @@ deb:
 	mkdir -p ${DEB_BUILDROOT}
 	make DESTDIR=${DEB_BUILDROOT} install
 	cp -pr DEBIAN ${DEB_BUILDROOT}
+	sed -i "s/^Version:.*$$/Version: ${PACKAGEVER}/" ${DEB_BUILDROOT}/DEBIAN/control
 	dpkg-deb --build --root-owner-group ${DEB_BUILDROOT}
 
 incr_gen_key:
@@ -96,13 +99,14 @@ sign:
 					     -sbo %{__signature_filename} \
 					     --digest-algo sha256 \
 					     %{__plaintext_filename}" \
-	  --addsign ${RPMFILE}
+	  --addsign $(shell echo ${RPMFILE})
 
 rpm:
 	rm -f ${TARFILE}
-	tar --xform='s/^/${PACKAGENAME}-${PACKAGEVER}\//' -cpzf ${TARFILE} *
+	tar --xform="s/^/${PACKAGENAME}-${PACKAGEVER}\//" -cpzf ${TARFILE} *
 	cp -p ${TARFILE} ~/rpmbuild/SOURCES
 	cp -p ${PACKAGENAME}.spec ~/rpmbuild/SPECS
+	echo "Version: ${PACKAGEVER}" > version.inc
 	rpmbuild -ba ~/rpmbuild/SPECS/${PACKAGENAME}.spec
 
 
