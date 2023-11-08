@@ -126,6 +126,7 @@ install-dracut: \
 	$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/${UTILITYNAME}-dracut.sh \
 	$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/${UTILITYNAME}-dracut.service \
 	$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/module-setup.sh \
+	$(DESTDIR)/usr/lib/tmpfiles.d/cryptsetup-tmpfiles.conf \
 	$(DESTDIR)/etc/dracut.conf.d/${UTILITYNAME}.conf \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/module-setup.sh \
@@ -174,6 +175,9 @@ $(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/${UTILITYNAME}-dracut.servi
 
 $(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/module-setup.sh: dracut/95${UTILITYNAME}/module-setup.sh
 	install -m 755 -D dracut/95${UTILITYNAME}/module-setup.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}"
+
+$(DESTDIR)/usr/lib/tmpfiles.d/cryptsetup-tmpfiles.conf: dracut/cryptsetup-tmpfiles.conf
+	install -m 644 -D dracut/cryptsetup-tmpfiles.conf -t "$(DESTDIR)/usr/lib/tmpfiles.d"
 
 $(DESTDIR)/etc/dracut.conf.d/${UTILITYNAME}.conf: dracut/${UTILITYNAME}.conf
 	install -m 644 -D dracut/${UTILITYNAME}.conf -t "$(DESTDIR)/etc/dracut.conf.d"
