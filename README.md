@@ -65,7 +65,7 @@ The following examples assume that /dev/loop0 is the encrypted block device. Sub
 
 ### dm-crypt keys
 
-1. Enable the hpcs-for-luks systemd service:
+1. Enable the hpcs-for-luks systemd service
 
 		systemctl enable hpcs-for-luks
 
@@ -83,11 +83,11 @@ The following examples assume that /dev/loop0 is the encrypted block device. Sub
 
     to populate it immediately.
 
-4. Use dmsetup to setup a crypt target for the block device, assuming /dev/loop0 as the block device for this example and secrets as the mapped name
+4. Use dmsetup to setup a crypt target for the block device, assuming /dev/loop0 as the block device for this example and "secrets" as the mapped name
 
 			dmsetup create secrets --table "0 $(blockdev --getsz /dev/loop0) crypt aes-xts-plain64 :32:logon:dmcrypt:key1 0 /dev/loop0 0"
 
-5. Format the mapped device with your favorite filesystem, in this case ext4:
+5. Format the mapped device with your favorite filesystem, in this case ext4
 
 			mkfs -t ext4 /dev/mapper/secrets
 
@@ -178,7 +178,7 @@ When executing multiple cryptsetup instances in parallel, as occurs setting up m
 
 There are a couple of different options to handle this situation.
 
-1. When formatting encrypted volumes with cryptsetup luksFormat, use PKKDF2, which implements a time-hard rather than memory-hard problem.  Updating the example above:
+1. When formatting encrypted volumes with cryptsetup luksFormat, use PBKDF2, which implements a time-hard rather than memory-hard problem.  Updating the example above:
 
 		cryptsetup luksFormat --type luks2 --pbkdf pbkdf2 /dev/loop0
 
@@ -265,7 +265,7 @@ Note the `_netdev` value in the options is required to delay the opening of the 
 
 	/dev/mapper/secrets   /secrets      ext4    defaults,_netdev 0 0
 
-Note the `_netdev` value in the options is required to delay the opening of the encrypted device until after networking is available and HPCS or Key Protect have been used to unwrap the key/passphrase and add it to the kernel keyring.
+Note the `_netdev` value in the options is required to delay the opening of the encrypted device until after networking is available and HPCS or Key Protect has been used to unwrap the key/passphrase and add it to the kernel keyring.
 
 ## Dracut modules for encrypted root partitions
 
@@ -306,9 +306,9 @@ Add the following Dracut module files to /etc/dracut.conf.d
 
 	add_dracutmodules+=" url-lib "
 
-### Rebuild initramfs
+### Rebuild initramfs for the booted kernel
 
-	dracut --regenerate-all --force --verbose
+	dracut --force --verbose
 
 ### Enable the hpcs-for-luks-wipe service
 For additional security the hpcs-for-luks-wipe service can be enabled to revoke the keys after the encrypted devices have been opened during boot.
@@ -325,7 +325,7 @@ The value of `rd.luks.name` is the UUID of an encrypted LUKS partition and the `
 
 #### Network
 
-Networking must be configured via the kernel command line. The networking confugration must include DNS configuration so the hostnames of IBM Cloud IAM and the key management system can be resolved.
+Networking must be configured via the kernel command line. The networking configration must include DNS configuration so the hostnames of IBM Cloud IAM and the key management system can be resolved.
 
 A simple DHCP based configuration is used above:
 
