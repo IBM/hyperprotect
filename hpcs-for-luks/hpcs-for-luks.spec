@@ -1,5 +1,5 @@
 Name:		hpcs-for-luks
-Version:	1.1
+%include version.inc
 Release:	1%{?dist}
 Summary:	IBM Key Protect Integration with LUKS
 BuildArch:	noarch
@@ -43,16 +43,23 @@ make install DESTDIR=%{buildroot}
 %attr(0644,root,root) %{_sharedstatedir}/%{UTILITY_NAME}/user
 %attr(0644,root,root) %{_mandir}/man1/%{UTILITY_NAME}.1.gz
 %if "%{BUILD_AND_PACKAGE_DRACUT}" == "1"
-%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{UTILITY_NAME}/%{UTILITY_NAME}.sh
-%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/85%{UTILITY_NAME}/module-setup.sh
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/95%{UTILITY_NAME}/%{UTILITY_NAME}-dracut.sh
+%attr(0644,root,root) %{_prefix}/lib/dracut/modules.d/95%{UTILITY_NAME}/%{UTILITY_NAME}-dracut.service
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/95%{UTILITY_NAME}/module-setup.sh
+%attr(0644,root,root) %{_prefix}/usr/lib/tmpfiles.d/cryptsetup-tmpfiles.conf
 %attr(0644,root,root) %{_sysconfdir}/dracut.conf.d/%{UTILITY_NAME}.conf
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/module-setup.sh
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/start-tcsd.sh
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/stop-tcsd.sh
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/run-tss-cmds.sh
 %attr(0644,root,root) %{_sysconfdir}/dracut.conf.d/tss.conf
 %endif
 
 %changelog
+* Wed Nov  8 2023 George Wilson <gcwilson@linux.ibm.com>
+- Package dracut files
+* Sun Oct 22 2023 Sam Matzek <smatzek@us.ibm.com>
+- Complete dracut module
 * Fri Apr 22 2022 George Wilson <gcwilson@linux.ibm.com>
 - Change package name to hpcs-for-luks
 * Wed Feb 16 2022 George Wilson <gcwilson@linux.ibm.com>
