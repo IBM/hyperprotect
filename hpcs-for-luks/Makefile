@@ -1,10 +1,11 @@
 PACKAGENAME=hpcs-for-luks
-PACKAGEVER=1.1
-
 UTILITYNAME=hpcs-for-luks
 
+# The utility itself is the central source of the version for all purposes
+PACKAGEVER=$(shell __VERSION=$$(./${UTILITYNAME} --version 2>&1) && echo $${__VERSION##* })
+
 TARFILE=${PACKAGENAME}-${PACKAGEVER}.tar.gz
-RPMFILE=${PACKAGENAME}-${PACKAGEVER}-1.el8.noarch.rpm
+RPMFILE=${PACKAGENAME}-${PACKAGEVER}-1.*.noarch.rpm
 DEBFILE=${PACKAGENAME}_${PACKAGEVER}_all.deb
 
 COUNTFILE=${HOME}/.${PACKAGENAME}-key-count
@@ -24,14 +25,15 @@ PASSPHRASEFILE=${HOME}/.${KEYNAME}.passphrase
 all: dist
 
 clean:
+	rm -f version.inc
 	rm -f ${TARFILE}
 	rm -f ${RPMFILE}
 	rm -f ${DEBFILE}
-	rm -f SHA256SUMS
+	rm -f SHA256SUMS-${PACKAGEVER}
 
 dist: pre-dist pre-dist-deb sign
-	sha256sum ${RPMFILE} > SHA256SUMS
-	sha256sum ${DEBFILE} >> SHA256SUMS
+	sha256sum ${RPMFILE} > SHA256SUMS-${PACKAGEVER}
+	sha256sum ${DEBFILE} >> SHA256SUMS-${PACKAGEVER}
 
 pre-dist: rpm
 	cp -p ~/rpmbuild/RPMS/noarch/${RPMFILE} .
@@ -44,6 +46,7 @@ deb:
 	mkdir -p ${DEB_BUILDROOT}
 	make DESTDIR=${DEB_BUILDROOT} install
 	cp -pr DEBIAN ${DEB_BUILDROOT}
+	sed -i "s/^Version:.*$$/Version: ${PACKAGEVER}/" ${DEB_BUILDROOT}/DEBIAN/control
 	dpkg-deb --build --root-owner-group ${DEB_BUILDROOT}
 
 incr_gen_key:
@@ -96,13 +99,14 @@ sign:
 					     -sbo %{__signature_filename} \
 					     --digest-algo sha256 \
 					     %{__plaintext_filename}" \
-	  --addsign ${RPMFILE}
+	  --addsign $(shell echo ${RPMFILE})
 
 rpm:
 	rm -f ${TARFILE}
-	tar --xform='s/^/${PACKAGENAME}-${PACKAGEVER}\//' -cpzf ${TARFILE} *
+	tar --xform="s/^/${PACKAGENAME}-${PACKAGEVER}\//" -cpzf ${TARFILE} *
 	cp -p ${TARFILE} ~/rpmbuild/SOURCES
 	cp -p ${PACKAGENAME}.spec ~/rpmbuild/SPECS
+	echo "Version: ${PACKAGEVER}" > version.inc
 	rpmbuild -ba ~/rpmbuild/SPECS/${PACKAGENAME}.spec
 
 
@@ -118,9 +122,11 @@ install: \
 	$(DESTDIR)/var/lib/${UTILITYNAME}/user
 
 install-dracut: \
-	$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME} \
-	$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}/${UTILITYNAME}.sh \
-	$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}/module-setup.sh \
+	$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME} \
+	$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/${UTILITYNAME}-dracut.sh \
+	$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/${UTILITYNAME}-dracut.service \
+	$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/module-setup.sh \
+	$(DESTDIR)/usr/lib/tmpfiles.d/cryptsetup-tmpfiles.conf \
 	$(DESTDIR)/etc/dracut.conf.d/${UTILITYNAME}.conf \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/module-setup.sh \
@@ -158,14 +164,20 @@ $(DESTDIR)/var/lib/${UTILITYNAME}/logon:
 $(DESTDIR)/var/lib/${UTILITYNAME}/user:
 	install -m 755 -d $(DESTDIR)/var/lib/${UTILITYNAME}/user
 
-$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}:
-	install -m 755 -d $(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}
+$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}:
+	install -m 755 -d $(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}
 
-$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}/${UTILITYNAME}.sh: dracut/85${UTILITYNAME}/${UTILITYNAME}.sh
-	install -m 755 -D dracut/85${UTILITYNAME}/${UTILITYNAME}.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}"
+$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/${UTILITYNAME}-dracut.sh: dracut/95${UTILITYNAME}/${UTILITYNAME}-dracut.sh
+	install -m 755 -D dracut/95${UTILITYNAME}/${UTILITYNAME}-dracut.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}"
 
-$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}/module-setup.sh: dracut/85${UTILITYNAME}/module-setup.sh
-	install -m 755 -D dracut/85${UTILITYNAME}/module-setup.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/85${UTILITYNAME}"
+$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/${UTILITYNAME}-dracut.service: dracut/95${UTILITYNAME}/${UTILITYNAME}-dracut.service
+	install -m 644 -D dracut/95${UTILITYNAME}/${UTILITYNAME}-dracut.service -t "$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}"
+
+$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}/module-setup.sh: dracut/95${UTILITYNAME}/module-setup.sh
+	install -m 755 -D dracut/95${UTILITYNAME}/module-setup.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}"
+
+$(DESTDIR)/usr/lib/tmpfiles.d/cryptsetup-tmpfiles.conf: dracut/cryptsetup-tmpfiles.conf
+	install -m 644 -D dracut/cryptsetup-tmpfiles.conf -t "$(DESTDIR)/usr/lib/tmpfiles.d"
 
 $(DESTDIR)/etc/dracut.conf.d/${UTILITYNAME}.conf: dracut/${UTILITYNAME}.conf
 	install -m 644 -D dracut/${UTILITYNAME}.conf -t "$(DESTDIR)/etc/dracut.conf.d"
