@@ -29,11 +29,11 @@ clean:
 	rm -f ${TARFILE}
 	rm -f ${RPMFILE}
 	rm -f ${DEBFILE}
-	rm -f SHA256SUMS
+	rm -f SHA256SUMS-${PACKAGEVER}
 
 dist: pre-dist pre-dist-deb sign
-	sha256sum ${RPMFILE} > SHA256SUMS
-	sha256sum ${DEBFILE} >> SHA256SUMS
+	sha256sum ${RPMFILE} > SHA256SUMS-${PACKAGEVER}
+	sha256sum ${DEBFILE} >> SHA256SUMS-${PACKAGEVER}
 
 pre-dist: rpm
 	cp -p ~/rpmbuild/RPMS/noarch/${RPMFILE} .
