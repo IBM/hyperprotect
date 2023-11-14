@@ -17,7 +17,7 @@ Requires:	python3
 and LUKS via the kernel keyring.
 
 %global UTILITY_NAME hpcs-for-luks
-%global BUILD_AND_PACKAGE_DRACUT 0
+%global BUILD_AND_PACKAGE_DRACUT 1
 
 %prep
 %setup -q
@@ -46,7 +46,7 @@ make install DESTDIR=%{buildroot}
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/95%{UTILITY_NAME}/%{UTILITY_NAME}-dracut.sh
 %attr(0644,root,root) %{_prefix}/lib/dracut/modules.d/95%{UTILITY_NAME}/%{UTILITY_NAME}-dracut.service
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/95%{UTILITY_NAME}/module-setup.sh
-%attr(0644,root,root) %{_prefix}/usr/lib/tmpfiles.d/cryptsetup-tmpfiles.conf
+%attr(0644,root,root) %{_prefix}/lib/tmpfiles.d/cryptsetup-tmpfiles.conf
 %attr(0644,root,root) %{_sysconfdir}/dracut.conf.d/%{UTILITY_NAME}.conf
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/module-setup.sh
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/start-tcsd.sh
