@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: samplepaymentsystem
+spec:
+  restartPolicy: Never
+  initContainers:
+  - name: cert-gen
+    restartPolicy: Never
+    image: docker.io/library/ubuntu@sha256:64527a83b9f1570aace6ec52e68e31f261f0b6791405008f81fe0bf402fcc516
+    command: ["/bin/bash", "-c"]
+    args:
+      - >-
+        set -ex;
+        if ! dpkg -l openssl; then
+          apt-get update && apt-get install -y --no-install-recommends openssl;
+        fi
+        [[ -f /mnt/data/backend.crt ]] || openssl req -new -newkey rsa:2048 -days 365 -nodes -x509  -addext "subjectAltName=DNS:sample.test,DNS:*.sample.test" -subj "/CN=sample.test" -keyout /mnt/data/backend.key -out /mnt/data/backend.crt;
+        cp /mnt/data/backend.crt /etc/nginx/backend.crt
+    volumeMounts:
+      - name: contract-nginx
+        mountPath: /etc/nginx
+      - name: data1
+        mountPath: /mnt/data/
+  containers:
+    - name: frontend
+      restartPolicy: Always
+      image: docker.io/library/nginx@sha256:cb4597cef4c2015dbfa7a4580e5c04fb6d997227e9be33e76f2e465ee4598b36
+      ports:
+        - containerPort: 80
+          hostPort: 80
+        - containerPort: 443
+          hostPort: 443
+      volumeMounts:
+        - name: contract-nginx
+          mountPath: /etc/nginx
+          readOnly: true
+        - name: contract-www
+          mountPath: /www
+          readOnly: true
+    - name: backend
+      image: icr.io/samplepaymentsystem/sps@sha256:e7edaf25f920cdc70ef1e1a259cec0d87a098c94353bf5cce56e057f0593e565
+      env:
+        - name: CERT
+          value: /mnt/data/backend.crt
+        - name: KEY
+          value: /mnt/data/backend.key
+      volumeMounts:
+        - name: data1
+          mountPath: /mnt/data/
+    - name: attestation
+      image: docker.io/library/ubuntu@sha256:64527a83b9f1570aace6ec52e68e31f261f0b6791405008f81fe0bf402fcc516
+      command: ["/bin/bash", "-c"]
+      args:
+        - >-
+          set -ex;
+          if ! dpkg -l openssl; then
+            apt-get update && apt-get install -y --no-install-recommends busybox;
+          fi
+          busybox httpd -f -v -p 14785 -h /var/hyperprotect/
+      volumeMounts:
+        - name: hyperprotect
+          mountPath: /var/hyperprotect/
+          readOnly: true
+  volumes:
+    - name: contract-nginx
+      hostPath:
+        path: ./nginx
+        type: Directory
+    - name: contract-www
+      hostPath:
+        path: ./www
+        type: Directory
+    - name: hyperprotect
+      hostPath:
+        path: /var/hyperprotect/
+        type: Directory
+    - name: data1
+      hostPath:
+        path: /mnt/data1/
+        type: Directory

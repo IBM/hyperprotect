@@ -1,0 +1,8 @@
+ip
+user-data
+user-data-plain
+sample/nginx/sample.test.crt
+sample/nginx/sample.test.key
+attestation.sig
+attestation_enc
+attestation_enc.pub

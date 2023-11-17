@@ -1,0 +1,4 @@
+TF_VAR_ibmcloud_api_key=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TF_VAR_hpcs_manager=xxx@ibm.com
+TF_VAR_hpcs_name=redbook-sample
+TF_VAR_hpcs_admin_token=FILL IN STRONG PASSWORD

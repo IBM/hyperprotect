@@ -1,0 +1,6 @@
+ibmcloud_api_key = "FILL IN KEY"
+region = "us-south"
+zone = "1"
+logdna_ingestion_hostname = "FILL IN HOST"
+logdna_ingestion_key = "FILL IN KEY"
+hpcs_crn = "FILL IN HPCS CRN AS VOLUME KMS"

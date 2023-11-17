@@ -1,0 +1,16 @@
+FROM golang as build
+
+RUN apt update && apt install -y --no-install-recommends make
+RUN go install github.com/securego/gosec/v2/cmd/gosec@latest
+
+WORKDIR /usr/src/app
+COPY . .
+
+RUN go get -u && make maintenance && make build
+
+
+FROM ubuntu:22.04
+
+COPY --from=build /usr/src/app/hps-util /usr/bin/
+
+ENTRYPOINT [ "hps-util" ]
