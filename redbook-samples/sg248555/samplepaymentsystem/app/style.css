@@ -1,0 +1,194 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: #fff url(images/Blank_image.jpg) no-repeat fixed;
+    background-size: cover;
+    color: #000;
+    font-size: 100%;
+    font-family: "IBM Plex Sans", Helvetica, Arial, sans-serif;
+}
+
+#grid {
+    display: grid;
+    margin: 0 6em;
+    color: #000;
+    grid-gap: 0em 0em;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 8em 30em 20em 8em 20em 8em 20em 16em;
+    grid-template-areas: "title title menu"
+                         "your your your"
+                         "don1 don2 don3"
+                         "how-help how-help how-help"
+                         "why1 why2 why3"
+                         "blog blog blog"
+                         "news1 news2 news3"
+                         "about sitelinks contact";
+}
+
+.button {
+    background: #fff;
+    color: #000;
+    padding: 1em;
+    margin: 2em 0;
+    text-decoration: none;
+}
+
+h2 {
+    font-weight: 500;
+    font-size: 100%;
+}
+
+.big {
+    font-size: 300%;
+    padding: 0;
+    margin: 0;
+}
+
+#how-help {
+    grid-area: how-help;
+}
+
+#blog {
+    grid-area: blog;
+}
+
+#how-help, #blog {
+    text-align: center;
+    background: #fff;
+    color: #000;
+    padding: 2em 8em 0 8em;
+    font-size: 150%;
+}
+
+.why {
+    background-color: #fff;
+    color: #000;
+    padding: 1em;
+}
+
+#don2 p {
+    margin-bottom: 5em;
+}
+
+#title {
+    padding: 3em;
+    grid-area: title;
+    background: #000;
+    color: #fff;
+}
+
+#menu {
+    padding: 3em;
+    grid-area: menu;
+    background: #000;
+    color: #fff;
+    display: inline-block;
+}
+
+#menu h1 {
+
+}
+
+#menu ul {
+    text-align: right;
+}
+
+#menu li {
+    display: inline-block;
+    list-style-type: none;
+    text-align: right;
+    padding: 0 3em;
+}
+
+#menu a {
+    color: #fff;
+    text-decoration: none;
+}
+
+#your {
+    grid-area: your;
+    background-color: rgba(248, 111, 45, 0.3);
+    font-size: 280%;
+    padding: 0 1em 1em 1em;
+    margin: 2em;
+}
+
+#don1 {
+    grid-area: don1;
+    background: #871313;
+    padding: 1em;
+}
+
+#don2 {
+    grid-area: don2;
+    background: #ab1b1b;
+    padding: 1em;
+}
+
+#don3 {
+    grid-area: don3;
+    background: #c82121;
+    padding: 1em;
+}
+
+#why1 {
+    grid-area: why1;
+}
+
+#why2 {
+    grid-area: why2;
+}
+
+#why3 {
+    grid-area: why3;
+}
+
+#news1 {
+    grid-area: news1;
+}
+
+#news2 {
+    grid-area: news2;
+}
+
+#news3 {
+    grid-area: news3;
+}
+
+#about {
+    grid-area: about;
+}
+
+#sitelinks {
+    grid-area: sitelinks;
+}
+
+#sitelinks ul {
+    padding: 0;
+    margin: 0;
+}
+
+#sitelinks li {
+    list-style-type: none;
+}
+
+a {
+    text-decoration: none;
+    color: #fff;
+}
+
+#contact {
+    grid-area: contact;
+}
+
+#about, #sitelinks, #contact {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 1em;
+}
+
+.light {
+    font-weight: 300;
+    margin: 0;
+    padding: 0;
+}

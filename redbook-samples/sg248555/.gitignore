@@ -1,0 +1,12 @@
+.vscode
+*.code-workspace
+.idea
+.vscode
+**/.DS_Store
+
+.env*
+build/
+
+*.tfstate*
+.terraform*
+secret-*

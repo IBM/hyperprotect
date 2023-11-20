@@ -1,0 +1,24 @@
+{
+  "name": "hyper-protect-sample-payment-system",
+  "version": "1.0.0",
+  "description": "SamplePaymentSystem Code Pattern for IBM Cloud Hyper Protect Services",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "express": "^4.18.2",
+    "fs": "0.0.1-security",
+    "http": "0.0.0",
+    "https": "^1.0.0",
+    "path": "^0.12.7",
+    "adm-zip": "^0.5.10"
+  }
+}
