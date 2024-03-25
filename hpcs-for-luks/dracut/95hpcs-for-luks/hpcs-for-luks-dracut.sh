@@ -72,6 +72,24 @@ parse_plaintext_json() {
 	_BASE64_PLAINTEXT=${_BASE64_PLAINTEXT%%\"*}
 }
 
+retry() {
+        local __MAX=10
+        local __COUNT=0
+        $1
+        __RC=$?
+        while [ $__RC -ne 0 -a $__COUNT -lt $__MAX ] ; do
+                sleep 1
+                echo "hpcs-for-luks-dracut.sh: Retrying $1: $__COUNT"
+                $1
+                __RC=$?
+                __COUNT=$((__COUNT + 1))
+        done
+        if [ $__COUNT -eq $__MAX ]; then
+                echo "hpcs-for-luks-dracut.sh: Max retries of $1 exceeded"
+                exit 1
+        fi
+}
+
 
 # /usr/bin/shelldrop.sh
 if grep -q "rd.${_UTILITY_NAME}" /proc/cmdline; then
@@ -90,7 +108,7 @@ if grep -q "rd.${_UTILITY_NAME}" /proc/cmdline; then
 			echo "${_UTILITY_NAME}-dracut module says there's TPM in the config file but rd.tss is not set on the cmdline"
 		fi
 	fi
-	authenticate
+	retry authenticate
 	parse_authtoken
 	#echo $_AUTH_TOKEN
 	#list_keys
