@@ -6,7 +6,7 @@
 #
 # Nayna Jain <nayna@linux.ibm.com>, George Wilson <gcwilson@linux.ibm.com>, Samuel Matzek <smatzek@us.ibm.com>
 #
-# Copyright (C) 2021,2023 IBM Corp.
+# Copyright (C) 2021,2024 IBM Corp.
 #
 
 import configparser
@@ -22,7 +22,7 @@ KEY_BYTES = 32
 WRAPPED_KEY_DIR = '/var/lib/hpcs-for-luks'
 KEY_TYPES = ('logon', 'user')
 BLOB_FILE = WRAPPED_KEY_DIR + '/api-key-blob.txt'
-VERSION = '2.1'
+VERSION = '2.2'
 
 
 #
