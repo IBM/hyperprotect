@@ -53,9 +53,12 @@ make install DESTDIR=%{buildroot}
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/stop-tcsd.sh
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/run-tss-cmds.sh
 %attr(0644,root,root) %{_sysconfdir}/dracut.conf.d/tss.conf
+%attr(0644,root,root) %{_docdir}/%{UTILITY_NAME}/examples/%{UTILITY_NAME}-rootfs-config.sh
 %endif
 
 %changelog
+* Wed Apr 10 2024 George Wilson <gcwilson@linux.ibm.com>
+- Package rootfs config script
 * Wed Nov  8 2023 George Wilson <gcwilson@linux.ibm.com>
 - Package dracut files
 * Sun Oct 22 2023 Sam Matzek <smatzek@us.ibm.com>
