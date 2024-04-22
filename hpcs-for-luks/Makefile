@@ -134,8 +134,7 @@ install-dracut: \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/start-tcsd.sh \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/stop-tcsd.sh \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/run-tss-cmds.sh \
-	$(DESTDIR)/etc/dracut.conf.d/tss.conf \
-	$(DESTDIR)/usr/share/doc/${UTILITYNAME}/examples/${UTILITYNAME}-rootfs-config.sh
+	$(DESTDIR)/etc/dracut.conf.d/tss.conf
 
 $(DESTDIR)/usr/bin/${UTILITYNAME}: ${UTILITYNAME}
 	install -m 755 -D ${UTILITYNAME} -t "$(DESTDIR)/usr/bin"
@@ -201,7 +200,4 @@ $(DESTDIR)/usr/lib/dracut/modules.d/83tss/run-tss-cmds.sh: dracut/83tss/run-tss-
 
 $(DESTDIR)/etc/dracut.conf.d/tss.conf: dracut/tss.conf
 	install -m 644 -D dracut/tss.conf -t "$(DESTDIR)/etc/dracut.conf.d"
-
-$(DESTDIR)/usr/share/doc/${UTILITYNAME}/examples/${UTILITYNAME}-rootfs-config.sh: dracut/${UTILITYNAME}-rootfs-config.sh
-	install -m 644 -D dracut/${UTILITYNAME}-rootfs-config.sh -t "$(DESTDIR)/usr/share/doc/${UTILITYNAME}/examples"
 

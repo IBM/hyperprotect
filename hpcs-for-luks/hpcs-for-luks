@@ -22,7 +22,7 @@ KEY_BYTES = 32
 WRAPPED_KEY_DIR = '/var/lib/hpcs-for-luks'
 KEY_TYPES = ('logon', 'user')
 BLOB_FILE = WRAPPED_KEY_DIR + '/api-key-blob.txt'
-VERSION = '2.3'
+VERSION = '2.2'
 
 
 #
@@ -242,11 +242,10 @@ def parse_args():
 
     args = parser.parse_args()
 
-    # Special case --version option to bypass all processing
+    # Convert --version option to an op string and handle as though it were an op
 
     if args.version == True:
-        print(os.path.basename(sys.argv[0]) + ' version ' + VERSION, file=sys.stderr)
-        exit(0)
+        args.op = 'version'
 
     # Work around add_subparsers() not honoring required= in python <3.7 and print help
 
@@ -361,6 +360,15 @@ class key_protect_luks:
                 pout, perr = keyctl_proc.communicate(input=plaintext)
                 print(pout.decode('utf-8'), end='', flush=True)
                 print(perr.decode('utf-8'), end='', flush=True)
+
+    #
+    #  Print version and exist
+    #
+
+    def op_version(self):
+
+        print(os.path.basename(sys.argv[0]) + ' version ' + VERSION, file=sys.stderr)
+        exit(0)
 
     #
     #
@@ -516,6 +524,7 @@ class key_protect_luks:
     #
 
     opswitch = {
+        'version': op_version,
         'list': op_list,
         'create': op_create,
         'get': op_get,
@@ -539,10 +548,10 @@ class key_protect_luks:
 #  Main
 #
 
-# Parse args and read config file
+# Read config file and parse args
 
-args = parse_args()
 config = parse_config(CONFIG_FILE)
+args = parse_args()
 
 # Handle TPM case
 
