@@ -101,6 +101,14 @@ ip_gateway() {
 }
 
 ################################################################################
+# Return the first non-localhost DNS server in /etc/resolv.conf.               #
+################################################################################
+ip_dns() {
+	#nmcli dev show $1 | awk '/DNS\[1\]/ { print $2 }'
+	awk '/nameserver/ { if($2 !~ "^127") { print $2; exit;} }' </etc/resolv.conf
+}
+
+################################################################################
 # Select a network interface: for now simply take the first one up.  Exit      #
 # upon failure.                                                                #
 ################################################################################
@@ -168,6 +176,17 @@ hfl_ble_index() {
 ################################################################################
 
 ################################################################################
+# Parse args                                                                   #
+################################################################################
+
+if [ "$1" == "-n" ]; then
+	NOCLEANANDREBOOT=1
+else
+	NOCLEANANDREBOOT=0
+fi
+
+
+################################################################################
 # Setup variables                                                              #
 ################################################################################
 
@@ -208,6 +227,7 @@ export mgmt_device=$(select_if)
 export vm_ip=$(ip_addr $mgmt_device)
 export vm_netmask=$(ip_netmask $mgmt_device)
 export vm_gw=$(ip_gateway $mgmt_device)
+#export vm_nameserver=$(ip_dns)
 export vm_nameserver=""
 export hostname=$(hostname)
 
@@ -534,7 +554,7 @@ args=$(grubby --info 0 | grep -m 1 args | grep -o '"[^"]\+"' | sed 's/"//g')
 args=$(echo $args | sed 's/rd\.debug//')
 args="${args} rd.hpcs-for-luks rd.neednet=1 rd.auto=1 root=/dev/mapper/root rd.luks.uuid=${disk_uuid} rd.luks.name=${disk_uuid}=root ip=${vm_ip}::${vm_gw}:${vm_netmask}:${hostname}:${mgmt_device}:none nameserver=${vm_nameserver}"
 #
-# Needed for "regular" 9.2 image but not for "SAP" image :-/
+# Needed for "regular" 9.2 image but not for "other" image :-/
 #
 #if [[ $(os_release) =~ ^9 ]]; then
 #	args="${args} net.ifnames=0 biosdevname=0"
@@ -571,3 +591,14 @@ fi
 # unnecessary on Power
 #
 cp /boot/grub2/grubenv /boot/efi/EFI/redhat/
+
+#
+# Clean up vars file and reboot unless directed not to
+#
+if [ $NOCLEANANDREBOOT -ne 1 ]; then
+	rm -f ${VAR_SCRIPT}
+	sync
+	umount /mnt/encryptedroot
+	sleep 1
+	shutdown -r now
+fi
