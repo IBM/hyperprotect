@@ -104,7 +104,7 @@ sign:
 
 rpm:
 	rm -f ${TARFILE}
-	tar --xform="s/^/${PACKAGENAME}-${PACKAGEVER}\//" -cpzf ${TARFILE} *
+	tar --xform="s/^/${PACKAGENAME}-${PACKAGEVER}\//" --exclude="*.tar.gz" -cpzf ${TARFILE} *
 	cp -p ${TARFILE} ~/rpmbuild/SOURCES
 	cp -p ${PACKAGENAME}.spec ~/rpmbuild/SPECS
 	echo "Version: ${PACKAGEVER}" > version.inc
