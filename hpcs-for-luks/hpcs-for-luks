@@ -22,7 +22,7 @@ KEY_BYTES = 32
 WRAPPED_KEY_DIR = '/var/lib/hpcs-for-luks'
 KEY_TYPES = ('logon', 'user')
 BLOB_FILE = WRAPPED_KEY_DIR + '/api-key-blob.txt'
-VERSION = '2.4'
+VERSION = '2.5'
 
 
 #

@@ -4,12 +4,14 @@ _UTILITY_NAME=hpcs-for-luks
 
 # called by dracut
 check() {
-    return 0
+	# Don't include this module by default.
+	return 255
 }
 
 # called by dracut
 depends() {
-    return 0
+	require_binaries /usr/sbin/tcsd /usr/bin/tpm_unsealdata || return 1
+	return 0
 }
 
 # called by dracut

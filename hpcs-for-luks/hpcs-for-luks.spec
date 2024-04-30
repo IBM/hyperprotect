@@ -53,6 +53,9 @@ make install DESTDIR=%{buildroot}
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/stop-tcsd.sh
 %attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/83tss/run-tss-cmds.sh
 %attr(0644,root,root) %{_sysconfdir}/dracut.conf.d/tss.conf
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/91tss2/module-setup.sh
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/91tss2/tss2-seal.sh
+%attr(0755,root,root) %{_prefix}/lib/dracut/modules.d/91tss2/tss2-unseal.sh
 %attr(0644,root,root) %{_docdir}/%{UTILITY_NAME}/examples/%{UTILITY_NAME}-rootfs-config.sh
 %endif
 
