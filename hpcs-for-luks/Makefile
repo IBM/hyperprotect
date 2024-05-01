@@ -104,7 +104,7 @@ sign:
 
 rpm:
 	rm -f ${TARFILE}
-	tar --xform="s/^/${PACKAGENAME}-${PACKAGEVER}\//" -cpzf ${TARFILE} *
+	tar --xform="s/^/${PACKAGENAME}-${PACKAGEVER}\//" --exclude="*.tar.gz" -cpzf ${TARFILE} *
 	cp -p ${TARFILE} ~/rpmbuild/SOURCES
 	cp -p ${PACKAGENAME}.spec ~/rpmbuild/SPECS
 	echo "Version: ${PACKAGEVER}" > version.inc
@@ -135,7 +135,15 @@ install-dracut: \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/stop-tcsd.sh \
 	$(DESTDIR)/usr/lib/dracut/modules.d/83tss/run-tss-cmds.sh \
 	$(DESTDIR)/etc/dracut.conf.d/tss.conf \
+	$(DESTDIR)/usr/lib/dracut/modules.d/91tss2 \
+	$(DESTDIR)/usr/lib/dracut/modules.d/91tss2/module-setup.sh \
+	$(DESTDIR)/usr/lib/dracut/modules.d/91tss2/tss2-seal.sh \
+	$(DESTDIR)/usr/lib/dracut/modules.d/91tss2/tss2-unseal.sh \
 	$(DESTDIR)/usr/share/doc/${UTILITYNAME}/examples/${UTILITYNAME}-rootfs-config.sh
+
+#
+# HPCS for LUKS
+#
 
 $(DESTDIR)/usr/bin/${UTILITYNAME}: ${UTILITYNAME}
 	install -m 755 -D ${UTILITYNAME} -t "$(DESTDIR)/usr/bin"
@@ -166,6 +174,10 @@ $(DESTDIR)/var/lib/${UTILITYNAME}/logon:
 $(DESTDIR)/var/lib/${UTILITYNAME}/user:
 	install -m 755 -d $(DESTDIR)/var/lib/${UTILITYNAME}/user
 
+#
+# HPCS for LUKS Dracut Service
+#
+
 $(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}:
 	install -m 755 -d $(DESTDIR)/usr/lib/dracut/modules.d/95${UTILITYNAME}
 
@@ -184,6 +196,10 @@ $(DESTDIR)/usr/lib/tmpfiles.d/cryptsetup-tmpfiles.conf: dracut/95${UTILITYNAME}/
 $(DESTDIR)/etc/dracut.conf.d/${UTILITYNAME}.conf: dracut/${UTILITYNAME}.conf
 	install -m 644 -D dracut/${UTILITYNAME}.conf -t "$(DESTDIR)/etc/dracut.conf.d"
 
+#
+# TrouSerS for Dracut
+#
+
 $(DESTDIR)/usr/lib/dracut/modules.d/83tss:
 	install -m 755 -d $(DESTDIR)/usr/lib/dracut/modules.d/83tss
 
@@ -201,6 +217,26 @@ $(DESTDIR)/usr/lib/dracut/modules.d/83tss/run-tss-cmds.sh: dracut/83tss/run-tss-
 
 $(DESTDIR)/etc/dracut.conf.d/tss.conf: dracut/tss.conf
 	install -m 644 -D dracut/tss.conf -t "$(DESTDIR)/etc/dracut.conf.d"
+
+#
+# TSS2 for Dracut + seal & unseal shell scripts
+#
+
+$(DESTDIR)/usr/lib/dracut/modules.d/91tss2:
+	install -m 755 -d $(DESTDIR)/usr/lib/dracut/modules.d/91tss2
+
+$(DESTDIR)/usr/lib/dracut/modules.d/91tss2/module-setup.sh: dracut/91tss2/module-setup.sh
+	install -m 755 -D dracut/91tss2/module-setup.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/91tss2"
+
+$(DESTDIR)/usr/lib/dracut/modules.d/91tss2/tss2-seal.sh: dracut/91tss2/tss2-seal.sh
+	install -m 755 -D dracut/91tss2/tss2-seal.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/91tss2"
+
+$(DESTDIR)/usr/lib/dracut/modules.d/91tss2/tss2-unseal.sh: dracut/91tss2/tss2-unseal.sh
+	install -m 755 -D dracut/91tss2/tss2-unseal.sh -t "$(DESTDIR)/usr/lib/dracut/modules.d/91tss2"
+
+#
+# Example rootfs configuration script
+#
 
 $(DESTDIR)/usr/share/doc/${UTILITYNAME}/examples/${UTILITYNAME}-rootfs-config.sh: dracut/${UTILITYNAME}-rootfs-config.sh
 	install -m 644 -D dracut/${UTILITYNAME}-rootfs-config.sh -t "$(DESTDIR)/usr/share/doc/${UTILITYNAME}/examples"
