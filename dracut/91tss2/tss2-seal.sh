@@ -66,3 +66,4 @@ done
 tsspolicymakerpcr -halg sha256 -bm $MASK -if "$POLICYPCRLIST" -v -pr -of "$POLICYPCR"
 tsspolicymaker -halg sha256 -if "$POLICYPCR" -of "$POLICY" -pr -v
 tsscreate -hp $HANDLE1 -nalg sha256 -bl -kt f -kt p -opr "$ENCSECRETPRIV" -opu "$ENCSECRETPUB" -if "$SECRET" -pol "$POLICY"
+echo $* > "${ENCSECRET_BASENAME}-pcrs"
