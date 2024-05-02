@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+#
+# Systemd service for unsealing TPM2-sealed keys to the kernel keyring
+#
+# George Wilson <gcwilson@linux.ibm.com>
+#
+# Copyright (C) 2024 IBM Corp.
+#
+
+[Unit]
+Description=TSS2 Unseal to Keyring Service
+Documentation=file:///usr/share/doc/hpcs-for-luks/README.md
+After=systemd-udevd.service
+Before=dracut-initqueue.service
+Conflicts=shutdown.target
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/tss2-unseal-to-keyring.sh
+
+[Install]
+RequiredBy=local-fs-pre.target network-pre.target

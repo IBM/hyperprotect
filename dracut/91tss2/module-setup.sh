@@ -37,4 +37,6 @@ install() {
 	inst_simple "$moddir/tss2-seal.sh" /usr/bin/tss2-seal.sh
 	inst_simple "$moddir/tss2-unseal.sh" /usr/bin/tss2-unseal.sh
 	inst_simple "$moddir/tss2-unseal-to-keyring.sh" /usr/bin/tss2-unseal-to-keyring.sh
+	inst_simple "$moddir/tss2-unseal-to-keyring.service" "$systemdsystemunitdir/tss2-unseal-to-keyring.service"
+	$SYSTEMCTL -q --root "$initdir" enable tss2-unseal-to-keyring.service
 }
