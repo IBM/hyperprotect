@@ -11,13 +11,11 @@
 #
 
 export TPM_ENCRYPT_SESSIONS=0
+export TPM_INTERFACE_TYPE=dev
+export TPM_DEVICE=/dev/tpm0
 
 set -e
 
-function gethandle() {
-	read a b; echo $b
-}
- 
 function calcmask() {
 	MASK=0
 	while [ "$1" != "" ]; do
@@ -36,6 +34,18 @@ function cleanup() {
 	exit $RC
 }
 
+function check_and_gethandle() {
+        __OUTPUT=$($*)
+        RC=$?
+        if [ $RC -eq 0 ]; then
+                echo ${__OUTPUT#* }
+        else
+                echo __OUTPUT 1>&2
+        fi
+        return $RC
+}
+
+
 PROGNAME=${0##*/}
 
 if [ $# -lt 3 -o "$1" == "--help" ]; then
@@ -52,12 +62,13 @@ POLICYPCR="policypcr.txt"
 POLICY="policy.bin"
 ENCSECRETPRIV="${ENCSECRET_BASENAME}-priv.bin"
 ENCSECRETPUB="${ENCSECRET_BASENAME}-pub.bin"
+ENCSECRETPCRS="${ENCSECRET_BASENAME}-pcrs"
 
 trap cleanup EXIT
 
 MASK=$(calcmask $*)
 
-HANDLE1=$(tsscreateprimary -hi n -ecc nistp256 | gethandle)
+HANDLE1=$(check_and_gethandle tsscreateprimary -hi n -ecc nistp256)
 echo $HANDLE1
 > "$POLICYPCRLIST"
 for PCR in $*; do
@@ -66,4 +77,4 @@ done
 tsspolicymakerpcr -halg sha256 -bm $MASK -if "$POLICYPCRLIST" -v -pr -of "$POLICYPCR"
 tsspolicymaker -halg sha256 -if "$POLICYPCR" -of "$POLICY" -pr -v
 tsscreate -hp $HANDLE1 -nalg sha256 -bl -kt f -kt p -opr "$ENCSECRETPRIV" -opu "$ENCSECRETPUB" -if "$SECRET" -pol "$POLICY"
-echo $* > "${ENCSECRET_BASENAME}-pcrs"
+echo $* > "$ENCSECRETPCRS"

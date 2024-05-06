@@ -23,6 +23,41 @@ BLOB_SUBDIR=/var/lib/tss2
 BLOB_PATH=/boot"${BLOB_SUBDIR}"
 SECRETS_TMP=/tmp/tss2
 
+echo "tss2: got here"
+
+cleanup() {
+<<<<<<< HEAD
+	rm -f "${SECRETS_TMP}/${BLOB_BASENAME}.out"
+	popd
+	umount /boot
+}
+
+retry() {
+        local __MAX=10
+        local __COUNT=0
+        $*
+        __RC=$?
+        while [ $__RC -ne 0 -a $__COUNT -lt $__MAX ]; do
+                sleep 1
+                echo "tss2: Retrying $*: $__COUNT"
+                $1
+                __RC=$?
+                __COUNT=$((__COUNT + 1))
+        done
+        if [ $__COUNT -eq $__MAX ]; then
+                echo "tss2: Max retries of $* exceeded" 1>&2
+                return 1
+        fi
+        return $__RC
+}
+
+=======
+	umount /boot
+}
+
+>>>>>>> 9c5015243f1b0d5f42f8df7122b7b6caf599be6f
+trap cleanup EXIT
+
 #
 # Make /boot mountpoint
 #
@@ -41,7 +76,7 @@ fi
 #
 
 if ! mountpoint /boot; then
-	mount LABEL=/boot /boot
+	retry mount LABEL=/boot /boot
 	RC=$?
 	if [ $RC -ne 0 ]; then
 		echo "$PROGNAME: cannot mount /boot, rc = $RC" 1>&2
@@ -74,11 +109,14 @@ for TYPE in *; do
 	pushd "${TYPE}"
 	for PUB_BLOB in *-pub.bin; do
 		BLOB_BASENAME="${PUB_BLOB%-pub.bin}"
-		tss2-unseal.sh "$BLOB_BASENAME" "${SECRETS_TMP}/${BLOB_BASENAME}.out" $(cat ${BLOB_BASENAME}-pcrs)
+		tss2-unseal.sh "$BLOB_BASENAME" "${SECRETS_TMP}/${BLOB_BASENAME}.out"
+		if [ $? -ne 0 ]; then
+			echo "tss2: Unseal failed" 1>&2
+			exit 1
+		fi
 		keyctl padd ${TYPE} "${BLOB_BASENAME}" @u < "${SECRETS_TMP}/${BLOB_BASENAME}.out"
 		rm -f "${SECRETS_TMP}/${BLOB_BASENAME}.out"
 	done
 	popd
 done
 
-popd
