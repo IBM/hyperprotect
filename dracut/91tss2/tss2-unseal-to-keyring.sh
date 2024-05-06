@@ -23,6 +23,14 @@ BLOB_SUBDIR=/var/lib/tss2
 BLOB_PATH=/boot"${BLOB_SUBDIR}"
 SECRETS_TMP=/tmp/tss2
 
+echo "tss2: got here"
+
+cleanup() {
+	umount /boot
+}
+
+trap cleanup EXIT
+
 #
 # Make /boot mountpoint
 #

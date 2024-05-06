@@ -10,8 +10,8 @@
 [Unit]
 Description=TSS2 Unseal to Keyring Service
 Documentation=file:///usr/share/doc/hpcs-for-luks/README.md
-After=systemd-udevd.service
-Before=dracut-initqueue.service
+After=network.target
+Before=cryptsetup-pre.target
 Conflicts=shutdown.target
 DefaultDependencies=no
 
@@ -21,3 +21,4 @@ ExecStart=/usr/bin/tss2-unseal-to-keyring.sh
 
 [Install]
 RequiredBy=local-fs-pre.target network-pre.target
+WantedBy=cryptsetup-pre.target
