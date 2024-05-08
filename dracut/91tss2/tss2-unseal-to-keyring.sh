@@ -26,7 +26,6 @@ SECRETS_TMP=/tmp/tss2
 echo "tss2: got here"
 
 cleanup() {
-<<<<<<< HEAD
 	rm -f "${SECRETS_TMP}/${BLOB_BASENAME}.out"
 	popd
 	umount /boot
@@ -51,11 +50,6 @@ retry() {
         return $__RC
 }
 
-=======
-	umount /boot
-}
-
->>>>>>> 9c5015243f1b0d5f42f8df7122b7b6caf599be6f
 trap cleanup EXIT
 
 #
