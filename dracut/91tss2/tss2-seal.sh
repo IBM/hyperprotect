@@ -68,11 +68,14 @@ trap cleanup EXIT
 
 MASK=$(calcmask $*)
 
-HANDLE1=$(check_and_gethandle tsscreateprimary -hi n -ecc nistp256)
+HANDLE1=$(check_and_gethandle tsscreateprimary -hi o -ecc nistp256)
 echo $HANDLE1
 > "$POLICYPCRLIST"
+> in-pcrs.txt
 for PCR in $*; do
 	tsspcrread -ha $PCR -halg sha256 -ns >> "$POLICYPCRLIST"
+	echo -n "PCR[$PCR]=" >> "in-pcrs.txt"
+	tsspcrread -ha $PCR -halg sha256 -ns >> "in-pcrs.txt"
 done
 tsspolicymakerpcr -halg sha256 -bm $MASK -if "$POLICYPCRLIST" -v -pr -of "$POLICYPCR"
 tsspolicymaker -halg sha256 -if "$POLICYPCR" -of "$POLICY" -pr -v

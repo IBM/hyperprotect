@@ -69,7 +69,13 @@ trap cleanup EXIT
 PCRS=$(cat "$ENCSECRETPCRS")
 MASK=$(calcmask $PCRS)
 
-HANDLE1=$(check_and_gethandle tsscreateprimary -hi n -ecc nistp256)
+> "out-pcrs.txt"
+for PCR in $PCRS; do
+	echo -n "PCR[$PCR]=" >> "out-pcrs.txt"
+        tsspcrread -ha $PCR -halg sha256 -ns >> "out-pcrs.txt"
+done
+
+HANDLE1=$(check_and_gethandle tsscreateprimary -hi o -ecc nistp256)
 echo $HANDLE1
 HANDLE2=$(check_and_gethandle tssload -hp $HANDLE1 -ipr "$ENCSECRETPRIV" -ipu "$ENCSECRETPUB")
 echo $HANDLE2
