@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# Key Protect Interface for hpcs-for-luks service via Python
+# Dracut script to unwrap hpcs-for-luks root key to kernel keyring
 #
 # George Wilson <gcwilson@linux.ibm.com>, Samuel Matzek <smatzek@us.ibm.com>
 #
@@ -10,6 +10,9 @@
 #
 
 type getcmdline > /dev/null 2>&1 || . /lib/dracut-lib.sh
+
+export http_proxy=$(getarg proxy=)
+export https_proxy=$(getarg proxy=)
 
 _UTILITY_NAME=hpcs-for-luks
 
