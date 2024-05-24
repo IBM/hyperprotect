@@ -3,6 +3,7 @@
 __BINARIES="\
 	tsscreate \
 	tsscreateprimary \
+	tssflushcontext \
 	tssload \
 	tsspcrread \
 	tsspolicymaker \
@@ -32,6 +33,11 @@ installkernel() {
 }
 
 install() {
-	inst_multiple -o $udevrulesdir/60-tpm-udev.rules ${__BINARIES}
+	inst_multiple -o $udevrulesdir/60-tpm-udev.rules ${__BINARIES} mountpoint
 	inst_libdir_file ${__LIBRARIES}
+	inst_simple "$moddir/tss2-seal.sh" /usr/bin/tss2-seal.sh
+	inst_simple "$moddir/tss2-unseal.sh" /usr/bin/tss2-unseal.sh
+	inst_simple "$moddir/tss2-unseal-to-keyring.sh" /usr/bin/tss2-unseal-to-keyring.sh
+	inst_simple "$moddir/tss2-unseal-to-keyring.service" "$systemdsystemunitdir/tss2-unseal-to-keyring.service"
+	$SYSTEMCTL -q --root "$initdir" enable tss2-unseal-to-keyring.service
 }
