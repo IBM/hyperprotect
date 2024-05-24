@@ -11,6 +11,9 @@
 
 type getcmdline > /dev/null 2>&1 || . /lib/dracut-lib.sh
 
+export http_proxy=$(getarg proxy=)
+export https_proxy=$(getarg proxy=)
+
 _UTILITY_NAME=hpcs-for-luks
 
 #
