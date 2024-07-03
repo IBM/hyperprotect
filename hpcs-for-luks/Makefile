@@ -2,7 +2,7 @@ PACKAGENAME=hpcs-for-luks
 UTILITYNAME=hpcs-for-luks
 
 # The utility itself is the central source of the version for all purposes
-PACKAGEVER=$(shell __VERSION=$$(./${UTILITYNAME} --version 2>&1) && echo $${__VERSION##* })
+PACKAGEVER=$(shell ./${UTILITYNAME} --version 2>&1 | (read __A __B __C && echo $${__C}))
 
 TARFILE=${PACKAGENAME}-${PACKAGEVER}.tar.gz
 RPMFILE=${PACKAGENAME}-${PACKAGEVER}-1.*.noarch.rpm
