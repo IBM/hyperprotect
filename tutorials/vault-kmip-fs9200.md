@@ -34,7 +34,12 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    ```
    export VAULT_LICENSE=./vault-ent-license.hclic
    ```
-1. Copy [vault-sample-config.hcl] to `~/vault-kmip/vault-config.hcl`
+1. Copy [vault-sample-config.hcl](configuration-files/vault-sample-config.hcl) to `~/vault-kmip/vault-config.hcl`
+1. Start the Vault server:
+   ```
+   ./vault server -config=~/vault-config.hcl
+   ```
+   Expect a sample output like this [vault-startup-sample-output](sample-files/vault-startup-sample-output)
 
 ## Step 2
 
