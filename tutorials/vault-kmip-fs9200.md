@@ -13,7 +13,7 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
 - Admin access to an IBM Flash Subsystem
   
 
-## Step 1
+## Step 1 - Install Vault
 1. Logon to the s390x server
 1. Prepare the environment
    ```
@@ -35,11 +35,41 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    export VAULT_LICENSE=$VAULT_HOME/vault-ent-license.hclic
    ```
 1. Copy [vault-sample-config.hcl](configuration-files/vault-sample-config.hcl) to `$VAULT_HOME/vault-config.hcl`
+   double check the `license_path` statement points to $VAULT_LICENSE
 1. Start the Vault server:
    ```
    ./vault server -config=$VAULT_HOME/vault-config.hcl
    ```
    Expect a sample output like this [vault-startup-sample-output](sample-files/vault-startup-sample-output)
+1. Check Vault status
+   ```
+   export VAULT_ADDR=http://127.0.0.1:8205
+   ./vault status
+   ```
+   The output should look like this:
+   ```
+   root@vault-cluster1:~/vault_1# ./vault status
+   Key                     Value
+   ---                     ----- 
+   Seal Type               shamir
+   Initialized             false
+   Sealed                  true
+   Total Shares            5
+   Threshold               3
+   Version                 1.18.6+ent
+   Build Date              2025-03-04T09:00:50Z
+   Storage Type            raft
+   Cluster Name            vault-cluster-72b2023c
+   Cluster ID              8abeaf0a-a5fc-aeda-92e8-8f0e42313d97
+   HA Enabled              true
+   HA Cluster              https://127.0.0.1:8206
+   HA Mode                 active
+   Active Since            2025-03-28T11:05:36.809998915Z
+   Raft Committed Index    861411
+   Raft Applied Index      861411
+   Last WAL                330202 
+   ```
+1. 
 
 ## Step 2
 
