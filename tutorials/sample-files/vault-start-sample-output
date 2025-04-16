@@ -1,0 +1,24 @@
+WARNING: Request Limiter configuration is no longer supported; overriding server configuration to disable 
+
+==> Vault server configuration: 
+
+Administrative Namespace:  
+             Api Address: http://127.0.0.1:8200 
+                     Cgo: disabled 
+
+         Cluster Address: https://127.0.0.1:8201 
+   Environment Variables: DBUS_SESSION_BUS_ADDRESS, HOME, LANG, LESSCLOSE, LESSOPEN, LOGNAME, LS_COLORS, MOTD_SHOWN, OLDPWD, PATH, PWD, SHELL, SHLVL, SSH_CLIENT, SSH_CONNECTION, SSH_TTY, TERM, USER, VAULT_ADDR, XDG_DATA_DIRS, XDG_RUNTIME_DIR, XDG_SESSION_CLASS, XDG_SESSION_ID, XDG_SESSION_TYPE, _ 
+              Go Version: go1.23.6 
+              Listener 1: tcp (addr: "0.0.0.0:8200", cluster address: "0.0.0.0:8201", disable_request_limiter: "false", max_request_duration: "1m30s", max_request_size: "33554432", tls: "disabled") 
+               Log Level:  
+                   Mlock: supported: true, enabled: false 
+           Recovery Mode: false 
+                 Storage: raft (HA available) 
+                 Version: Vault v1.18.6+ent, built 2025-03-04T09:00:50Z 
+             Version Sha: 801f289b608575e0622cea49f6790d5ec3884f5d 
+
+==> Vault server started! Log data will stream in below: 
+
+2025-03-18T08:37:34.534Z [WARN]  unknown or unsupported field enterprise found in configuration at /etc/vault.d/vault.hcl:24:1 
+2025-03-18T08:37:34.534Z [INFO]  proxy environment: http_proxy="" https_proxy="" no_proxy="" 
+2025-03-18T08:37:34.561Z [INFO]  incrementing seal generation: generation=1 
