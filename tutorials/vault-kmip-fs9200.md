@@ -17,27 +17,27 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
 1. Logon to the s390x server
 1. Prepare the environment
    ```
-   mkdir ~/vault-kmip
-   cd ~/vault-kmip
+   export VAULT_HOME=/etc/vault.d
+   export VAULT_RAFT=/opt/vault/data
+   mkdir -p $VAULT_HOME
+   mkdir -p $VAULT_RAFT
+   cd $VAULT_HOME
    ```
-1. Download the latest version of Vault-s390x from [releases.hashicorp.com](https://releases.hashicorp.com/vault/1.19.1+ent/)
+1. Download the latest version of Vault-s390x from [releases.hashicorp.com](https://releases.hashicorp.com/vault/1.19.1+ent/) and check if Vault looks good:
    ```
    wget https://releases.hashicorp.com/vault/1.18.4+ent/vault_1.18.4+ent_linux_s390x.zip
    unzip vault_1.18.4+ent_linux_s390x.zip
+   ./vault version
    ```
-1. Check if Vault install looks good
-   ```
-   ./vault version 
-   ```
-1. Create the Vault License file by copying into a file `vault-ent-license.hclic`
+1. Create the Vault License file by copying into a file `$VAULT_HOME/vault-ent-license.hclic`
 1. Apply the vault license
    ```
-   export VAULT_LICENSE=./vault-ent-license.hclic
+   export VAULT_LICENSE=$VAULT_HOME/vault-ent-license.hclic
    ```
-1. Copy [vault-sample-config.hcl](configuration-files/vault-sample-config.hcl) to `~/vault-kmip/vault-config.hcl`
+1. Copy [vault-sample-config.hcl](configuration-files/vault-sample-config.hcl) to `$VAULT_HOME/vault-config.hcl`
 1. Start the Vault server:
    ```
-   ./vault server -config=~/vault-config.hcl
+   ./vault server -config=$VAULT_HOME/vault-config.hcl
    ```
    Expect a sample output like this [vault-startup-sample-output](sample-files/vault-startup-sample-output)
 
