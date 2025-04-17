@@ -56,7 +56,7 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    Sealed                  true
    Total Shares            5
    Threshold               3
-   Version                 1.18.6+ent
+   Version                 1.19.1+ent
    Build Date              2025-03-04T09:00:50Z
    Storage Type            raft
    Cluster Name            vault-cluster-72b2023c
@@ -69,7 +69,77 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    Raft Applied Index      861411
    Last WAL                330202 
    ```
-1. 
+1. Check Vault License status
+   ```
+   ./vault license inspect $VAULT_LICENSE_PATH
+   ```
+   The output should look something like this:
+   ```
+   Source: /etc/vault.d/license.hclic
+   Product: vault
+   License ID: 07cd369b-bb50-e993-d6bb-e0f54d4f4be6
+   Customer ID: e99ff6f3-b823-dfb3-c514-06f16668de76
+   Installation ID: *
+   Issue Time: 2025-01-28 14:50:58.185093991 +0000 UTC
+   Start Time: 2025-01-28 00:00:00 +0000 UTC
+   Expiration Time: 2025-04-30 00:00:00 +0000 UTC
+   Termination Time: 2025-05-31 00:00:00 +0000 UTC
+   {"license_id":"07cd369b-bb50-e993-d6bb-e0f54d4f4be6","customer_id":"e99ff6f3-b823-dfb3-c514-06f16668de76","installation_id":"*","issue_time":"2025-01
+   28T14:50:58.185093991Z","start_time":"2025-01-28T00:00:00Z","expiration_time":"2025-04-30T00:00:00Z","termination_time":"2025-05-31T00:00:00Z","flags":{"modules":["multi-dc
+   scale","governance-policy","advanced-data-protection-key-management","advanced-data-protection-transform"]},"features":["HSM","Performance Replication","DR
+   Replication","MFA","Sentinel","Seal Wrapping","Control Groups","Performance Standby","Namespaces","KMIP","Entropy Augmentation","Transform Secrets Engine","Lease Count Quotas","Key
+   Management Secrets Engine","Automated Snapshots","Key Management Transparent Data Encryption","Secrets Sync"],"performance_standby_count":9999}
+
+   License is valid
+   ```
+1. Initialize vault and unseal
+   ```
+   ./vault operator init
+   ```
+   The output should look something like this:
+   ```
+   Recovery Key 1: hy1i97i1PP9tCWX**uoyTrqAzhHs*u61JE5sNwVFdUHQ+
+   Recovery Key 2: iQcyiI14+55ooBsNo**+ECPk83PtaC/4qJQkU2hJgGG7
+   Recovery Key 3: 9Tru************Io/mT7HoKI0mwpl
+   Recovery Key 4: yKWRklqRM/wNsmftNOR3TK**uIdK2Z/Kx7L4Ww/ORVU1
+   Recovery Key 5: fRD03kNS8sICfdOb**9DioS9PY6K6yRweLWGVxiUTmVx
+
+   Initial Root Token: hvs.7ta2pMiIpLXki**ZCkpzskHX
+
+   Success! Vault is initialized
+
+   Recovery key initialized with 5 key shares and a key threshold of 3. Please securely distribute the key shares printed above.
+   ```
+   Unseal Vault with any 3 of the recovery keys with this command:
+   ```
+   ./vault unseal <unseal-key>
+   ```
+1. Make sure Vault is now unsealed
+   ```
+   ./vault status
+   ```
+   The output should look something like this:
+   ```
+   Key                     Value
+   ---                     -----
+   Seal Type               shamir
+   Initialized             true
+   Sealed                  false
+   Total Shares            5
+   Threshold               3
+   Version                 1.19.1+ent
+   Build Date              2025-01-29T14:07:00Z
+   Storage Type            raft
+   Cluster Name            vault-cluster-18d5d356
+   Cluster ID              d2f3c181-08ab-3168-ae83-0e89a1d02129
+   HA Enabled              true
+   HA Cluster              https://127.0.0.1:8206
+   HA Mode                 active
+   Active Since            2025-03-19T10:32:50.727057924Z
+   Raft Committed Index    96
+   Raft Applied Index      96
+   Last WAL                33 
+   ```
 
 ## Step 2
 
