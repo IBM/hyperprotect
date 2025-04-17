@@ -110,7 +110,7 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
 
    Recovery key initialized with 5 key shares and a key threshold of 3. Please securely distribute the key shares printed above.
    ```
-   Unseal Vault with any 3 of the recovery keys with this command:
+   Make a note of the *Initial Root Token* and Unseal Vault with any 3 of the recovery keys with this command:
    ```
    ./vault unseal <unseal-key>
    ```
@@ -141,6 +141,57 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    Last WAL                33 
    ```
 
-## Step 2
+## Step 2 Login to vault and enable KMIP
+1. Login to Vault with the "Inital Root Token"
+   ```
+   ./vault login <initial root token>
+   ```
+1. Enable KMIP Secrets Engine
+   ```
+   ./vault secrets enable kmip
+   Success! Enabled the kmip secrets engine at: kmip/ 
+   ```
+   ```
+   vault write kmip/config listen_addrs=0.0.0.0:5696 tls_ca_key_type=rsa tls_ca_key_bits=2048 default_tls_client_key_type=rsa default_tls_client_key_bits=2048
+   Success! Data written to: kmip/config 
+   ```
+   ```
+   ./vault read kmip/config
+   ```
+   The output should look something like this:
+   ```
+   Key                            Value
+   ---                            -----
+   default_tls_client_key_bits    2048
+   default_tls_client_key_type    rsa
+   default_tls_client_ttl         336h
+   listen_addrs                   [0.0.0.0:5696]
+   server_hostnames               [localhost]
+   server_ips                     [127.0.0.1 ::1]
+   tls_ca_key_bits                2048
+   tls_ca_key_type                rsa
+   tls_min_version                tls12 
+   ```
+1. Extract the `root-ca` of the KMIP secrets engine into the file `vault-ca.pem`
+   ```
+   ./vault read kmip/ca -format=json | jq -r '.data | .ca_pem' >> vault-ca.pem && cat vault-ca.pem
+   ```
+1. Create Scope and Roles
+   ```
+   vault write -f kmip/scope/finance
+   Success! Data written to: kmip/scope/finance
+   ```
+   List out KMIP Scope and Roles
+   ```
+   ./vault read kmip/scope/finance/role/accounting
+   ```
+   ```
+   Key                    Value
+   ---                    -----
+   operation_all          true
+   tls_client_key_bits    0
+   tls_client_key_type    n/a
+   tls_client_ttl         0s
+   ```
 
 ## Conclusion
