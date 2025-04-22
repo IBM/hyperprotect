@@ -141,7 +141,7 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    Last WAL                33 
    ```
 
-## Step 2 Login to vault and enable KMIP
+## Step 2 - Login to vault and enable KMIP
 1. Login to Vault with the "Inital Root Token"
    ```
    ./vault login <initial root token>
@@ -193,5 +193,75 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    tls_client_key_type    n/a
    tls_client_ttl         0s
    ```
+1. Generate `Client Certificate` for IBM Flash System (FS9200)
+   ```
+   ./vault write -format=json kmip/scope/finance/role/accounting/credential/generate format=pem > credential.json && cat credential.json
+   jq -r .data.certificate < credential.json > cert.pem
+   jq -r .data.private_key < credential.json > key.pem
+   ```
+
+## Step 3 - Configure externel Key Server for IBM Flash System
+1. Logon to the "IBM Flash System UI"
+   
+   <img src="pictures/flash-system-ui-login.png" alt="IBM Flash System UI" width="640" height="480">
+1. Create CSR on the IBM Flash System command line
+   ```
+   openssl x509 -req -in CAvault.csr -CA CARoot_cert.pem -CAkey CARootPrivateKey.pem -CAcreateserial -days 365 -extfile openssl.cnf -extensions v3_req -out EndPointCluster01.pem
+   ```
+1. Copy the CSR file `fs9200_cert_new.csr` to the Vault Server and `sign` it with this command:
+   ```
+   ./vault write -f kmip/scope/finance/role/accounting/credential/sign csr=@/etc/vault.d/fs9200_cert_new.csr 
+   ```
+   - copy the ca-chain to the file `vault-kmip-ca-chain.pem`
+   - copy the certificate to the file `fs9200-vault-certificate.pem`
+1. On the "IBM Flash System UI", navigate to `Settings -> Encryption` and click on `Enable Encryption`
+   
+   <img src="pictures/flash-system-ui-encryption-enable.png" alt="IBM Flash System UI" width="640" height="480">
+1. Select "Key Server" and choose "Thales CipherTrust Manager"
+   ![flash system encryption key server](pictures/flash-system-ui-keyserver-1.png)
+
+   - No need to provide userid / password on this screen
+   - Go to the next step
+1. On the "Add Key Server" panel,
+   ![flash system encryption key server](pictures/flash-system-ui-keyserver-add.png)
+
+   - Enter the `external` IP address of the KMIP Server
+   - Enter the Port number of the KMIP Server
+   - Proceed to the next screen
+1. On the next panel, upload the certificate from the KMIP server
+   - vault-kmip-ca-chain.pem
+1. If all configuration elements are in place, the Flash System should be able to establish connection with the Vault-KMIP Key Server
+   ![flash system encryption key server](pictures/flash-system-ui-keyserver-connect.png)
+
+## Step 4 - Configure volume encryption on IBM Flash System
+On the IBM Flash System UI,
+1. Create an "Encrypted Volume Pool" for encrypted volumes, by navigating to Volumes -> Volumes by pool -> "Create Pool"
+   ![flash system encryption key server](pictures/flash-system-ui-volume-pool-encryption.png)
+
+   - select "encryption"
+   - select a provisioning policy
+
+1. Add "storage" to the volume pool by clicking on "Pool Actions" -> "Add Storage"
+  ![flash system encryption key server](pictures/flash-system-ui-volume-pool-add-storage-1.png)
+
+  - choose the number of drives
+  - choose the RAID level
+  - check the total storage provisioned
+  - click on "Add Storage"
+
+  ![flash system encryption key server](pictures/flash-system-ui-volume-pool-add-storage-2.png)
+  
+1. Create an "Encrypted Volume" in the "Encrypted Volume Pool", by navigating to Volumes -> "Create Volumes"
+   ![flash system encryption key server](pictures/flash-system-ui-volume-create.png)
+
+   Click on "Define Volume Properties" with a volume name, for example `vault-kmip-encrypted-vol`
+   ![flash system encryption key server](pictures/flash-system-ui-volume-properties.png)
+
+   Back on the "Create Volumes" panel, click on "Create Volumes"
+   ![flash system encryption key server](pictures/flash-system-ui-volume-create-2.png)
+
+1. The encrypted volume must be available now for use:
+   ![flash system encryption key server](pictures/flash-system-ui-volume-create-3.png)
 
 ## Conclusion
+Now that you have gone through the whole process of creating encrypted volumes with KMIP on Vault, try creating some files on the encrypted volumes. Make sure the data in the volumes is encrypted. To further fortify the configuration, the Vault installation can be integrated with the IBM HSM on LinuxONE.
