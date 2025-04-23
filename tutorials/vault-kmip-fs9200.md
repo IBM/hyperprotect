@@ -1,4 +1,5 @@
 # Configuring Vault KMIP as Key Server for IBM Flash System
+*Sandeep Batta, Robbie Avill, Swathi C*
 
 ## Introduction
 Storage Systems are data repositories that hold the key to *data-at-rest security*. Whether it is in the cloud or on an enterprise' on-premise infrastructure, storage systems have inbuilt data-protection. With multifold increase in cybersecurity incidents, regulations call for compliance with enhanced data protection standards. These standards require storage systems to obtain data-encryption-keys (DEKs) from a *Key Server*. A *Key Server*, in the context of a *Storage System*, is a [Key Management System (KMS)](https://en.wikipedia.org/wiki/Key_management#Key_management_system) that is accessible with [Key Management Interoeprability Protocol (KMIP)](https://en.wikipedia.org/wiki/Key_Management_Interoperability_Protocol). 
@@ -14,8 +15,8 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
   
 
 ## Step 1 - Install Vault
-1. Logon to the s390x server
-1. Prepare the environment
+1. Login to the s390x server
+2. Prepare the environment
    ```
    export VAULT_HOME=/etc/vault.d
    export VAULT_RAFT=/opt/vault/data
@@ -23,25 +24,25 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    mkdir -p $VAULT_RAFT
    cd $VAULT_HOME
    ```
-1. Download the latest version of Vault-s390x from [releases.hashicorp.com](https://releases.hashicorp.com/vault/1.19.1+ent/) and check if Vault looks good:
+3. Download the latest version of Vault-s390x from [releases.hashicorp.com](https://releases.hashicorp.com/vault/1.19.1+ent/) and check if Vault looks good:
    ```
    wget https://releases.hashicorp.com/vault/1.18.4+ent/vault_1.18.4+ent_linux_s390x.zip
    unzip vault_1.18.4+ent_linux_s390x.zip
    ./vault version
    ```
-1. Create the Vault License file by copying into a file `$VAULT_HOME/vault-ent-license.hclic`
-1. Apply the vault license
+4. Create the Vault License file by copying into a file `$VAULT_HOME/vault-ent-license.hclic`
+5. Apply the vault license
    ```
    export VAULT_LICENSE=$VAULT_HOME/vault-ent-license.hclic
    ```
-1. Copy [vault-sample-config.hcl](configuration-files/vault-sample-config.hcl) to `$VAULT_HOME/vault-config.hcl`
+6. Copy [vault-sample-config.hcl](configuration-files/vault-sample-config.hcl) to `$VAULT_HOME/vault-config.hcl`
    double check the `license_path` statement points to $VAULT_LICENSE
-1. Start the Vault server:
+7. Start the Vault server:
    ```
    ./vault server -config=$VAULT_HOME/vault-config.hcl
    ```
    Expect a sample output like this [vault-startup-sample-output](sample-files/vault-startup-sample-output)
-1. Check Vault status
+8. Check Vault status
    ```
    export VAULT_ADDR=http://127.0.0.1:8205
    ./vault status
@@ -69,7 +70,7 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    Raft Applied Index      861411
    Last WAL                330202 
    ```
-1. Check Vault License status
+9. Check Vault License status
    ```
    ./vault license inspect $VAULT_LICENSE_PATH
    ```
@@ -92,7 +93,7 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
 
    License is valid
    ```
-1. Initialize vault and unseal
+10. Initialize vault and unseal
    ```
    ./vault operator init
    ```
@@ -114,7 +115,7 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    ```
    ./vault unseal <unseal-key>
    ```
-1. Make sure Vault is now unsealed
+11. Make sure Vault is now unsealed
    ```
    ./vault status
    ```
@@ -146,7 +147,7 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    ```
    ./vault login <initial root token>
    ```
-1. Enable KMIP Secrets Engine
+2. Enable KMIP Secrets Engine
    ```
    ./vault secrets enable kmip
    Success! Enabled the kmip secrets engine at: kmip/ 
@@ -172,11 +173,11 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    tls_ca_key_type                rsa
    tls_min_version                tls12 
    ```
-1. Extract the `root-ca` of the KMIP secrets engine into the file `vault-ca.pem`
+3. Extract the `root-ca` of the KMIP secrets engine into the file `vault-ca.pem`
    ```
    ./vault read kmip/ca -format=json | jq -r '.data | .ca_pem' >> vault-ca.pem && cat vault-ca.pem
    ```
-1. Create Scope and Roles
+4. Create Scope and Roles
    ```
    vault write -f kmip/scope/finance
    Success! Data written to: kmip/scope/finance
@@ -193,7 +194,7 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    tls_client_key_type    n/a
    tls_client_ttl         0s
    ```
-1. Generate `Client Certificate` for IBM Flash System (FS9200)
+5. Generate `Client Certificate` for IBM Flash System (FS9200)
    ```
    ./vault write -format=json kmip/scope/finance/role/accounting/credential/generate format=pem > credential.json && cat credential.json
    jq -r .data.certificate < credential.json > cert.pem
@@ -201,36 +202,42 @@ This tutorial will provide step-by-step instructions on how to configure a Vault
    ```
 
 ## Step 3 - Configure externel Key Server for IBM Flash System
-1. Logon to the "IBM Flash System UI"
+1. Login to the "IBM Flash System UI"
    
    <img src="pictures/flash-system-ui-login.png" alt="IBM Flash System UI" width="640" height="480">
-1. Create CSR on the IBM Flash System command line
-   ```
-   openssl x509 -req -in CAvault.csr -CA CARoot_cert.pem -CAkey CARootPrivateKey.pem -CAcreateserial -days 365 -extfile openssl.cnf -extensions v3_req -out EndPointCluster01.pem
-   ```
-1. Copy the CSR file `fs9200_cert_new.csr` to the Vault Server and `sign` it with this command:
+
+2. Create CSR on the IBM Flash System by navigating to Security -> System Certificates. Click on the ellipsis on the right corder and select update certificate. Then, select externally signed certfixate and enter the details. This creates certificate signing request by the Flash system.
+
+3. Copy the CSR file `fs9200_cert_new.csr` to the Vault Server and `sign` it with this command:
    ```
    ./vault write -f kmip/scope/finance/role/accounting/credential/sign csr=@/etc/vault.d/fs9200_cert_new.csr 
    ```
    - copy the ca-chain to the file `vault-kmip-ca-chain.pem`
    - copy the certificate to the file `fs9200-vault-certificate.pem`
-1. On the "IBM Flash System UI", navigate to `Settings -> Encryption` and click on `Enable Encryption`
+
+4. On the "IBM Flash System UI", navigate to `Settings -> Security -> System Certificate` and click on `Install Signed Certificate`. Select `Add Certificate`. Provide `fs9200-vault-certificate.pem` created earllier.
+
+5. On the "IBM Flash System UI", navigate to `Settings -> Encryption` and click on `Enable Encryption`
    
    <img src="pictures/flash-system-ui-encryption-enable.png" alt="IBM Flash System UI" width="640" height="480">
-1. Select "Key Server" and choose "Thales CipherTrust Manager"
+
+6. Select "Key Server" and choose "Thales CipherTrust Manager"
    ![flash system encryption key server](pictures/flash-system-ui-keyserver-1.png)
 
    - No need to provide userid / password on this screen
    - Go to the next step
-1. On the "Add Key Server" panel,
+
+7. On the "Add Key Server" panel,
    ![flash system encryption key server](pictures/flash-system-ui-keyserver-add.png)
 
    - Enter the `external` IP address of the KMIP Server
    - Enter the Port number of the KMIP Server
    - Proceed to the next screen
-1. On the next panel, upload the certificate from the KMIP server
+
+8. On the next panel, upload the certificate from the KMIP server
    - vault-kmip-ca-chain.pem
-1. If all configuration elements are in place, the Flash System should be able to establish connection with the Vault-KMIP Key Server
+
+9. If all configuration elements are in place, the Flash System should be able to establish connection with the Vault-KMIP Key Server
    ![flash system encryption key server](pictures/flash-system-ui-keyserver-connect.png)
 
 ## Step 4 - Configure volume encryption on IBM Flash System
@@ -241,7 +248,7 @@ On the IBM Flash System UI,
    - select "encryption"
    - select a provisioning policy
 
-1. Add "storage" to the volume pool by clicking on "Pool Actions" -> "Add Storage"
+2. Add "storage" to the volume pool by clicking on "Pool Actions" -> "Add Storage"
   ![flash system encryption key server](pictures/flash-system-ui-volume-pool-add-storage-1.png)
 
   - choose the number of drives
@@ -251,7 +258,7 @@ On the IBM Flash System UI,
 
   ![flash system encryption key server](pictures/flash-system-ui-volume-pool-add-storage-2.png)
   
-1. Create an "Encrypted Volume" in the "Encrypted Volume Pool", by navigating to Volumes -> "Create Volumes"
+3. Create an "Encrypted Volume" in the "Encrypted Volume Pool", by navigating to Volumes -> "Create Volumes"
    ![flash system encryption key server](pictures/flash-system-ui-volume-create.png)
 
    Click on "Define Volume Properties" with a volume name, for example `vault-kmip-encrypted-vol`
@@ -260,7 +267,7 @@ On the IBM Flash System UI,
    Back on the "Create Volumes" panel, click on "Create Volumes"
    ![flash system encryption key server](pictures/flash-system-ui-volume-create-2.png)
 
-1. The encrypted volume must be available now for use:
+4. The encrypted volume must be available now for use:
    ![flash system encryption key server](pictures/flash-system-ui-volume-create-3.png)
 
 ## Conclusion
