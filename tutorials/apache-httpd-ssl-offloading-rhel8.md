@@ -157,4 +157,4 @@ If all of the prerequisites are in place, it should take you no more than 30 min
 ## Conclusion
 Offloading TLS with an HSM allows for a single, centralized point of control and management of "Private Keys" used to create certificates. If HSM services are part of a larger "Encryption Services Platform", policies can be created to align with an organization's security policies. This greatly simplifies the administration overhead and also allows for separation of the security role from the application owner role to the security admin.
 
-The procedure described here is applicable, with some modifications, to other load balancers, web application firewalls, caching servers, etc. A `one-click` install script that covers all the steps outlined in this tutorial is described here: [tlsoffload-onclick-readme](apache-httpd-ssl-offloading-rhel-script.md)
+The procedure described here is applicable, with some modifications, to other load balancers, web application firewalls, caching servers, etc.
