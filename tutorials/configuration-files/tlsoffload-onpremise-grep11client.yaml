@@ -1,0 +1,32 @@
+tokens:
+  0:
+    grep11connection:
+      address: "<GREP11-ENDPOINT-IP>"
+      port: "<GREP11-ENDPOINT-PORT>"
+      tls:
+        enabled: true
+        mutual: true
+        cacert: "/etc/ep11client/certs/grep11-ca.pem"
+        certfile: "/etc/ep11client/certs/client.pem"
+        keyfile: "/etc/ep11client/certs/client.key"
+    storage:
+ #     filestore:
+ #       enabled: true
+ #       storagepath: <GREP11-KeyStore>
+      remotestore:
+        enabled: true
+      # localpostgres:
+      #   enabled: false
+      #   connectionstring:
+    users:
+      0: # SO User
+        name: "SO user"
+      1: # User
+        name: "Normal user"
+        tokenspaceID: "<UUID-#1>"
+      2: # Anonymous user
+        name: "Anonymous"
+        tokenspaceID: "<UUID-#2>"
+logging:
+  loglevel: "trace"
+  logpath: /tmp/grep11.log
