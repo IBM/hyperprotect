@@ -30,9 +30,6 @@ If all of the prerequisites are in place, it should take you no more than 30 min
     - Client Certificate
     - Client Key
 - Access to a Certifcate Authority (CA) to create a Certificate from a CSR that being created using a  `private-key` created with the HSM
-- 2 x UUIDs - you can use an [UUID-Generator](https://www.uuidgenerator.net)
-  - UUID-#1 - for the Normal HSM user
-  - UUID-#2 - for the Anonymous HSM user
 
 ## Step 1. Prepare the server
 1. Logon to your `RHEL 8.10` server
