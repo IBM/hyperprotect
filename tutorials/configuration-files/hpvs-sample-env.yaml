@@ -1,0 +1,8 @@
+type: env
+logging:
+  syslog:
+    hostname: ${HOSTNAME}
+    port: 6514
+    server: ${CA}
+    cert: ${CLIENT_CERTIFICATE}
+    key: ${CLIENT_PRIVATE_KEY}
