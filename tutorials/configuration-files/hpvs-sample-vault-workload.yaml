@@ -1,0 +1,41 @@
+type: workload
+play:
+  templates:
+    - apiVersion: v1
+      kind: Pod
+      metadata:
+        name: samplevault
+      spec:
+        securityContext:
+          privileged: false
+        containers:
+        - name: zcatvault
+          image: <us.icr.io/path-to-vault-image>
+          securityContext:
+            privileged: false
+          volumeMounts:
+          - name: vault-data
+            mountPath: /vault/data
+          env:
+          - name: conf
+            value: <base64-vault-conf.hcl> 
+          - name: license
+            value: <license-key>
+          ports:
+          - containerPort: 8200
+            hostPort: 8200
+        volumes:
+        - name: vault-data
+          hostPath:
+            path: /mnt/data
+            type: DirectoryOrCreate   
+        restartPolicy: Never
+volumes:
+  vault-vol:
+    mount: "/mnt/data"
+    seed: "vault-vol-luks-key"
+    filesystem: "ext4"
+auths:
+  us.icr.io:
+    password: <us-icr-apikey>
+    username: iamapikey
