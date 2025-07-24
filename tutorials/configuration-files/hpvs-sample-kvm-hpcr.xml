@@ -1,0 +1,52 @@
+<domain type='kvm'>
+  <name>grep11se02</name>
+  <uuid>2315f8ea-a340-4506-abbf-ae04cf7ea868</uuid>
+  <metadata>
+    <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
+      <libosinfo:os id="http://ubuntu.com/ubuntu/20.04"/>
+    </libosinfo:libosinfo>
+  </metadata>
+  <memory unit='KiB'>3903488</memory>
+  <currentMemory unit='KiB'>3903488</currentMemory>
+  <vcpu placement='static'>2</vcpu>
+  <os>
+    <type arch='s390x' machine='s390-ccw-virtio-rhel8.2.0'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+  <cpu mode='host-model' check='partial'/>
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+    <emulator>/usr/libexec/qemu-kvm</emulator>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2' iommu='on'/>
+      <source file='/var/lib/libvirt/images/hpcr/student02/ibm-hyper-protect-container-runtime-23.6.2.qcow2'/>
+      <backingStore/>
+      <target dev='vda' bus='virtio'/>
+      <address type='ccw' cssid='0xfe' ssid='0x0' devno='0x0000'/>
+    </disk>
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='raw' cache='none' io='native' iommu='on'/>
+      <source file='/var/lib/libvirt/images/hpvslab/student02/ciiso.iso'/>
+      <target dev='vdc' bus='virtio'/>
+      <readonly/>
+      <address type='ccw' cssid='0xfe' ssid='0x0' devno='0x0002'/>
+    </disk>
+    <controller type='pci' index='0' model='pci-root'/>
+    <interface type='network'>
+      <mac address='52:54:00:b1:e0:11'/>
+      <source network='default'/>
+      <model type='virtio'/>
+      <driver name='vhost' iommu='on'/>
+      <address type='ccw' cssid='0xfe' ssid='0x0' devno='0x0001'/>
+    </interface>
+    <console type='pty'>
+      <target type='sclp' port='0'/>
+    </console>
+    <audio id='1' type='none'/>
+    <memballoon model='none'/>
+    <panic model='s390'/>
+  </devices>
+</domain>
