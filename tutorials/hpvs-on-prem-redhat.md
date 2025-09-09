@@ -7,7 +7,7 @@ A Confidential Computing enclave is like a Secure Compartmented Information Faci
 
 ![HPVS-SCIF](pictures/hpvs-scif.jpg)
 
-This tutorial provides additional insight into official documentation on [Setting up Hyper Protect Virtual Servers](https://www.ibm.com/docs/en/hpvs/2.2.x?topic=servers-setting-up-configuring-hyper-protect-virtual), to avoid going back and forth between different sets of documentations.
+This tutorial provides additional insight into official documentation on [Setting up and configuring IBM Hyper Protect Container Runtime](https://www.ibm.com/docs/en/hpcr/1.1.x?topic=runtime-setting-up-configuring-hyper-protect-container), to avoid going back and forth between different sets of documentations.
 
 
 ## Pre-requisites
@@ -16,7 +16,7 @@ This tutorial provides additional insight into official documentation on [Settin
 - Access to a container image of the `workload` that will run inside the Hyper Protect Confidential Container Runtime, for example `Vault`
 
 *Notes*: 
-- For detailed HW requirements, check [HPVS System Requirements](https://www.ibm.com/docs/en/hpvs/2.2.x?topic=servers-system-requirements)
+- For detailed HW requirements, check [HPCR System Requirements](https://www.ibm.com/docs/en/hpcr/1.1.x?topic=runtime-system-requirements)
 - For details on downloading HPVS image, check [Downloadng HPCR image](https://www.ibm.com/docs/en/hpvs/2.2.x?topic=servers-downloading-hyper-protect-container-runtime-image)
 
 ## Step 1. Confirm "Secure Execution" is enabled
@@ -59,8 +59,8 @@ mkdir -p /var/lib/libvirt/overlay
 
 ## Step 3. Download the HPVS bundle
 1. Logon to [IBM Passport Advantage](https://www-01.ibm.com/software/passportadvantage/pao_customer.html)
-1. Navigate to **My Programs** and select **IBM  Hyper Protect Virtual Servers**
-1. Download the latest version. The name of the downloaded file will be something like `IBM_HPVS_OnPrem_v2.2.2_EN.tar.gz`
+1. Navigate to **My Programs** and select **IBM  Hyper Protect Container Runtime**
+1. Download the latest version. The name of the downloaded file will be something like `IBM_HPCR_RHVS_v1.1_EN.tar.gz`
 1. Upload the HPVS Image to the LinuxONE RHEL LPAR like this:
    ```
    scp </path/to/IBM_HPVS_OnPrem_v2.2.2_EN.tar.gz> <userid>@<linuxone-rhel-lpar>:/opt/hpcr-files
@@ -70,10 +70,10 @@ mkdir -p /var/lib/libvirt/overlay
 Logon to the LinuxONE RHEL LPAR and issue the following commands:
 ```
 cd /opt/hpcr-files
-gunzip IBM_HPVS_OnPrem_v2.2.2_EN.tar.gz
-tar -xvf IBM_HPVS_OnPrem_v2.2.2_EN.tar
-tar -xvzf M0RHCEN.tar.gz
-cp images/ibm-hyper-protect-container-runtime-25.4.0.qcow2 /var/lib/libvirt/images/hpcr
+gunzip IBM_HPCR_RHVS_v1.1_EN.tar.gz
+tar -xvf IBM_HPCR_RHVS_v1.1_EN.tar
+tar -xvzf M0SK4EN.tar.gz
+cp images/ibm-hyper-protect-container-runtime-rhvs-1.1.0.qcow2 /var/lib/libvirt/images/hpcr
 ```
 
 *Note*: The files names in your case might be different depending on the HPVS version you are working with
