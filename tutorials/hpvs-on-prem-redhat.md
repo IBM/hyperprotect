@@ -63,7 +63,7 @@ mkdir -p /var/lib/libvirt/overlay
 1. Download the latest version. The name of the downloaded file will be something like `IBM_HPCR_RHVS_v1.1_EN.tar.gz`
 1. Upload the HPVS Image to the LinuxONE RHEL LPAR like this:
    ```
-   scp </path/to/IBM_HPVS_OnPrem_v2.2.2_EN.tar.gz> <userid>@<linuxone-rhel-lpar>:/opt/hpcr-files
+   scp </path/to/IBM_HPCR_RHVS_v1.1_EN.tar.gz> <userid>@<linuxone-rhel-lpar>:/opt/hpcr-files
    ```  
 
 ## Step 4. Extract the HPVS image file
@@ -92,7 +92,7 @@ cp images/ibm-hyper-protect-container-runtime-rhvs-1.1.0.qcow2 /var/lib/libvirt/
 - Copy the [sample-env.yaml](configuration-files/hpvs-sample-env.yaml) file to `/var/lib/libvirt/images/hpcr/env.yaml`
 - Edit the following entries in the `env.yaml` file replacing:
   1. `${HOSTNAME}` with the hostname or IP of the SYSLOG server on the network and change the port number if different
-  2. `<${CA}` with the YAML scallar equivalent of the CA certificate (for example: `server: "-----BEGIN CERTIFICATE-----\nMIIFCTCCAvECFEp7wJLz4jNStIsV..."`)
+  2. `${CA}` with the YAML scallar equivalent of the CA certificate (for example: `server: "-----BEGIN CERTIFICATE-----\nMIIFCTCCAvECFEp7wJLz4jNStIsV..."`)
   3. `${CLIENT_CERTIFICATE}` with the YAML scallar equivalent of the client certificate
   4. `${CLIENT_PRIVATE_KEY}` with the YAML scallar equivalent of the client certificate PKCS8 key
 - Copy the [sample-vault-workload.yaml](configuration-files/hpvs-sample-vault-workload.yaml) file to `/var/lib/libvirt/images/hpcr/workload.yaml`
