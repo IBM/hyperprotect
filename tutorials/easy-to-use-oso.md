@@ -61,6 +61,68 @@ Recommended System requirements:
 |OS           |RHEL 9.x|RHEL 9.x|RHEL 9.x|RHEL 9.x |
 |Feature Code |0115 SE |0115 SE |0115 SE |0103, 0104 - SSC | 0115 SE |
 
+#### To add more disk space with DASDs to linux
+
+1. Check which DADSs are available with `lsdasd` command:
+```
+[root@cotoso1 ~]# lsdasd
+Bus-ID    Status    Name      Device  Type         BlkSz  Size      Blocks
+================================================================================
+0.0.8618  active    dasda     94:0    ECKD         4096   42259MB   10818360
+0.0.8619  active    dasdb     94:4    ECKD         4096   42259MB   10818360
+0.0.861a  active    dasdc     94:8    ECKD         4096   42259MB   10818360
+0.0.861b  active    dasdd     94:12   ECKD         4096   42259MB   10818360
+0.0.861c  active    dasde     94:16   ECKD         4096   42259MB   10818360
+0.0.861d  active    dasdf     94:20   ECKD         4096   42259MB   10818360
+0.0.861e  active    dasdg     94:24   ECKD         4096   42259MB   10818360
+0.0.861f  active    dasdh     94:28   ECKD         4096   42259MB   10818360
+```
+1. Check if any are being used by the system with `df -h` command (or `mount` command):
+```
+[root@cotoso1 ~]# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+devtmpfs        4.0M     0  4.0M   0% /dev
+tmpfs            16G   32K   16G   1% /dev/shm
+tmpfs           6.3G  8.6M  6.2G   1% /run
+/dev/dasda1      41G  7.9G   31G  21% /
+tmpfs           3.2G   32K  3.2G   1% /run/user/0
+```
+1. In the case above `dasda` is being used but we have `dasdb` through to `dasdh` to use all with 42GB, so lets add around 160GB (4 DASDs) to `/data`:
+ - Create PVs (physical volumes):
+ ```
+ pvcreate /dev/dasdb1
+ pvcreate /dev/dasdc1
+ pvcreate /dev/dasdd1
+ pvcreate /dev/dasde1
+ ```
+ - Create a VG (volume group) called `vg_data`:
+ ```
+ vgcreate vg_data /dev/dasdb1 /dev/dasdc1 /dev/dasdd1 /dev/dasde1
+ ```
+ - Create a LV (logical volume) on the previously created `vg_data` group called `lv_data`:
+ lvcreate -n lv_data -l 100%FREE vg_data
+ ```
+ - Format `lv_data` and mount it on `/data`:
+ mkfs.xfs /dev/vg_data/lv_data
+ mkdir /data
+ mount /dev/vg_data/lv_data /data
+ ```
+ - To make this volume mount persistent during reboots it must be added to `/etc/fstab` (becareful when editing this file as making changes in other lines will probably result in an unbootable system, make a backup copy firts with `cp /etc/fstab fstab.backup`).
+  - Get block id of the new volume with `blkid /dev/vg_data/lv_data` command:
+  ```
+  [root@cotoso1 ~]# blkid /dev/vg_data/lv_data
+  /dev/vg_data/lv_data: UUID="be27deac-3099-4acc-a056-92bcded2a3e2" TYPE="xfs"
+  ```
+  - *Add* the following line to ``/etc/fstab`, but change the UUID to match the previous output on YOUR system `UUID=be27deac-3099-4acc-a056-92bcded2a3e2   /data   xfs   defaults   0 0`
+  - Test before rebooting:
+  ```
+  systemctl daemon-reload
+  umount /data
+  mount -a
+  df -h /data
+  ```
+  Any errors *do not reboot* before fixing them (worse case scenario try reverting fstab to what it was with `cp fstab.backup /etc/fstab`).
+
 ### Pre-2. Install required packages
 *Required on `LPAR-1, LPAR-2, LPAR-3`*
 - Open terminal sessions, with `root` or with `sudo` permissions
