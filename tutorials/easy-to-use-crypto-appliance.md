@@ -75,7 +75,7 @@ For more details about configuring the SSC LPAR, check the [SSC User Guide](http
 ## Step 2. Configure the Crypto Appliance
 
 There are two options here:
- - Using a helper script by following this [guide](https://github.ibm.com/ZaaS/zcat-assets/blob/main/tutorials/CryptoApplianceSetupPackage.md) that will configure the crypto appliance automatically and will also create the certificates and mkae available the instructions to configure the local linux as a SYSLOG server for the Crytpo Appliance as well as help stand up a grep11 container connected to the crypto appliance)
+ - Using a helper script by following [Crypto Appliance Setup Package](CryptoApplianceSetupPackage.md) that will configure the crypto appliance automatically and will also create the certificates and mkae available the instructions to configure the local linux as a SYSLOG server for the Crytpo Appliance as well as help stand up a grep11 container connected to the crypto appliance)
  - Manually following instructions below that require knowledge on how to execute API commands (there are CURL examples in the first two steps)
 
 ### a) Obtain an API-token to communicate with the Crypto Appliance
