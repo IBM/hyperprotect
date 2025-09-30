@@ -107,13 +107,13 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
  mkdir /data
  mount /dev/vg_data/lv_data /data
  ```
- - To make this volume mount persistent during reboots it must be added to `/etc/fstab` (becareful when editing this file as making changes in other lines will probably result in an unbootable system, make a backup copy firts with `cp /etc/fstab fstab.backup`).
+ - To make this volume mount persistent during reboots it must be added to `/etc/fstab` (**becareful** when editing this file as making changes in other lines will probably result in an unbootable system, make a backup copy firts with `cp /etc/fstab fstab.backup`).
   - Get block id of the new volume with `blkid /dev/vg_data/lv_data` command:
   ```
   [root@cotoso1 ~]# blkid /dev/vg_data/lv_data
   /dev/vg_data/lv_data: UUID="be27deac-3099-4acc-a056-92bcded2a3e2" TYPE="xfs"
   ```
-  - *Add* the following line to ``/etc/fstab`, but change the UUID to match the previous output on YOUR system `UUID=be27deac-3099-4acc-a056-92bcded2a3e2   /data   xfs   defaults   0 0`
+  - *Add* the following line to `/etc/fstab`, but change the UUID to match the previous output on YOUR system `UUID=be27deac-3099-4acc-a056-92bcded2a3e2   /data   xfs   defaults   0 0`
   - Test before rebooting:
   ```
   systemctl daemon-reload
@@ -121,7 +121,7 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
   mount -a
   df -h /data
   ```
-  Any errors *do not reboot* before fixing them (worse case scenario try reverting fstab to what it was with `cp fstab.backup /etc/fstab`).
+  Any errors **do not reboot** before fixing them (worse case scenario try reverting fstab to what it was with `cp fstab.backup /etc/fstab`).
 
 ### Pre-2. Install required packages
 *Required on `LPAR-1, LPAR-2, LPAR-3`*
