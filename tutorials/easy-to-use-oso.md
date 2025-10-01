@@ -470,7 +470,7 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
    ```
 1. Retrieve digests to be used by Terraform
    ```
-   export DIGEST_FOR_TERRAFORM=$(skopeo inspect docker://registry.control23.dap.local/oso/oso:v1.4.0 --creds $REGISTRY_USER:$REGISTRY_PASSWORD | jq '.Name + "@" + .Digest')
+   export DIGEST_FOR_TERRAFORM=$(skopeo inspect docker://registry.control23.dap.local/oso/oso:v1.4.0 --creds $REGISTRY_USER:$REGISTRY_PASSWORD | jq '.Digest' | tr -d \")
    ```
 
 ## Step 8. Configure Certificates
@@ -503,8 +503,8 @@ This step is only required if you will use this OSO environment for Demo / Test 
    ```
 1. Edit `terraform.tfvars` to make updates
    ```
-   sed -i 's|registry.control12.dap.local/oso/oso@sha256:|registry.control12.dap.local/oso/oso@sha256:'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
-   sed -i 's|registry.control23.dap.local/oso/oso@sha256:|registry.control23.dap.local/oso/oso@sha256:'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
+   sed -i 's|registry.control12.dap.local/oso/oso@sha256:|registry.control12.dap.local/oso/oso@'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
+   sed -i 's|registry.control12.dap.local/oso/oso@sha256:|registry.control23.dap.local/oso/oso@'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
    ```
    - copy-paste value for APPROVER_FINGERPRINTS from `$OSO_HOME/contracts/certificates/user1-fingerprint` and `$OSO_HOME/contracts/certificates/user2-fingerprint` like this example:
      ```
