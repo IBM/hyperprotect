@@ -393,7 +393,7 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
 1. Try connecting to vm-LPAR1
    ```
    cd $OSO_HOME/hpvs-environment/example-single-server
-   ssh -i ./vm-lpar1/id_ci ubuadm@logging.control12.dap.local - for LPAR-1
+   ssh -i ./vm-lpar1/id_ci ubuadm@logging.control12.dap.local
    ```
    
 ### On `LPAR-2`
@@ -429,7 +429,7 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
 1. Try connecting to vm-LPAR2
    ```
    cd $OSO_HOME/hpvs-environment/example-single-server
-   ssh -i ./vm-lpar2/id_ci ubuadm@logging.control23.dap.local - for LPAR-2
+   ssh -i ./vm-lpar2/id_ci ubuadm@logging.control23.dap.local
    ```
    
 ### On `LPAR-3`
@@ -444,6 +444,11 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
    ./create-certs.sh
    ./create-cloud-init.sh
    virsh create domain.xml --console
+   ```
+1. Try connecting to vm-LPAR3
+   ```
+   cd $OSO_HOME/hpvs-environment/example-single-server
+   ssh -i ./vm-lpar3/id_ci ubuadm@192.168.128.9
    ```
 
 ## Step 7. Load Docker Images
