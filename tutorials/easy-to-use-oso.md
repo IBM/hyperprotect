@@ -100,9 +100,11 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
  vgcreate vg_data /dev/dasdb1 /dev/dasdc1 /dev/dasdd1 /dev/dasde1
  ```
  - Create a LV (logical volume) on the previously created `vg_data` group called `lv_data`:
+ ```
  lvcreate -n lv_data -l 100%FREE vg_data
  ```
  - Format `lv_data` and mount it on `/data`:
+ ```
  mkfs.xfs /dev/vg_data/lv_data
  mkdir /data
  mount /dev/vg_data/lv_data /data
