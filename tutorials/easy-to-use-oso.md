@@ -426,7 +426,8 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
 1. Copy registry-server-certificate into Docker-certs folder on the host
    ```
    export REGISTRY_CA_CRT=$(sudo cat registry-server.crt)
-   sudo cp registry-server.crt /etc/docker/certs.d/registry.control23.dap.local/ca.crt
+   mkdir /etc/containers/certs.d/registry.control23.dap.local/
+   sudo cp registry-server.crt /etc/containers/certs.d/registry.control23.dap.local/ca.crt
    ```
 1. Try connecting to vm-LPAR2
    ```
