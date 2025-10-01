@@ -609,7 +609,7 @@ Create Frontend and Backend workload contracts. This step is specific to the plu
    cd $OSO_HOME/contracts/conductor
    cp terraform.tfvars.template terraform.tfvars
    ```
-1. Update `terraform.tfvars` as follows, but please be advised that unless the value is a base64 value (like REGISTRY_CA below) it should follow `<<-EOT ... EOY` YAML convention the like this:
+1. Update `terraform.tfvars` as follows, but please be advised that unless the value is a base64 value (like REGISTRY_CA below) it should follow `<<-EOT ... EOT` YAML convention the like this:
      ```
      ATTESTATION_PUBKEY=<<-EOT
      -----BEGIN PUBLIC KEY-----
