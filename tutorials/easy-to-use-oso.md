@@ -300,10 +300,11 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
    export LIBVIRT_PRIVATEKEY_LPAR1=$(cat ~/.ssh/$OSO_PREFIX-libvirt-key)
    export LIBVIRT_PUBLICKEY_LPAR1=$(cat ~/.ssh/$OSO_PREFIX-libvirt-key.pub)
    ```
-1. Enable `Conductor` login (execute this as `root` AND **PLEASE NOTE** to substiutte the `$LIBVIRT_PUBLICKEY_LPAR2` below from notepad/edit step 2.1 above - this `libvirt-user` ssh public key from LPAR2):
+1. Enable `Conductor` login by adding the ssh public key for user `libvirt-user` in LPAR2 to LPAR1 (continue executing this as `libvirt-user` and **PLEASE NOTE** to substiutte the `$LIBVIRT_PUBLICKEY_LPAR2` below from notepad/edit step 2.1):
    ```
    echo "$LIBVIRT_PUBLICKEY_LPAR2" >> ~/.ssh/authorized_keys  (from step 2.1 above)
    chmod 0600 ~/.ssh/authorized_keys
+   exit
    ```
 1. Allow TCP Forwarding (execute this as `root`):
    ```
@@ -324,10 +325,11 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
    export LIBVIRT_PRIVATEKEY_LPAR3=$(cat ~/.ssh/$OSO_PREFIX-libvirt-key)
    export LIBVIRT_PUBLICKEY_LPAR3=$(cat ~/.ssh/$OSO_PREFIX-libvirt-key.pub)
    ```
-1. Enable `Conductor` login (execute this as `root` AND **PLEASE NOTE** to substiutte the `$LIBVIRT_PUBLICKEY_LPAR2` below from notepad/edit step 2.1 above - this `libvirt-user` ssh public key from LPAR2):
+1. Enable `Conductor` login by adding the ssh public key for user `libvirt-user` in LPAR2 to LPAR3 (continue executing this as `libvirt-user` and **PLEASE NOTE** to substiutte the `$LIBVIRT_PUBLICKEY_LPAR2` below from notepad/edit step 2.1):
    ```   
    echo "$LIBVIRT_PUBLICKEY_LPAR2" >> ~/.ssh/authorized_keys  (from step 2.1 above)
    chmod 0600 ~/.ssh/authorized_keys
+   exit
    ```
 1. Allow TCP Forwarding (execute this as `root`):
    ```
