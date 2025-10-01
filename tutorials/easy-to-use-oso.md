@@ -260,74 +260,76 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
    ```
 ## Step 2. Configure Users
 ### Step 2.1 LPAR-2 / Conductor
-1. Create and configure libvirt-user
+1. Create and configure libvirt-user (execute this as `root`):
    ```
    adduser libvirt-user
    usermod -aG libvirt,qemu,kvm libvirt-user
+   ```
+1. Create Conductor SSH-Key-Pair (execute this initially as `root`, which will change to `libvirt-user` after the `sudo su -...` ALSO note to copy the `$LIBVIRT_PUBLICKEY_LPAR2` value to a notepad/editor):
+   ```
    sudo su - libvirt-user
    export OSO_PREFIX=<prefix>
-   ```
-1. Restrict HiperSocket operations to the Conductor
-   ```
-   echo 'libvirt-user ALL=(root) NOPASSWD: /usr/sbin/chzdev -a $HS12 online=1, /usr/sbin/chzdev -a $HS12 online=0, /usr/sbin/chzdev -a $HS23 online=1, /usr/sbin/chzdev -a $HS23 online=0' | EDITOR='tee -a' visudo
-   ```
-1. Create Conductor SSH-Key-Pair 
-   ```
    ssh-keygen -t ed25519 -a 4096 -f ~/.ssh/$OSO_PREFIX-libvirt-key -C ""
    export LIBVIRT_PRIVATEKEY_LPAR2=$(cat ~/.ssh/$OSO_PREFIX-libvirt-key)
    export LIBVIRT_PUBLICKEY_LPAR2=$(cat ~/.ssh/$OSO_PREFIX-libvirt-key.pub)
    echo $LIBVIRT_PUBLICKEY_LPAR2 >> ~/.ssh/authorized_keys
    chmod 0600 ~/.ssh/authorized_keys
+   exit
    ```
-1. Allow TCP Forwarding
+1. Allow TCP Forwarding (execute this as `root`):
    ```
    echo "AllowTCPForwarding yes" | sudo tee -a /etc/ssh/sshd_config
    ```
+1. Allow Conductor to perform HiperSocket operations as `libvirt-user` (execute this as `root`):
+   ```
+   echo 'libvirt-user ALL=(root) NOPASSWD: /usr/sbin/chzdev -a $HS12 online=1, /usr/sbin/chzdev -a $HS12 online=0, /usr/sbin/chzdev -a $HS23 online=1, /usr/sbin/chzdev -a $HS23 online=0' | EDITOR='tee -a' visudo
+   ```
   
 ### Step 2.2 LPAR-1 / Frontend
-1. Create and configure libvirt-user
+1. Create and configure `libvirt-user` (execute this as `root`):
    ```
    adduser libvirt-user
    usermod -aG libvirt,qemu,kvm libvirt-user
+
+   ```
+1. Create SSH-Key-Pair on FrontEnd (execute this initially as `root`, which will change to `libvirt-user` after the `sudo su -...`):
+   ```
    sudo su - libvirt-user
    export OSO_PREFIX=<prefix>
-   ```
-1. Create SSH-Key-Pair on FrontEnd
-   ```
    ssh-keygen -t ed25519 -a 4096 -f ~/.ssh/$OSO_PREFIX-libvirt-key -C ""
    export LIBVIRT_PRIVATEKEY_LPAR1=$(cat ~/.ssh/$OSO_PREFIX-libvirt-key)
    export LIBVIRT_PUBLICKEY_LPAR1=$(cat ~/.ssh/$OSO_PREFIX-libvirt-key.pub)
    ```
-1. Enable `Conductor` login
+1. Enable `Conductor` login (execute this as `root` AND **PLEASE NOTE** to substiutte the `$LIBVIRT_PUBLICKEY_LPAR2` below from notepad/edit step 2.1 above - this `libvirt-user` ssh public key from LPAR2):
    ```
-   cat $LIBVIRT_PUBLICKEY_LPAR2 >> ~/.ssh/authorized_keys  (from step 2.1 above)
+   echo "$LIBVIRT_PUBLICKEY_LPAR2" >> ~/.ssh/authorized_keys  (from step 2.1 above)
    chmod 0600 ~/.ssh/authorized_keys
    ```
-1. Allow TCP Forwarding
+1. Allow TCP Forwarding (execute this as `root`):
    ```
    echo "AllowTCPForwarding yes" | sudo tee -a /etc/ssh/sshd_config
    ```
 
 ### Step 2.3 LPAR-3 / Backend
-1. Create and configure libvirt-user
+1. Create and configure `libvirt-user` (execute this as `root`):
    ```
    adduser libvirt-user
    usermod -aG libvirt,qemu,kvm libvirt-user
+   ```
+1. Create SSH-Key-Pair on BackEnd (execute this initially as `root`, which will change to `libvirt-user` after the `sudo su -...`):
+   ```
    sudo su - libvirt-user
    export OSO_PREFIX=<prefix>
-   ```
-1. Create SSH-Key-Pair on BackEnd
-   ```
    ssh-keygen -t ed25519 -a 4096 -f ~/.ssh/$OSO_PREFIX-libvirt-key -C ""
    export LIBVIRT_PRIVATEKEY_LPAR3=$(cat ~/.ssh/$OSO_PREFIX-libvirt-key)
    export LIBVIRT_PUBLICKEY_LPAR3=$(cat ~/.ssh/$OSO_PREFIX-libvirt-key.pub)
    ```
-1. Enable `Conductor` login
+1. Enable `Conductor` login (execute this as `root` AND **PLEASE NOTE** to substiutte the `$LIBVIRT_PUBLICKEY_LPAR2` below from notepad/edit step 2.1 above - this `libvirt-user` ssh public key from LPAR2):
    ```   
-   cat $LIBVIRT_PUBLICKEY_LPAR2 >> ~/.ssh/authorized_keys  (from step 2.1 above)
+   echo "$LIBVIRT_PUBLICKEY_LPAR2" >> ~/.ssh/authorized_keys  (from step 2.1 above)
    chmod 0600 ~/.ssh/authorized_keys
    ```
-1. Allow TCP Forwarding
+1. Allow TCP Forwarding (execute this as `root`):
    ```
    echo "AllowTCPForwarding yes" | sudo tee -a /etc/ssh/sshd_config
    ```
