@@ -504,7 +504,7 @@ This step is only required if you will use this OSO environment for Demo / Test 
 1. Edit `terraform.tfvars` to make updates
    ```
    sed -i 's|registry.control12.dap.local/oso/oso@sha256:|registry.control12.dap.local/oso/oso@'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
-   sed -i 's|registry.control12.dap.local/oso/oso@sha256:|registry.control23.dap.local/oso/oso@'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
+   sed -i 's|registry.control23.dap.local/oso/oso@sha256:|registry.control23.dap.local/oso/oso@'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
    ```
    - copy-paste value for APPROVER_FINGERPRINTS from `$OSO_HOME/contracts/certificates/user1-fingerprint` and `$OSO_HOME/contracts/certificates/user2-fingerprint` like this example:
      ```
