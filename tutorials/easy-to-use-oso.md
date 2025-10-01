@@ -503,8 +503,8 @@ This step is only required if you will use this OSO environment for Demo / Test 
    ```
 1. Edit `terraform.tfvars` to make updates
    ```
-   sed -i 's|registry.control12.dap.local/oso/oso@sha256:|registry.control12.dap.local/oso/oso@'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
-   sed -i 's|registry.control23.dap.local/oso/oso@sha256:|registry.control23.dap.local/oso/oso@'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
+   sed -i 's|registry.control12.dap.local/oso/oso@sha256:|192.168.0.9/oso/oso@'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
+   sed -i 's|registry.control23.dap.local/oso/oso@sha256:|192.168.64.9/oso/oso@'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
    ```
    - copy-paste value for HPCR_CERT from `$HPVS_HOME/config/certs/ibm-hyper-protect-container-runtime-25.8.1-encrypt.crt` like this example:
      ```
