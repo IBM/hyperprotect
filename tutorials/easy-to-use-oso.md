@@ -506,6 +506,16 @@ This step is only required if you will use this OSO environment for Demo / Test 
    sed -i 's|registry.control12.dap.local/oso/oso@sha256:|registry.control12.dap.local/oso/oso@'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
    sed -i 's|registry.control23.dap.local/oso/oso@sha256:|registry.control23.dap.local/oso/oso@'"$DIGEST_FOR_TERRAFORM"'|g' terraform.tfvars
    ```
+   - copy-paste value for HPCR_CERT from `$HPVS_HOME/config/certs/ibm-hyper-protect-container-runtime-25.8.1-encrypt.crt` like this example:
+     ```
+     HPCR_CERT=<<-EOT
+     -----BEGIN CERTIFICATE-----
+     MIIGqjCCBJKgAwIBAgIQS5VuFWi1XUyXEgPzRAm61TANBgkqhkiG9w0BAQ0FADCB
+     wzELMAkGA1UE...
+     ...ip22zsMAgPAAtDGxU
+     -----END CERTIFICATE-----
+     EOT
+     ```
    - copy-paste value for APPROVER_FINGERPRINTS from `$OSO_HOME/contracts/certificates/user1-fingerprint` and `$OSO_HOME/contracts/certificates/user2-fingerprint` like this example:
      ```
      APPROVER_FINGERPRINTS    = <<-EOT
