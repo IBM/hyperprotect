@@ -310,7 +310,7 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
    ```
 1. Allow Conductor to perform HiperSocket operations as `libvirt-user` (execute this as `root`):
    ```
-   echo 'libvirt-user ALL=(root) NOPASSWD: /usr/sbin/chzdev -a $HS12 online=1, /usr/sbin/chzdev -a $HS12 online=0, /usr/sbin/chzdev -a $HS23 online=1, /usr/sbin/chzdev -a $HS23 online=0' | EDITOR='tee -a' visudo
+   echo "libvirt-user ALL=(root) NOPASSWD: /usr/sbin/chzdev -a $HS12 online=1, /usr/sbin/chzdev -a $HS12 online=0, /usr/sbin/chzdev -a $HS23 online=1, /usr/sbin/chzdev -a $HS23 online=0" | EDITOR='tee -a' visudo
    ```
   
 ### Step 2.2 LPAR-1 / Frontend
