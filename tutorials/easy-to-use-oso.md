@@ -702,7 +702,7 @@ Once the contracts are created, the conductor can be brought up by following the
    sed -i 's/{prefix}-oso-conductor-hpcr/HPVS/g' domain.xml
    sed -i 's|/images/images/|/images/oso/|g' domain.xml
    sed -i 's|bin/qemu-system-s390x|libexec/qemu-kvm|g' domain.xml
-   sed -i 's/{PREFIX}/$OSO_PREFIX/g' domain.xml
+   sed -i 's/{prefix}/$OSO_PREFIX/g' domain.xml
    ```
 1. Create the domain
    ```
