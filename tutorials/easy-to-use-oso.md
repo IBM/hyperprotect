@@ -176,12 +176,21 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
    export HS23NAME=$(sudo lszdev $HS23 | grep $HS23 | awk '{print $5}')
    export HS34NAME=$(sudo lszdev $HS34 | grep $HS34 | awk '{print $5}')
    ```
+1. Optionally - you may want to add these to the ~/.bashrc file so that the variables will get loaded automatically on yout next login, is so execute the following command:
+   ```
+   echo "export HS12=$HS12" >> ~/.bashrc
+   echo "export HS23=$HS23" >> ~/.bashrc
+   echo "export HS34=$HS34" >> ~/.bashrc
+   echo "export HS12NAME=/$(sudo lszdev /$HS12 | grep /$HS12 | awk '{print /$5}')" >> ~/.bashrc
+   echo "export HS23NAME=/$(sudo lszdev /$HS23 | grep /$HS23 | awk '{print /$5}')" >> ~/.bashrc
+   echo "export HS34NAME=/$(sudo lszdev /$HS34 | grep /$HS34 | awk '{print /$5}')" >> ~/.bashrc
+   ```
 
 ### Pre-5. Download / install required software images
 *Required on `LPAR-1, LPAR-2, LPAR-3`*
 
 1. Logon to [IBM Passport Advantage](https://www.ibm.com/software/passportadvantage/pao_customer.html)
-1. Create the required directories
+1. Create the required directories (the following wil install HPOSO and HPVS to the user's home directory, change the `~` accordingly)
    ```
    export OSO_HOME=~/HPOSO
    export HPVS_HOME=~/HPVS
@@ -191,6 +200,7 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
    mkdir -p $HPVS_HOME
    mkdir -p /$JAMMY_IMAGE
    ```
+
 1. Download & Untar the OSO tarball into $OSO_HOME
    - you should have a file like `$OSO_HOME/IBM_HPOSO_OnPrem_v1.4.0_EN.tar`
    - Unpack the tar file
@@ -203,6 +213,7 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
      ```
      export OSO_GPGKEY=$OSO_HOME/OSO_GPG_Key.pub
      ```
+
 1. Download & Unpack the HPVS tarball to $HPVS_HOME
    - you should have a file like `$HPVS_HOME/IBM_HPVS_OnPrem_v2.2_2_EN.tar`
    - Unpack the tar file
@@ -213,7 +224,7 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
 
      export HPVS_IMAGE=$HPVS_HOME/images/ibm-hyper-protect-container-runtime-25.4.0.qcow2
      ```     
-1. Assign a PREFIX to be used to identify this installation of OSO and for the `Contracts` created for OSO install and configuration:
+1. Assign a PREFIX to be used to identify this installation of OSO and for the `Contracts` created for OSO install and configuration (change `<prefix>` accordingly, like PROD, QA or TEST):
    ```
    export OSO_PREFIX=<prefix>
    ```
@@ -230,6 +241,15 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
    ```
    sudo modprobe br_netfiltersudo sysctl -p /etc/sysctl.conf
    ```
+1. Optionally - you may want to add these to the ~/.bashrc file so that the variables will get loaded automatically on yout next login, is so execute the following command:
+   ```
+   echo "export OSO_HOME=~/HPOSO" >> ~/.bashrc
+   echo "export HPVS_HOME=~/HPVS" >> ~/.bashrc
+   echo "export JAMMY_IMAGE=/var/lib/libvirt/images/" >> ~/.bashrc
+   echo "export OSO_GPGKEY=/$OSO_HOME/OSO_GPG_Key.pub" >> ~/.bashrc
+   echo "export HPVS_IMAGE=\$HPVS_HOME/images/ibm-hyper-protect-container-runtime-25.4.0.qcow2" >> ~/.bashrc
+   echo "export OSO_PREFIX=$OSO_PREFIX" >> ~/.bashrc
+   ```   
      
 ### Pre-6 Configure Crypto Appliance (optional - if LPAR-4 is used for Crypto-Access)
 *Required on `your workstation`*
@@ -259,6 +279,12 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
    ```
    cd $OSO_HOME/hpvs-environment/interfaces
    $OSO_HOME/hpvs-environment/interfaces/lpar3.sh $HS23NAME
+   ```
+1. Optionally - you may want to add these to the ~/.bashrc file so that the variables will get loaded automatically on yout next login, is so execute the following command:
+   ```
+   echo "export LIBVIRT_HOST_LPAR1=$LIBVIRT_HOST_LPAR1" >> ~/.bashrc
+   echo "export LIBVIRT_HOST_LPAR2=$LIBVIRT_HOST_LPAR2" >> ~/.bashrc
+   echo "export LIBVIRT_HOST_LPAR3=$LIBVIRT_HOST_LPAR3" >> ~/.bashrc
    ```
 ## Step 2. Configure Users
 ### Step 2.1 LPAR-2 / Conductor
@@ -453,7 +479,13 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
    cd $OSO_HOME/hpvs-environment/example-single-server
    ssh -i ./vm-lpar3/id_ci ubuadm@192.168.128.9
    ```
-
+1. Optionally - you may want to add these to the ~/.bashrc file so that the variables will get loaded automatically on yout next login, is so execute the following command (only on LPAR2):
+   ```
+   echo "export REGISTRY_USER=registryuser" >> ~/.bashrc
+   echo "export REGISTRY_PASSWORD=\$(sudo cat \$OSO_HOME/hpvs-environment/example-single-server/vm-lpar2/registry-passwd)" >> ~/.bashrc
+   echo "export REGISTRY_CA=\$(sudo cat \$OSO_HOME/hpvs-environment/example-single-server/vm-lpar2/registry-server.crt)" >> ~/.bashrc
+   ```
+   
 ## Step 7. Load Docker Images
 *Required on `LPAR-2`*
 
@@ -471,6 +503,11 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
 1. Retrieve digests to be used by Terraform
    ```
    export DIGEST_FOR_TERRAFORM=$(skopeo inspect docker://registry.control23.dap.local/oso/oso:v1.4.0 --creds $REGISTRY_USER:$REGISTRY_PASSWORD | jq '.Digest' | tr -d \")
+   ```
+1. Optionally - you may want to add these to the ~/.bashrc file so that the variables will get loaded automatically on yout next login, is so execute the following command (only on LPAR2):
+   ```
+   echo "export FINGERPRINT=\$(gpg --fingerprint --with-colons | grep fpr | tr -d 'fpr:')" >> ~/.bashrc
+   echo "export DIGEST_FOR_TERRAFORM=\$(skopeo inspect docker://registry.control23.dap.local/oso/oso:v1.4.0 --creds \$REGISTRY_USER:\$REGISTRY_PASSWORD | jq '.Digest' | tr -d \\\")" >> ~/.bashrc
    ```
 
 ## Step 8. Configure Certificates
