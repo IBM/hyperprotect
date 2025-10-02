@@ -750,6 +750,7 @@ Once the contracts are created, the conductor can be brought up by following the
 ### Step 11.3 Initialize Conductor
 1. Use the OSO CLI to initialize the conductor
    ```
+   cd $OSO_HOME/hpvs-environment
    python3 ./oso_cli.py operator -v --cert $OSO_HOME/contracts/certificates/admin1.crt --key $OSO_HOME/contracts/certificates/admin1-key.pem -i init
    ```
    you should see log messages with DEPLOYING_RESOURCES and after a few minutes
