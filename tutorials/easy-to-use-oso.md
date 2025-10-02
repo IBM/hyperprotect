@@ -634,7 +634,7 @@ Create Frontend and Backend workload contracts. This step is specific to the plu
    |REGISTRY_PASSWORD | $OSO_HOME/hpvs-environment/example-single-server/vm-lpar2/registry-passwd |
    |REGISTRY_CA | output of `cat $OSO_HOME/hpvs-environment/example-single-server/vm-lpar2/ca.crt \| base64 -w0` |
    |HPCR_CERT | the HPCR certificate for contract encryption |
-   |ATTESTATION_PUBKEY | the HPCR attestation certificate |
+   |ATTESTATION_PUBKEY | copy-paste content of `openssl x509 -in $OSO_HOME/contracts/certificates/sysadmin.crt -pubkey -noout` |
    | | |
    |OSO_IMAGE | "oso/oso@sha256:<sha-id>" - the SHA-ID will be the value of $DIGEST_FOR_TERRAFORM from Step 7 |
    |PREFIX | $OSO_PREFIX |
