@@ -699,6 +699,8 @@ Once the contracts are created, the conductor can be brought up by following the
 1. Edit `osc/domain.xml` file for RHEL and your PREFIX
    ```
    cd osc
+   sed -i 's/{prefix}-oso-conductor-hpcr/HPVS/g' domain.xml
+   sed -i 's|/images/images/|/images/osc/|g' domain.xml
    sed -i 's|bin/qemu-system-s390x|libexec/qemu-kvm|g' domain.xml
    sed -i 's/{PREFIX}/$OSO_PREFIX/g' domain.xml
    ```
