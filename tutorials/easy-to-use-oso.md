@@ -386,6 +386,10 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
 1. Copy HPVS image to the storage pool
    ```
    cp $HPVS_IMAGE /var/lib/libvirt/images/oso/HPVS
+   virsh pool-refresh images
+   ```
+1. Create OSO overlay (**only required** on `LPAR2`)
+   ```
    qemu-img create -f qcow2 /var/lib/libvirt/images/oso/$OSO_PREFIX-oso-conductor-overlay 20G
    virsh pool-refresh images
    ```
@@ -683,6 +687,8 @@ Create Frontend and Backend workload contracts. This step is specific to the plu
    |SYSLOG23_SERVER_CERT | copy-paste content of `$OSO_HOME/hpvs-environment/example-single-server/vm-lpar2/logging-server.crt` |
    |SYSLOG23_CLIENT_CERT | copy-paste content of `$OSO_HOME/hpvs-environment/example-single-server/vm-lpar2/client.crt` |
    |SYSLOG23_CLIENT_KEY | copy-paste content of `$OSO_HOME/hpvs-environment/example-single-server/vm-lpar2/client-key.pem` |
+   | HPCR/HPVS Image Location | |
+   | SE_VSI_IMAGE | Change to the value of `/var/lib/libvirt/images/oso/HPVS` |
    | LPAR-1 LIBVIRT | |
    |LIBVIRT_PRIVATEKEY_LPAR1 |  copy-paste content of $LIBVIRT_PRIVATEKEY_LPAR2 from Step 2|
    |LIBVIRT_PUBLICKEYS_LPAR1   |output of `ssh-keyscan -H $LIBVIRT_HOST_LPAR2 \| grep -v "^#"`  |
