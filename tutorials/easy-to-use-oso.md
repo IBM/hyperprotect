@@ -731,7 +731,7 @@ Once the contracts are created, the conductor can be brought up by following the
    cd $OSO_HOME/contracts
    ./create-osc-cloudinit.sh $OSO_PREFIX
    cd osc
-   cp cloud-init /var/lib/libvirt/images/images/$OSO_PREFIX-oso-conductor-cloudinit
+   cp cloud-init /var/lib/libvirt/images/oso/$OSO_PREFIX-oso-conductor-cloudinit
    ```
 1. Edit `osc/domain.xml` file for RHEL and your PREFIX
    ```
