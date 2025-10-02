@@ -176,7 +176,7 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
    export HS23NAME=$(sudo lszdev $HS23 | grep $HS23 | awk '{print $5}')
    export HS34NAME=$(sudo lszdev $HS34 | grep $HS34 | awk '{print $5}')
    ```
-1. Optionally - you may want to add these to the ~/.bashrc file so that the variables will get loaded automatically on yout next login, is so execute the following command:
+1. Optionally - you may want to add these to the `~/.bashrc` file so that the variables will get loaded automatically on yout next login, is so execute the following command:
    ```
    echo "export HS12=$HS12" >> ~/.bashrc
    echo "export HS23=$HS23" >> ~/.bashrc
@@ -241,7 +241,7 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
    ```
    sudo modprobe br_netfiltersudo sysctl -p /etc/sysctl.conf
    ```
-1. Optionally - you may want to add these to the ~/.bashrc file so that the variables will get loaded automatically on yout next login, is so execute the following command:
+1. Optionally - you may want to add these to the `~/.bashrc` file so that the variables will get loaded automatically on yout next login, is so execute the following command:
    ```
    echo "export OSO_HOME=~/HPOSO" >> ~/.bashrc
    echo "export HPVS_HOME=~/HPVS" >> ~/.bashrc
@@ -280,7 +280,7 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
    cd $OSO_HOME/hpvs-environment/interfaces
    $OSO_HOME/hpvs-environment/interfaces/lpar3.sh $HS23NAME
    ```
-1. Optionally - you may want to add these to the ~/.bashrc file so that the variables will get loaded automatically on yout next login, is so execute the following command:
+1. Optionally - you may want to add these to the `~/.bashrc` file so that the variables will get loaded automatically on yout next login, is so execute the following command:
    ```
    echo "export LIBVIRT_HOST_LPAR1=$LIBVIRT_HOST_LPAR1" >> ~/.bashrc
    echo "export LIBVIRT_HOST_LPAR2=$LIBVIRT_HOST_LPAR2" >> ~/.bashrc
@@ -479,7 +479,7 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
    cd $OSO_HOME/hpvs-environment/example-single-server
    ssh -i ./vm-lpar3/id_ci ubuadm@192.168.128.9
    ```
-1. Optionally - you may want to add these to the ~/.bashrc file so that the variables will get loaded automatically on yout next login, is so execute the following command (only on LPAR2):
+1. Optionally - you may want to add these to the `~/.bashrc` file so that the variables will get loaded automatically on yout next login, is so execute the following command (only on LPAR2):
    ```
    echo "export REGISTRY_USER=registryuser" >> ~/.bashrc
    echo "export REGISTRY_PASSWORD=\$(sudo cat \$OSO_HOME/hpvs-environment/example-single-server/vm-lpar2/registry-passwd)" >> ~/.bashrc
@@ -504,7 +504,7 @@ Follow instructions outlined at [Easy-to-Use Crypto Appliance](easy-to-use-crypt
    ```
    export DIGEST_FOR_TERRAFORM=$(skopeo inspect docker://registry.control23.dap.local/oso/oso:v1.4.0 --creds $REGISTRY_USER:$REGISTRY_PASSWORD | jq '.Digest' | tr -d \")
    ```
-1. Optionally - you may want to add these to the ~/.bashrc file so that the variables will get loaded automatically on yout next login, is so execute the following command (only on LPAR2):
+1. Optionally - you may want to add these to the `~/.bashrc` file so that the variables will get loaded automatically on yout next login, is so execute the following command (only on LPAR2):
    ```
    echo "export FINGERPRINT=\$(gpg --fingerprint --with-colons | grep fpr | tr -d 'fpr:')" >> ~/.bashrc
    echo "export DIGEST_FOR_TERRAFORM=\$(skopeo inspect docker://registry.control23.dap.local/oso/oso:v1.4.0 --creds \$REGISTRY_USER:\$REGISTRY_PASSWORD | jq '.Digest' | tr -d \\\")" >> ~/.bashrc
