@@ -677,7 +677,7 @@ Create Frontend and Backend workload contracts. This step is specific to the plu
    |HPCR_CERT | the HPCR certificate for contract encryption |
    |ATTESTATION_PUBKEY | copy-paste content of `openssl x509 -in $OSO_HOME/contracts/certificates/sysadmin.crt -pubkey -noout` |
    | | |
-   |OSO_IMAGE | "oso/oso@sha256:<sha-id>" - the SHA-ID will be the value of $DIGEST_FOR_TERRAFORM from Step 7 |
+   |OSO_IMAGE | "oso/oso@sha256:<sha-id>" - the SHA-ID will be the value of $DIGEST_FOR_TERRAFORM from Step 7 **minus** the `sha:` component, just watch out for two `sha:` as there should be only one so if you see `OSO_IMAGE="oso/oso@sha256:sha256:7274cd2759ba461...` change to `OSO_IMAGE="oso/oso@sha256:7274cd2759ba461...`|
    |PREFIX | $OSO_PREFIX |
    | LPAR-1 Logging| |
    |SYSLOG12_SERVER_CERT | copy-paste content of `$OSO_HOME/hpvs-environment/example-single-server/vm-lpar1/logging-server.crt` |
@@ -716,7 +716,6 @@ Create Frontend and Backend workload contracts. This step is specific to the plu
    |PURGE_WAIT_TIME | 30d 0h 0m 0s (default)|
    |PURGE_INTERVAL | 24h 0m 0s (default)|
    |CERT_VALIDITY_PERIOD | 720 (`default hours for certificate validity, 720 is 30 days`) |
-   |OSO_IMAGE | "oso/oso@sha256:<sha-id>" - the SHA-ID will be the value of $DIGEST_FOR_TERRAFORM from Step 7 |
    |PREFIX |  prefix will the value of $OSA_PREFIX |
    |CONFIRMATION_WAIT_TIME | "10m" |
    |BRIDGE_WAIT_TIME | "10m" |
@@ -790,7 +789,7 @@ To make any changes to the configuration / workloads, etc the `terraform.tfvars`
    And obtain the sha256 of the image:
 1. Retrieve digests to be used by Terraform
    ```
-   export DIGEST_FOR_TERRAFORM=$(skopeo inspect docker://registry.control23.dap.local/oso/grep11server:v1.1.3 --creds $REGISTRY_USER:$REGISTRY_PASSWORD | jq '.Name + "@" + .Digest')
+   skopeo inspect docker://registry.control23.dap.local/oso/grep11server:v1.1.3 --creds $REGISTRY_USER:$REGISTRY_PASSWORD | jq '.Name + "@" .Digest'
    ```
    See the [IBM Hyper Protect Virtual Servers Documentation](https://www.ibm.com/docs/en/hpvs/2.1.x?topic=dcenasee-downloading-crypto-express-network-api-secure-execution-enclaves-major-release) for steps to locate and download the image.
 
