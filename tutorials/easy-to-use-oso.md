@@ -691,10 +691,10 @@ Create Frontend and Backend workload contracts. This step is specific to the plu
    | SE_VSI_IMAGE | Change to the value of `/var/lib/libvirt/images/oso/HPVS` |
    | LPAR-1 LIBVIRT | |
    |LIBVIRT_PRIVATEKEY_LPAR1 |  copy-paste content of $LIBVIRT_PRIVATEKEY_LPAR2 from Step 2|
-   |LIBVIRT_PUBLICKEYS_LPAR1   |output of `ssh-keyscan -H $LIBVIRT_HOST_LPAR2 \| grep -v "^#"`  |
+   |LIBVIRT_PUBLICKEYS_LPAR1   |output of `ssh-keyscan -H $LIBVIRT_HOST_LPAR1 \| grep -v "^#"`  |
    | LPAR-2 LIBVIRT | |
    |LIBVIRT_PRIVATEKEY_LPAR2 |  copy-paste content of $LIBVIRT_PRIVATEKEY_LPAR2 from Step 2|
-   |LIBVIRT_PUBLICKEYS_LPAR2   |output of `ssh-keyscan -H $LIBVIRT_HOST_LPAR1 \| grep -v "^#"`  |
+   |LIBVIRT_PUBLICKEYS_LPAR2   |output of `ssh-keyscan -H $LIBVIRT_HOST_LPAR2 \| grep -v "^#"`  |
    | LPAR-3 LIBVIRT | |
    |LIBVIRT_PRIVATEKEY_LPAR3 |  copy-paste content of $LIBVIRT_PRIVATEKEY_LPAR2 from Step 2|
    |LIBVIRT_PUBLICKEYS_LPAR3   |output of `ssh-keyscan -H $LIBVIRT_HOST_LPAR3 \| grep -v "^#"`  |                                       |
