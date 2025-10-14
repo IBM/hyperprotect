@@ -849,6 +849,53 @@ BACKEND_WORKLOADS=[
 ]
 ```
 
+### Step 12.3 (Optional) Test 
+
+1. Clone the repository
+```bash
+git clone https://github.com/silliman/hpcs-grep11-go
+cd hpcs-grep11-go
+```
+
+2. Copy the certificates to the `certs/` directory
+Copy the following files into the `certs` directory of the project:
+- `client.crt`
+- `client.key`
+- `ca.crt`
+
+```bash
+cp /path/to/your/certs/*.crt /path/to/your/certs/*.key ./certs/
+```
+
+3. Update the GREP11 server address
+If running **locally**, use:
+```bash
+sed -i -e "s/STUDENT_GREP11SERVER_IP/127.0.0.1/g" server_test.go
+```
+
+If running on a **remote LPAR**, replace it with your host IP:
+```bash
+sed -i -e "s/STUDENT_GREP11SERVER_IP/<LPAR_IP_ADDRESS>/g" server_test.go
+```
+
+4. Run the test
+```bash
+go test -v
+```
+
+---
+
+## ✅ Expected Result
+If everything is configured correctly, you should see output similar to:
+```
+=== RUN   TestGrep11Server
+--- PASS: TestGrep11Server (0.50s)
+PASS
+ok  	hpcs-grep11-go	0.501s
+```
+
+---
+
 ## Conclusion / Next Steps
 A completely installed OSO environment will look something like this:
 
