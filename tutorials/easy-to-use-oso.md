@@ -885,16 +885,6 @@ go test -v
 
 ---
 
-## ✅ Expected Result
-If everything is configured correctly, you should see output similar to:
-```
-=== RUN   TestGrep11Server
---- PASS: TestGrep11Server (0.50s)
-PASS
-ok  	hpcs-grep11-go	0.501s
-```
-
----
 
 ## Conclusion / Next Steps
 A completely installed OSO environment will look something like this:
