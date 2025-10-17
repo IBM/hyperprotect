@@ -849,7 +849,7 @@ BACKEND_WORKLOADS=[
 ]
 ```
 
-### Step 12.3 (Optional) Test 
+### Step 12.4 (Optional) Test 
 
 1. Clone the repository
 ```bash
