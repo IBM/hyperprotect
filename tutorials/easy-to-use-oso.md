@@ -886,48 +886,48 @@ Refer to the section above about on how to [init](#step-113-initialize-conductor
 The steps should be done in sequence, so first the network (on the affected LPAR/LPARS), THEN the support VMs (on the affected LPAR/LPARS), and lastly OSO CLEAN-UP. 
 
 For example, suppose all three LPARs were re-actived unexpectedly, then follow these steps:
-1. On LPAR1/COTOSO1 reconfigure the network:
+1. On LPAR1 reconfigure the network:
 ```
 cd $OSO_HOME/hpvs-environment/interfaces
 ./lpar1.sh $HS12NAME
 ```
-2. On LPAR2/COTOSO2 reconfigure the network:
+2. On LPAR2 reconfigure the network:
 ```
 cd $OSO_HOME/hpvs-environment/interfaces
 ./lpar2.sh $HS12NAME $HS23NAME
 ```
-3. On LPAR3/COTOSO3 reconfigure the network:
+3. On LPAR3 reconfigure the network:
 ```
 cd $OSO_HOME/hpvs-environment/interfaces
 ./lpar3.sh $HS23NAME
 ```
-4. On LPAR1/COTOSO1 bring up supporting VM:
+4. On LPAR1 bring up supporting VM:
 ```
 cd $OSO_HOME/hpvs-environment/example-single-server/vm-lpar1/
 virsh create domain.xml
 ```
-5. On LPAR2/COTOSO2 bring up supporting VM:
+5. On LPAR2 bring up supporting VM:
 ```
 cd $OSO_HOME/hpvs-environment/example-single-server/vm-lpar2/
 virsh create domain.xml
 ```
-6. On LPAR1/COTOSO1 run oso-cleaning script (answer yes to all):
+6. On LPAR1 run oso-cleaning script (answer yes to all):
 ```
 cd $OSO_HOME/tools
 ./oso_cleanup.sh osopre images
 ```
-8. On LPAR2/COTOSO2 run oso-cleaning script (answer yes to all):
+8. On LPAR2 run oso-cleaning script (answer yes to all):
 ```
 cd $OSO_HOME/tools
 ./oso_cleanup.sh osopre images
 qemu-img create -f qcow2 /var/lib/libvirt/images/oso/$OSO_PREFIX-oso-conductor-overlay 20G
 ```
-8. On LPAR3/COTOSO3 run oso-cleaning script (answer yes to all):
+8. On LPAR3 run oso-cleaning script (answer yes to all):
 ```
 cd $OSO_HOME/tools
 ./oso_cleanup.sh osopre images
 ```
-9. On LPAR2/COTOSO2 bring up OSO:
+9. On LPAR2 bring up OSO:
 ```
 cd $OSO_HOME/contracts/osc/
 virsh create domain.xml --console
