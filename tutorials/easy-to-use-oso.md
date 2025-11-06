@@ -23,6 +23,7 @@ This doc is based on [OSO Documentation for OSO 1.4.x](https://www.ibm.com/docs/
 |[Step 10. Create Frontend and Backend workload contracts](#step-10-create-frontend-and-backend-workload-contracts)|
 |[Step 11. Configure Contracts for the Conductor](#step-11-configure-contracts-for-the-conductor)|
 |[Step 12 Configure GREP11 Container for OSO](#step-12-configure-grep11-container-for-oso)|
+|[Troubleshooting](#troubleshooting)| 
 |[Conclusion / Next Steps](#conclusion--next-steps)|
 |[Version Control](#version-control)|
 
@@ -875,11 +876,11 @@ All components that run on LPAR2 and LPAR3 log to vm_lpar2, to access (in LPAR2)
 ssh -i $OSO_HOME/hpvs-environment/example-single-server/vm-lpar2/id_ci ubuadm@logging.control23.dap.local
 sudo tail –f /var/log/syslog
 ```
-Refer to the section about on how to init, deinit and flush the system.
+Refer to the section above about on how to [init](#step-113-initialize-conductor), [deinit](#step-114-shutting-down--de-init-conductor) and flush the system.
 
 ### Environment restart and reboots (or reactivaton)
-- Every LPAR has non-persistent network configurations that need to reconfigured in the event of a restart. As detailed in the [section above](https://github.com/IBM/hyperprotect/blob/main/tutorials/easy-to-use-oso.md#step-1-configure-lpar-network-interfaces).
-- LPARs 1 and 2 have a supporting VM (vm-lpar1 & vm_lpar2) that need to be restarted AFTER the networking has been reconfigured but BEFORE the conductor is brough up. As detailed in the [section above](https://github.com/IBM/hyperprotect/blob/main/tutorials/easy-to-use-oso.md#step-6-setup-docker-and-logging-server).
+- Every LPAR has non-persistent network configurations that need to reconfigured in the event of a restart. As detailed in the [section above](#step-1-configure-lpar-network-interfaces).
+- LPARs 1 and 2 have a supporting VM (vm-lpar1 & vm_lpar2) that need to be restarted AFTER the networking has been reconfigured but BEFORE the conductor is brough up. As detailed in the [section above](#step-6-setup-docker-and-logging-server).
 - Lastly, if the restart was not done with a clean environment (OSO deinit and properly shutdown beforehand), then the clean-up script should be executed on the affected LPAR.
 
 The steps should be done in sequence, so first the network (on the affected LPAR/LPARS), THEN the support VMs (on the affected LPAR/LPARS), and lastly OSO CLEAN-UP. 
