@@ -862,6 +862,77 @@ Optionally, the OSO UI can be setup. The broad steps to enable the UI are as fol
 
 for more information, talk to your IBM Representative.
 
+## Troubleshooting
+
+### Looking at logs
+All components that run on LPAR1 log to vm_lpar1, to access (in LPAR1):
+```
+ssh -i $OSO_HOME/hpvs-environment/example-single-server/vm-lpar1/id_ci ubuadm@logging.control12.dap.local
+sudo tail –f /var/log/syslog
+```
+All components that run on LPAR2 and LPAR3 log to vm_lpar2, to access (in LPAR2):
+```
+ssh -i $OSO_HOME/hpvs-environment/example-single-server/vm-lpar2/id_ci ubuadm@logging.control23.dap.local
+sudo tail –f /var/log/syslog
+```
+Refer to the section about on how to init, deinit and flush the system.
+
+### Environment restart and reboots (or reactivaton)
+- Every LPAR has non-persistent network configurations that need to reconfigured in the event of a restart. As detailed in the [section above](https://github.com/IBM/hyperprotect/blob/main/tutorials/easy-to-use-oso.md#step-1-configure-lpar-network-interfaces).
+- LPARs 1 and 2 have a supporting VM (vm-lpar1 & vm_lpar2) that need to be restarted AFTER the networking has been reconfigured but BEFORE the conductor is brough up. As detailed in the [section above](https://github.com/IBM/hyperprotect/blob/main/tutorials/easy-to-use-oso.md#step-6-setup-docker-and-logging-server).
+- Lastly, if the restart was not done with a clean environment (OSO deinit and properly shutdown beforehand), then the clean-up script should be executed on the affected LPAR.
+
+The steps should be done in sequence, so first the network (on the affected LPAR/LPARS), THEN the support VMs (on the affected LPAR/LPARS), and lastly OSO CLEAN-UP. 
+
+For example, suppose all three LPARs were re-actived unexpectedly, then follow these steps:
+1. On LPAR1/COTOSO1 reconfigure the network:
+```
+cd $OSO_HOME/hpvs-environment/interfaces
+./lpar1.sh $HS12NAME
+```
+2. On LPAR2/COTOSO2 reconfigure the network:
+```
+cd $OSO_HOME/hpvs-environment/interfaces
+./lpar2.sh $HS12NAME $HS23NAME
+```
+3. On LPAR3/COTOSO3 reconfigure the network:
+```
+cd $OSO_HOME/hpvs-environment/interfaces
+./lpar3.sh $HS23NAME
+```
+4. On LPAR1/COTOSO1 bring up supporting VM:
+```
+cd $OSO_HOME/hpvs-environment/example-single-server/vm-lpar1/
+virsh create domain.xml
+```
+5. On LPAR2/COTOSO2 bring up supporting VM:
+```
+cd $OSO_HOME/hpvs-environment/example-single-server/vm-lpar2/
+virsh create domain.xml
+```
+6. On LPAR1/COTOSO1 run oso-cleaning script (answer yes to all):
+```
+cd $OSO_HOME/tools
+./oso_cleanup.sh osopre images
+```
+8. On LPAR2/COTOSO2 run oso-cleaning script (answer yes to all):
+```
+cd $OSO_HOME/tools
+./oso_cleanup.sh osopre images
+qemu-img create -f qcow2 /var/lib/libvirt/images/oso/$OSO_PREFIX-oso-conductor-overlay 20G
+```
+8. On LPAR3/COTOSO3 run oso-cleaning script (answer yes to all):
+```
+cd $OSO_HOME/tools
+./oso_cleanup.sh osopre images
+```
+9. On LPAR2/COTOSO2 bring up OSO:
+```
+cd $OSO_HOME/contracts/osc/
+virsh create domain.xml --console
+``` 
+Then you can check the logs on vm_lpar2 for the "CONDUTOR INSTANTIATED... nginx started..." messages and issue the INIT command as mentioned above. If only LPAR1 or 3 gets reactivated you can run the steps only on the reacted LPAR, however, if LPAR2 got reactivated then you run the steps on LPAR2 along with just the cleaning steps on LPAR1 and 3.
+
 ## Version Control
 - [v1.6] Sep 2, 2025: Sandeep Batta, Peter Szmrecsanyi - Added overall picture, TOC, GREP11 processes
 - [v1.5] Aug 27, 2025: Sandeep Batta - Added Crypto Appliance to the solution / install process
