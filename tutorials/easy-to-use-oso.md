@@ -106,7 +106,7 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
  ```
  - Format `lv_data` and mount it on `/data`:
  ```
- mkfs.xfs /dev/vg_data/lv_data
+ mkfs.ext4 /dev/vg_data/lv_data
  mkdir /data
  mount /dev/vg_data/lv_data /data
  ```
@@ -114,9 +114,9 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
   - Get block id of the new volume with `blkid /dev/vg_data/lv_data` command:
   ```
   [root@cotoso1 ~]# blkid /dev/vg_data/lv_data
-  /dev/vg_data/lv_data: UUID="be27deac-3099-4acc-a056-92bcded2a3e2" TYPE="xfs"
+  /dev/vg_data/lv_data: UUID="be27deac-3099-4acc-a056-92bcded2a3e2" TYPE="ext4"
   ```
-  - *Add* the following line to `/etc/fstab`, but change the UUID to match the previous output on YOUR system `UUID=be27deac-3099-4acc-a056-92bcded2a3e2   /data   xfs   defaults   0 0`
+  - *Add* the following line to `/etc/fstab`, but change the UUID to match the previous output on YOUR system `UUID=be27deac-3099-4acc-a056-92bcded2a3e2   /data   ext4   defaults   0 0`
   - Test before rebooting:
   ```
   systemctl daemon-reload
