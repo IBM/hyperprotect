@@ -212,6 +212,9 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
      ```
    - Download the OSO GPG Key from https://public.dhe.ibm.com/systems/hyper-protect/OSO_GPG_Key.pub
      ```
+     wget -P "$OSO_HOME" https://public.dhe.ibm.com/systems/hyper-protect/OSO_GPG_Key.pub
+     ```
+     ```
      export OSO_GPGKEY=$OSO_HOME/OSO_GPG_Key.pub
      ```
 
@@ -231,6 +234,14 @@ tmpfs           3.2G   32K  3.2G   1% /run/user/0
    ```
 1. Download Logging Server image
    - Download the file `jammy-server-cloudimg-s390x.img` from https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-s390x.img
+   ``` 
+   wget -P "$JAMMY_IMAGE" https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-s390x.img
+   ```
+   - Upload the file to `$JAMMY_IMAGE`
+   - Rename the file to `jammy`
+   ```
+   mv $JAMMY_IMAGE/jammy-server-cloudimg-s390x.img $JAMMY_IMAGE/jammy
+   ```
    - Upload the file to `$JAMMY_IMAGE`
    - Rename the file to `jammy`
 1. Copy [kernel-parameters.conf](configuration-files/oso-kernel-parameters.conf) to `/etc/sysctl.d/55-oso-kernel-parameters.conf` and reload sysctl with this command:
