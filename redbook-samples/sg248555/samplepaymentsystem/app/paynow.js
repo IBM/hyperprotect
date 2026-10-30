@@ -99,17 +99,20 @@ function getDonations() {
 
       // Chopping it up so we only show latest 5 contributions
       // console.log(donatorList.slice(0, (donatorList.length < 5 ? donatorList.length : 5)));
-      var donator = "";
+      var donator = $("<div>");
       $.each(donatorList, function (index, value) {
 
-        donator = donator + `<div class="paynow">
-                    <p class="name">` + value.name + `</p>
-                    <img src="images/person_` + getRandomInt(1, 9) + `.jpg" />
-                    <p class="payment-amount">` + value.contribution + `</p>
-                    </div>`;
+        // .text() treats user-supplied values as plain text, never as HTML
+        donator.append(
+          $('<div class="paynow">').append(
+            $('<p class="name">').text(value.name),
+            $('<img>').attr("src", "images/person_" + getRandomInt(1, 9) + ".jpg"),
+            $('<p class="payment-amount">').text(value.contribution)
+          )
+        );
 
       });
-      $("#paynow-results").html(donator);
+      $("#paynow-results").empty().append(donator.children());
     },
     error: function (XMLHttpRequest, textStatus, errorThrown) {
       console.log("Error : " + textStatus + " Threw : " + errorThrown);
