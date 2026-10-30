@@ -18,6 +18,7 @@ var fs = require('fs');
 var http = require('http');
 var https = require('https');
 var admzip = require('adm-zip');
+var rateLimit = require('express-rate-limit');
 
 var app = express();
 const bodyParser = require('body-parser');
@@ -25,14 +26,26 @@ var path = require('path');
 
 var transactions = [];
 
-app.use(express.static('./'));
+app.use(rateLimit({
+    windowMs: 60 * 1000,
+    limit: 100,
+    standardHeaders: true,
+    legacyHeaders: false
+}));
+
+// Serve only the files the pages need, not the whole working directory
+// (which contains sslcert/, package.json, node_modules/, ...).
+['index.html', 'paynow.html', 'style.css', 'paynow.css', 'paynow.js'].forEach(function(file) {
+    app.get('/' + file, function(req, res) {
+        res.sendFile(path.join(__dirname, file));
+    });
+});
+app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(express.json());
 
 var options = {
     key: fs.readFileSync( 'sslcert/localhost.key', 'utf8' ),
-    cert: fs.readFileSync('sslcert/localhost.cert', 'utf8'),
-    requestCert: false,
-    rejectUnauthorized: false
+    cert: fs.readFileSync('sslcert/localhost.cert', 'utf8')
 };
 
 app.get('/', function(req, res) {
@@ -67,7 +80,7 @@ app.get('/api/v1/attestationdocument', function(req, res) {
 
 app.get('/api/v1/transactions', function(req, res) {
     console.log('GET ' + req.path);
-    res.status(200).send(JSON.stringify(transactions));
+    res.status(200).json(transactions);
 });
 
 app.post('/api/v1/transactions', (req, res) => {
