@@ -26,21 +26,21 @@ var path = require('path');
 
 var transactions = [];
 
-app.use(rateLimit({
+var limiter = rateLimit({
     windowMs: 60 * 1000,
     limit: 100,
     standardHeaders: true,
     legacyHeaders: false
-}));
+});
 
 // Serve only the files the pages need, not the whole working directory
 // (which contains sslcert/, package.json, node_modules/, ...).
 ['index.html', 'paynow.html', 'style.css', 'paynow.css', 'paynow.js'].forEach(function(file) {
-    app.get('/' + file, function(req, res) {
+    app.get('/' + file, limiter, function(req, res) {
         res.sendFile(path.join(__dirname, file));
     });
 });
-app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/images', limiter, express.static(path.join(__dirname, 'images')));
 app.use(express.json());
 
 var options = {
@@ -48,12 +48,12 @@ var options = {
     cert: fs.readFileSync('sslcert/localhost.cert', 'utf8')
 };
 
-app.get('/', function(req, res) {
+app.get('/', limiter, function(req, res) {
     console.log(path.join(__dirname + '/index.html'));
     res.sendFile(path.join(__dirname + '/index.html'));
 });
 
-app.get('/api/v1/attestation', function(req, res) {
+app.get('/api/v1/attestation', limiter, function(req, res) {
     console.log('GET ' + req.path);
     const fileName = 'attestation.zip';
     const fileType = 'application/zip';
@@ -73,17 +73,17 @@ app.get('/api/v1/attestation', function(req, res) {
     res.end(zipFileContents);
 });
 
-app.get('/api/v1/attestationdocument', function(req, res) {
+app.get('/api/v1/attestationdocument', limiter, function(req, res) {
     console.log('GET ' + req.path);
     res.type('txt').sendFile('/var/hyperprotect/se-checksums.txt');
 });
 
-app.get('/api/v1/transactions', function(req, res) {
+app.get('/api/v1/transactions', limiter, function(req, res) {
     console.log('GET ' + req.path);
     res.status(200).json(transactions);
 });
 
-app.post('/api/v1/transactions', (req, res) => {
+app.post('/api/v1/transactions', limiter, (req, res) => {
     console.log('POST ' + req.path);
     let data = req.body;
     transactions.push(data);
